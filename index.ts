@@ -1,3 +1,4 @@
+import { TypeSystem } from "./tests/test";
 
 /**
  * Asserts at compile time that the provided type argument's type resolves to the expected boolean literal type.
@@ -64,6 +65,12 @@ export type IsNever<T> = [T] extends [never] ? true : false;
 export type IsUnknown<T> = IsNever<T> extends true ? false
     : (T extends unknown ? unknown extends T ? /* catch any type */ T extends string ? false : true : false : false);
 
+/**
+ * Checks if the type `T` exactly matches type `U`, or whether `T` or `U` are exactly `any`.
+ */
+export type IsExactOrAny<T, U> = [T] extends [U] ? [U] extends [T] ? true : false : false;
+
+
 
 export type MapType<T extends { [property in keyof T]: T[property] }> = T;
 export type ExcludeKeysFromMapType<T extends { [property in keyof T]: T[property] }, TKeysToExclude extends keyof T>
@@ -90,23 +97,17 @@ function _getKey<T>(t: T): K<T, Russell> {
     throw new Error();
 }
 
-const x: X = null as any;
-const subx: subX = null as any;
-const key1Example = getKey<undefined>()(undefined);
-const key2Example = getKey<null>()(null);
-const key9Example = getKey<null>()(undefined);
-const key3Example = getKey<undefined | null>()(null);
-const key4Example = getKey<number>()(4);
-// const key5Example = getKey(null as NoKey);
-const key6Example = getKey<X>()(x);
-const key7Example = getKey<subX>()(subx);
-
 
 
 export type primitiveTypes = {
+    'null': null,
+    'undefined': undefined,
     'number': number,
     'string': string,
-    'boolean': boolean
+    'boolean': boolean,
+    'number?': number | undefined,
+    'number|null': number | null,
+    'number?|null': number | undefined | null,
 }
 
 function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): ITypeDescription<primitiveTypes[p]> {
@@ -114,13 +115,22 @@ function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): IType
         is(obj: any): obj is primitiveTypes[p] {
             return typeof obj === s;
         },
-        f(t: primitiveTypes[p]): void { }
     });
 }
+export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
+    return ({
+        is(obj: any): obj is K1 | K2 {
+            return description1.is(obj) || description2.is(obj);
+        },
+    });
+}
+export const undefinedDescription: ITypeDescription<undefined> = ({ is(obj: any): obj is undefined { return obj === undefined; } })
+export const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { return obj === null; } })
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
 export const booleanDescription = createPrimitiveDescription('boolean');
 
+type primitiveTypeDescriptions = { [K in keyof primitiveTypes]: ITypeDescription<primitiveTypes[K]> };
 export interface Russell {
     readonly 'number': ITypeDescription<number>,
     readonly 'string': ITypeDescription<string>,
@@ -130,16 +140,11 @@ type SelectTypeDescriptionsFor<
     Types extends { [K in keyof Types]: Types[K] },
     Keys extends keyof Types>
     = { [K in Keys]: ITypeDescription<Types[K]> }
-type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
+export type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
 
 type TypeDescriptionsForNonPrimitives<Types extends { [K in (keyof Types | keyof primitiveTypes)]: Types[K] }> =
     SelectTypeDescriptionsFor<Types, Exclude<keyof Types, keyof primitiveTypes>>;
-type test = TypeDescriptionsForNonPrimitives<{
-    'number': number,
-    'string': string,
-    'boolean': boolean,
-    'x': object
-}>
+
 type tes123t = TypeDescriptionsForNonPrimitives<
     primitiveTypes & {
         'x': object
@@ -168,15 +173,20 @@ export class BaseTypeSystem<Types extends { [K in keyof Types]: Types[K] }> {
     }
 
     constructor(description: TypeDescriptionsFor<Types>) {
-        const baseTypes: Russell =
+        const baseTypes: primitiveTypeDescriptions =
         {
+            'undefined': undefinedDescription,
+            'null': nullDescription,
             'string': stringDescription,
             'number': numberDescription,
-            'boolean': booleanDescription
+            'number?': composeDescriptions(undefinedDescription, numberDescription),
+            'number|null': numberDescription,
+            'number?|null': numberDescription,
+            'boolean': booleanDescription,
         };
 
         for (const k in baseTypes) {
-            const key = k as keyof Russell;
+            const key = k as keyof primitiveTypes;
             this._add(key, baseTypes[key]);
         }
 
@@ -220,30 +230,42 @@ interface NoKey {
 export function is<T extends { key: K } | undefined | null | string | number, K>(arg: T, key: K): arg is T {
     throw new Error('not implemented');
 }
-export function addType<T>(description: ITypeDescription) {
-}
-
-const types = new Map<string, TypeDescription>();
 
 export interface ITypeDescription<T> {
-    f(t: T): void;
     is(obj: any): obj is T;
 }
-export class TypeDescription<T> implements ITypeDescription<T> {
-    is(obj: any): obj is T {
+export type getK<T, Types extends { [k in keyof Types]: Types[k] }> =
+    { [K in keyof Types]: Types[K] extends T ? K : never };
 
+type t = {
+    'u': undefined,
+    '0': null,
+    's': string,
+    'n': number,
+    'any': any
+};
+type asdf = getK<string, t>;
+
+export type getK2<T, Types extends { [k in keyof Types]: Types[k] }> =
+    { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
+
+type asfaddfs = t[keyof t];
+type asdf2 = getK2<string, t>;
+type adfsasdfasdf2 = getK2<boolean, t>;
+export class TypeDescription<Types, T> implements ITypeDescription<T> {
+    public static create<Types, T>(propertyDescriptions: { [k in keyof T]: getK2<T[k], Types> }) {
+        throw null;
+        // return new TypeDescription(propertyDescriptions);
+    }
+    public static createLazily<T>(propertyDescriptions: { [k in keyof T]: () => ITypeDescription<T[k]> }): () => TypeDescription<T> {
+        return () => new TypeDescription(propertyDescriptions.map();
+    }
+    private constructor(private readonly propertyDescriptions: { [k in keyof T]: ITypeDescription<T[k]> }) {
+    }
+    is(obj: any): obj is T {
         throw new Error("Method not implemented.");
     }
 
-    public constructor(public readonly properties: PropertyDescription[]) {
-    }
+    // public constructor(public readonly properties: PropertyDescription[]) {
+    // }
 }
-
-export class PropertyDescription {
-    public constructor(
-        public readonly name: string,
-        public readonly typeDescription: ITypeDescription) {
-    }
-}
-
-const test2341234 = new BaseTypeSystem<Russell>({} as never).assert('x')(0);
