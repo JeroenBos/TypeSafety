@@ -98,8 +98,8 @@ type withParameterIfError<T, Types extends Russell> = withParameterIf<KIsError<T
 
 
 export type primitiveTypes = {
-    // 'null': null,
-    // 'undefined': undefined,
+    'null': null,
+    'undefined': undefined,
     'number': number,
     'string': string,
     // 'boolean': boolean,
@@ -308,8 +308,8 @@ export type NonNullableValuesContraint<T> = { [K in keyof T]: string | number | 
  * More specifically, given the name of a property `p` of interface `Types[K]` where `p extends string & keyof Types[K]`, 
  * the key for this property is `Types[K][p]` and its type is `Types[Types[K][p]]`. 
  */
-export class TypeDescription<K extends keyof Types, Types extends NonNullableValuesContraint<Types>> implements ITypeDescription<Types[K]> {
-    public static create<Types extends NonNullableValuesContraint<Types>, K extends keyof Types>(
+export class TypeDescription<K extends keyof Types, Types> implements ITypeDescription<Types[K]> {
+    public static create<Types, K extends keyof Types>(
         propertyDescriptions: DescriptionKeys<K, Types>): ITypeDescription<Types[K]> {
         return new TypeDescription(propertyDescriptions);
     }
@@ -332,7 +332,7 @@ export class TypeDescription<K extends keyof Types, Types extends NonNullableVal
         }
         return true;
     }
-    private isValidKey(propertyName: string | keyof NonNullableValuesContraint<Types[K]>): propertyName is keyof NonNullableValuesContraint<Types[K]> {
+    private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
