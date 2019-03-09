@@ -55,12 +55,17 @@ export type IsAny<T> = IsUnknown<T> extends true ? false
     : T extends any ? any extends T ? true : false : false;
 
 /**
- * Checks it the type `T` is the `never` type.
+ * Checks if the type `T` is the `never` type.
  */
 export type IsNever<T> = [T] extends [never] ? true : false;
 
 /**
- * Checks it the type `T` is the `unknown` type.
+ * Checks if the type `T` is not the `never` type.
+ */
+export type IsNotNever<T> = [T] extends [never] ? false : true;
+
+/**
+ * Checks if the type `T` is the `unknown` type.
  */
 export type IsUnknown<T> = IsNever<T> extends true ? false
     : (T extends unknown ? unknown extends T ? /* catch any type */ T extends string ? false : true : false : false);
@@ -238,6 +243,39 @@ type asdf2 = getKey<string, t>;
 type adfsasdfasdf2 = t[getKey<string, t>];
 /// this is a type from T to 
 export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[K]]: getKey<Types[K][u], Types> }
+
+
+export type lookupValueContains<Types extends { [k in keyof Types]: Types[k] }, T> =
+    { [K in keyof Types]: Types[K] extends T ? IsExact<T, Types[K]> extends true ? Types : never : never }[keyof Types];
+
+type t0 = lookupValueContains<t, IsNotNever<number>>;
+type t1 = lookupValueContains<t, 'undefined'>;
+type t2 = lookupValueContains<t, undefined>;
+type t3 = lookupValueContains<t, string>;
+type t4 = lookupValueContains<t, string | number>;
+type t5 = lookupValueContains<t, any>;
+assert<IsExact<t0, never>>(true);
+assert<IsExact<t1, never>>(true);
+assert<IsExact<t2, t>>(true);
+assert<IsExact<t3, t>>(true);
+assert<IsExact<t4, never>>(true);
+assert<IsExact<t5, never>>(true);
+
+export type ToNeverIfContainsUndefinedToNullPart1<Types>
+    = { [K in keyof Types]: undefined extends Types[K] ? {} : null extends Types[K] ? {} : never }
+type t12 = ToNeverIfContainsUndefinedToNullPart1<{ 'a': number | undefined, 'b': undefined, 'ok': string }>;
+
+export type ToNeverIfContainsUndefinedToNull<Types extends { [K in keyof Types]: Types[K] }>
+    = [{ [K in keyof Types]: undefined extends Types[K] ? {} : null extends Types[K] ? {} : never }[keyof Types]] extends [never] ? Types : never;
+type t1234 = ToNeverIfContainsUndefinedToNull<{ 'a': number | undefined, 'b': undefined }>;
+
+assert<IsExact<never, ToNeverIfContainsUndefinedToNull<t>>>(true); // t contains a property that is undefined or null, so `never` is expected
+assert<IsExact<{}, ToNeverIfContainsUndefinedToNull<{}>>>(true);   // {} does not contain a property that is undefined, so `{}` is expected
+assert<IsExact<never, ToNeverIfContainsUndefinedToNull<{ 'a': undefined }>>>(true); // a contains a property that is undefined, so `never` is expected
+assert<IsExact<ToNeverIfContainsUndefinedToNull<{ 'a': null }>, never>>(true); // a contains a property that is null, so `never` is expected
+assert<IsExact<never, ToNeverIfContainsUndefinedToNull<{ 'a': number | undefined }>>>(true); // a contains a property that is sometimes undefined, so `never` is expected
+assert<IsExact<{ 'a': number }, ToNeverIfContainsUndefinedToNull<{ 'a': number }>>>(true);
+assert<IsExact<never, ToNeverIfContainsUndefinedToNull<{ 'a'?: number }>>>(true);
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
