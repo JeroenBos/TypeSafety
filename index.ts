@@ -98,8 +98,8 @@ type withParameterIfError<T, Types extends Russell> = withParameterIf<KIsError<T
 
 
 export type primitiveTypes = {
-    'null': null,
-    'undefined': undefined,
+    // 'null': null,
+    // 'undefined': undefined,
     'number': number,
     'string': string,
     // 'boolean': boolean,
@@ -277,14 +277,39 @@ assert<IsExact<never, ToNeverIfContainsUndefinedToNull<{ 'a': number | undefined
 assert<IsExact<{ 'a': number }, ToNeverIfContainsUndefinedToNull<{ 'a': number }>>>(true);
 assert<IsExact<never, ToNeverIfContainsUndefinedToNull<{ 'a'?: number }>>>(true);
 
+type LookupValues<TLookup> = { [K in keyof TLookup]: TLookup[K] }[keyof TLookup];
+assert<IsExact<never, LookupValues<{}>>>(true);
+assert<IsExact<'a', LookupValues<{ x: 'a' }>>>(true);
+assert<IsExact<undefined, LookupValues<{ x: undefined }>>>(true);
+assert<IsExact<undefined | string, LookupValues<{ x: undefined, a: string }>>>(true);
+assert<IsExact<0 | string, LookupValues<{ x: 0, s: string }>>>(true);
+type ToNeverIfNullOrUndefined<T> = undefined extends T ? never : null extends T ? never : T;
+
+
+type NonNullableLookup<Types> = Has<undefined, Types[keyof Types]> extends true ? never :
+    Has<null, Types[keyof Types]> extends true ? never : Types;
+
+// [undefined extends LookupValues<Types> ? never : null extends LookupValues<Types> ? never : {}] extends [never] ? never : Types;
+type a1 = NonNullableLookup<{ 'a': 'a' }>;
+type a2 = NonNullableLookup<{ 'a': 'a' | null }>;
+type t663 = NonNullableLookup<{ 'a': 'a' | null, 'b': 'b' }>;
+assert<IsExact<never, NonNullableLookup<{ 'a': 'a' }>>>(false);
+assert<IsExact<never, NonNullableLookup<{ 'a': 'a' | null }>>>(true);
+assert<IsExact<never, NonNullableLookup<{ 'a': 'a' | null, 'b': 'b' }>>>(true);
+assert<IsExact<never, NonNullableLookup<{ 'a'?: 'a' }>>>(true);
+assert<IsExact<never, NonNullableLookup<{ 'a': 'a', 'b': number }>>>(false);
+assert<IsExact<never, NonNullableLookup<{ 'a': 'a' | null, 'b': 'b' }>>>(true);
+
+export type NonNullableValuesContraint<T> = { [K in keyof T]: string | number | boolean | object }
+
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
  * The names of the properties are `keyof Types[K]`, and each property has the value of another key, i.e. of type `keyof Types`. 
  * More specifically, given the name of a property `p` of interface `Types[K]` where `p extends string & keyof Types[K]`, 
  * the key for this property is `Types[K][p]` and its type is `Types[Types[K][p]]`. 
  */
-export class TypeDescription<K extends keyof Types, Types> implements ITypeDescription<Types[K]> {
-    public static create<Types, K extends keyof Types>(
+export class TypeDescription<K extends keyof Types, Types extends NonNullableValuesContraint<Types>> implements ITypeDescription<Types[K]> {
+    public static create<Types extends NonNullableValuesContraint<Types>, K extends keyof Types>(
         propertyDescriptions: DescriptionKeys<K, Types>): ITypeDescription<Types[K]> {
         return new TypeDescription(propertyDescriptions);
     }
@@ -307,7 +332,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
         return true;
     }
-    private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
+    private isValidKey(propertyName: string | keyof NonNullableValuesContraint<Types[K]>): propertyName is keyof NonNullableValuesContraint<Types[K]> {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
