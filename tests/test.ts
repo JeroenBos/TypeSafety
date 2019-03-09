@@ -1,5 +1,5 @@
 import 'mocha';
-import { is, ITypeDescription, stringDescription, BaseTypeSystem, primitiveTypes, TypeDescriptionsFor, TypeDescription, numberDescription, composeDescriptions, undefinedDescription } from '..';
+import { is, ITypeDescription, BaseTypeDescriptions, stringDescription, BaseTypeSystem, primitiveTypes, TypeDescriptionsFor, TypeDescription, numberDescription, composeDescriptions, undefinedDescription, getKey, DescriptionKeys, assert, IsExact, IsExactOrAny } from '..';
 
 
 export class A {
@@ -17,34 +17,87 @@ type checkableTypes = {
     'b': B,
     'b?': B | undefined
 }
-export class AllTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
+//
+// test getKey
+//
+
+assert<IsExact<'string', getKey<string, allCheckableTypes>>>(true);
+assert<IsExact<'a', getKey<A, allCheckableTypes>>>(true);
+assert<IsExact<'b', getKey<B, allCheckableTypes>>>(true);
+assert<IsExact<'b?', getKey<B | undefined, allCheckableTypes>>>(true);
+
+//
+// test allCheckableTypes[getKey]
+//
+
+assert<IsExact<string, allCheckableTypes[getKey<string, allCheckableTypes>]>>(true);
+assert<IsExact<A, allCheckableTypes[getKey<A, allCheckableTypes>]>>(true);
+assert<IsExact<B, allCheckableTypes[getKey<B, allCheckableTypes>]>>(true);
+assert<IsExact<B | undefined, allCheckableTypes[getKey<B | undefined, allCheckableTypes>]>>(true);
+
+//
+// test type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
+//
+assert<IsExact<ITypeDescription<null>, TypeDescriptionsFor<allCheckableTypes>['null']>>(true);
+assert<IsExact<ITypeDescription<string>, TypeDescriptionsFor<allCheckableTypes>['string']>>(true);
+assert<IsExact<ITypeDescription<B>, TypeDescriptionsFor<allCheckableTypes>['b']>>(true);
+assert<IsExact<ITypeDescription<B | undefined>, TypeDescriptionsFor<allCheckableTypes>['b?']>>(true);
+
+//
+// test type descriptionDebug
+//
+type descriptionDebugwrapper<K extends keyof allCheckableTypes, T extends allCheckableTypes[K], U extends keyof T> = descriptionDebug<K, T, allCheckableTypes, U>;
+type debugWrappera = descriptionDebugwrapper<'a', A, 'x' | 'b'>;
+assert<IsExact<{ x: A['x'], b: A['b'] }, debugWrappera>>(true);
+
+export type descriptionDebug<K extends keyof Types, T extends Types[K], Types, U extends keyof T> = { [u in U]: T[u] }
+
+//
+// test type real
+//
+type realwrapper<K extends keyof allCheckableTypes> = real<K, allCheckableTypes>;
+type reala = realwrapper<'a'>;
+assert<IsExact<{ x: 'string', b: 'b?' }, reala>>(true);
+type realb = realwrapper<'b'>;
+assert<IsExact<{ a: 'a' }, realb>>(true);
+
+export type real<K extends keyof Types, Types> = { [u in keyof Types[K]]: getKeyL<Types[K][u], allCheckableTypes> }
+export type getKeyL<T, Types extends { [k in keyof Types]: Types[k] }> =
+    { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
+
+
+type allCheckableTypes = checkableTypes & primitiveTypes;
+
+// is called like create<getKey<B, allCheckableTypes>>(...)
+// function create<K extends keyof allCheckableTypes>(
+//     propertyDescriptions: DescriptionKeys<K, allCheckableTypes>): ITypeDescription<allCheckableTypes[K]> 
+// {
+//     return TypeDescription.create<allCheckableTypes, K>(propertyDescriptions);
+// }
+
+function create<T extends allCheckableTypes[keyof allCheckableTypes]>(
+    propertyDescriptions: DescriptionKeys<getKey4<T, allCheckableTypes>, allCheckableTypes>): ITypeDescription<allCheckableTypes[getKey4<T, allCheckableTypes>]> {
+    return TypeDescription.create<allCheckableTypes, getKey4<T, allCheckableTypes>>(propertyDescriptions);
+}
+
+export type getKey4<T, Types extends { [k in keyof Types]: Types[k] }> =
+    { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
+
+
+export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
     // public readonly a = lazy({}, AllTypeDescriptions.createA);
     // private static createA(this: AllTypeDescriptions): ITypeDescription<A> {
     //     return TypeDescription.create<A>({ x: stringDescription, b: this['b?'] });
     // }
-    public readonly a = TypeDescription.create<checkableTypes, A>({ x: 'string', b: 'b?' });
-    public readonly b = TypeDescription.create<B>({ a: this.a });
-    public readonly 'b?' = composeDescriptions(this.b, undefinedDescription);
+    public readonly a: ITypeDescription<A> = create<A>({ x: 'string', b: 'b?' });
+    public readonly b: ITypeDescription<B> = create<B>({ a: 'a' });
+    public readonly 'b?': ITypeDescription<B | undefined> = create<B | undefined>({ a: 'a' });// composeDescriptions(this.b, undefinedDescription);
 
     constructor() {
-        for (const key in this) {
-            const description = this[key] as any as { __factory__: () => any };
-            if (AllTypeDescriptions.isLazilyInitializedObject(description)) {
-                Object.assign(description, description.__factory__());
-                delete description.__factory__;
-            }
-        }
-    }
-
-    private static isLazilyInitializedObject(obj: any): obj is { __factory__: () => any } {
-        return obj.__factory__ !== undefined;
+        super()
     }
 }
-function lazy<T>(obj: {}, factory: (a: null, _: AllTypeDescriptions) => T): T {
-    (obj as any).__factory__ = factory;
-    return obj as T;
-}
-export class TypeSystem extends BaseTypeSystem<checkableTypes> {
+export class TypeSystem extends BaseTypeSystem<checkableTypes & primitiveTypes> {
     constructor() {
         super(new AllTypeDescriptions())
     }
