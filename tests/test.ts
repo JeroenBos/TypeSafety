@@ -76,13 +76,9 @@ type allCheckableTypes = checkableTypes & primitiveTypes;
 // }
 
 function create<T extends allCheckableTypes[keyof allCheckableTypes]>(
-    propertyDescriptions: DescriptionKeys<getKey4<T, allCheckableTypes>, allCheckableTypes>): ITypeDescription<allCheckableTypes[getKey4<T, allCheckableTypes>]> {
-    return TypeDescription.create<allCheckableTypes, getKey4<T, allCheckableTypes>>(propertyDescriptions);
+    propertyDescriptions: DescriptionKeys<getKey<T, allCheckableTypes>, allCheckableTypes>): ITypeDescription<allCheckableTypes[getKey<T, allCheckableTypes>]> {
+    return TypeDescription.create<allCheckableTypes, getKey<T, allCheckableTypes>>(propertyDescriptions);
 }
-
-export type getKey4<T, Types extends { [k in keyof Types]: Types[k] }> =
-    { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
-
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
     // public readonly a = lazy({}, AllTypeDescriptions.createA);

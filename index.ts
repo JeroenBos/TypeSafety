@@ -89,13 +89,6 @@ type withMandatoryParameter<R> = (obj: any, no_description_was_defined_for_the_g
 type withParameterIf<B extends boolean, R> = B extends true ? withMandatoryParameter<R> : withOptionalParameter<R>;
 type KIsError<T, Types extends Russell> = K<T, Types> extends error ? true : false;
 type withParameterIfError<T, Types extends Russell> = withParameterIf<KIsError<T, Types>, T>;
-export function getKey<T>(): withParameterIfError<T, Russell> {
-    return null as any;
-    // const key = _getKey(t);
-}
-function _getKey<T>(t: T): K<T, Russell> {
-    throw new Error();
-}
 
 
 
@@ -235,7 +228,9 @@ type t = {
 };
 type asdf = getK<string, t>;
 
-export type getKey<T/* extends Types[getKey<T, Types>]*/, Types extends { [k in keyof Types]: Types[k] }> =
+
+
+export type getKey<T, Types extends { [k in keyof Types]: Types[k] }> =
     { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
 
 type asfaddfs = t[keyof t];
