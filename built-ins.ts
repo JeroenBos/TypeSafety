@@ -1,6 +1,6 @@
 import { TypeDescriptionsFor, ITypeDescription } from "./ITypeDescription";
 
-export type primitiveTypes = {
+export type PrimitiveTypes = {
     'null': null,
     'undefined': undefined,
 
@@ -25,7 +25,7 @@ export type primitiveTypes = {
     'nullable boolean?': boolean | null | undefined,
 }
 
-export class BaseTypeDescriptions implements TypeDescriptionsFor<primitiveTypes> {
+export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes> {
 
     'null' = nullDescription;
     'undefined' = undefinedDescription
@@ -62,9 +62,9 @@ export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
 export const booleanDescription = createPrimitiveDescription('boolean');
 
-function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): ITypeDescription<primitiveTypes[p]> {
+function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescription<PrimitiveTypes[p]> {
     return ({
-        is(obj: any): obj is primitiveTypes[p] {
+        is(obj: any): obj is PrimitiveTypes[p] {
             return typeof obj === s;
         },
     });

@@ -1,5 +1,5 @@
 import 'mocha';
-import {  getKey } from '..';
+import {  GetKey } from '..';
 import { typeSystem, checkableTypes, AllTypeDescriptions, A, B, allCheckableTypes } from '../system';
 import { assert, IsExact, IsExactOrAny } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
@@ -14,19 +14,19 @@ assert<IsExact<A['b'], B | undefined>>(true);
 // test getKey
 //
 
-assert<IsExact<'string', getKey<string, allCheckableTypes>>>(true);
-assert<IsExact<'a', getKey<A, allCheckableTypes>>>(true);
-assert<IsExact<'b', getKey<B, allCheckableTypes>>>(true);
-assert<IsExact<'b?', getKey<B | undefined, allCheckableTypes>>>(true);
+assert<IsExact<'string', GetKey<string, allCheckableTypes>>>(true);
+assert<IsExact<'a', GetKey<A, allCheckableTypes>>>(true);
+assert<IsExact<'b', GetKey<B, allCheckableTypes>>>(true);
+assert<IsExact<'b?', GetKey<B | undefined, allCheckableTypes>>>(true);
 
 //
 // test allCheckableTypes[getKey]
 //
 
-assert<IsExact<string, allCheckableTypes[getKey<string, allCheckableTypes>]>>(true);
-assert<IsExact<A, allCheckableTypes[getKey<A, allCheckableTypes>]>>(true);
-assert<IsExact<B, allCheckableTypes[getKey<B, allCheckableTypes>]>>(true);
-assert<IsExact<B | undefined, allCheckableTypes[getKey<B | undefined, allCheckableTypes>]>>(true);
+assert<IsExact<string, allCheckableTypes[GetKey<string, allCheckableTypes>]>>(true);
+assert<IsExact<A, allCheckableTypes[GetKey<A, allCheckableTypes>]>>(true);
+assert<IsExact<B, allCheckableTypes[GetKey<B, allCheckableTypes>]>>(true);
+assert<IsExact<B | undefined, allCheckableTypes[GetKey<B | undefined, allCheckableTypes>]>>(true);
 
 //
 // test type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }

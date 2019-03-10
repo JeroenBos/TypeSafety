@@ -1,18 +1,18 @@
-import { OptionalToMissing, getKey, MyRequired, DescriptionKeys } from ".";
-import { IsExact, assert } from "./typeHelper";
-import { primitiveTypes } from "./built-ins";
+import { GetKey, DescriptionKeys } from ".";
+import { IsExact, assert, OptionalToMissing, MyRequired } from "./typeHelper";
+import { PrimitiveTypes } from "./built-ins";
 
 export class C {
     c: number | undefined = 0;
     d: undefined;
-    e: string ='';
+    e: string = '';
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export type checkableTypes = OptionalToMissing<{
     'C': C
 }>
-export type allCheckableTypes = MyRequired<checkableTypes> & primitiveTypes;
+export type allCheckableTypes = MyRequired<checkableTypes> & PrimitiveTypes;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -21,8 +21,8 @@ type expectedDescriptionsC = {
     d: 'undefined';
     e: 'string';
 }
-type key = getKey<C, allCheckableTypes>;
-type resultDescriptionsC = DescriptionKeys<getKey<C, allCheckableTypes>, allCheckableTypes>;
+type key = GetKey<C, allCheckableTypes>;
+type resultDescriptionsC = DescriptionKeys<GetKey<C, allCheckableTypes>, allCheckableTypes>;
 assert<IsExact<resultDescriptionsC, expectedDescriptionsC>>(true);
 
 

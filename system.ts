@@ -1,6 +1,7 @@
-import { OptionalToMissing, createCreateFunction, TypeSystem } from ".";
-import { primitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
+import { createCreateFunction, TypeSystem } from ".";
+import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
 import { TypeDescriptionsFor } from "./ITypeDescription";
+import { OptionalToMissing } from "./typeHelper";
 
 export class A {
     x: string = 'a';
@@ -24,7 +25,7 @@ export type checkableTypes = OptionalToMissing<{
     'nullable b?': B | undefined | null,
     'optional b'?: B
 }>
-export type allCheckableTypes = checkableTypes & primitiveTypes;
+export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
 
 const create = <T extends object>() => createCreateFunction<allCheckableTypes, T>();
