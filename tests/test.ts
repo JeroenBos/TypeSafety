@@ -1,22 +1,12 @@
 import 'mocha';
-import { is, ITypeDescription, BaseTypeDescriptions, stringDescription, BaseTypeSystem, primitiveTypes, TypeDescriptionsFor, TypeDescription, numberDescription, composeDescriptions, undefinedDescription, getKey, DescriptionKeys, assert, IsExact, IsExactOrAny } from '..';
+import { is, ITypeDescription, BaseTypeDescriptions, stringDescription, TypeSystem, primitiveTypes, TypeDescriptionsFor, TypeDescription, numberDescription, composeDescriptions, getKey, DescriptionKeys, assert, IsExact, IsExactOrAny, optional, nullable, optionalNullable, nonAnyFunction, possiblyUndefined, possiblyNullOrUndefined, Missing, OptionalToMissing } from '..';
+import { typeSystem, checkableTypes, AllTypeDescriptions, A, B, allCheckableTypes } from '../system';
 
 
-export class A {
-    x: string = 'a';
-    b: B | undefined;
-}
-export class B {
-    a: A = new A();
-}
+assert<IsExact<A['b'], B | undefined>>(true);
 
 
 
-type checkableTypes = {
-    'a': A,
-    'b': B,
-    'b?': B | undefined
-}
 //
 // test getKey
 //
@@ -66,7 +56,6 @@ export type getKeyL<T, Types extends { [k in keyof Types]: Types[k] }> =
     { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
 
 
-type allCheckableTypes = checkableTypes & primitiveTypes;
 
 // is called like create<getKey<B, allCheckableTypes>>(...)
 // function create<K extends keyof allCheckableTypes>(
@@ -75,35 +64,77 @@ type allCheckableTypes = checkableTypes & primitiveTypes;
 //     return TypeDescription.create<allCheckableTypes, K>(propertyDescriptions);
 // }
 
-function create<T extends allCheckableTypes[keyof allCheckableTypes]>(
-    propertyDescriptions: DescriptionKeys<getKey<T, allCheckableTypes>, allCheckableTypes>): ITypeDescription<allCheckableTypes[getKey<T, allCheckableTypes>]> {
-    return TypeDescription.create<allCheckableTypes, getKey<T, allCheckableTypes>>(propertyDescriptions);
-}
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
-    // public readonly a = lazy({}, AllTypeDescriptions.createA);
-    // private static createA(this: AllTypeDescriptions): ITypeDescription<A> {
-    //     return TypeDescription.create<A>({ x: stringDescription, b: this['b?'] });
-    // }
-    public readonly a: ITypeDescription<A> = create<A>({ x: 'string', b: 'b?' });
-    public readonly b: ITypeDescription<B> = create<B>({ a: 'a' });
-    public readonly 'b?': ITypeDescription<B | undefined> = create<B>({ a: 'a' });// composeDescriptions(this.b, undefinedDescription);
+// function create<T extends object & allCheckableTypes[keyof allCheckableTypes]>(
+//     propertyDescriptions: DescriptionKeys<getKey<T, allCheckableTypes>, allCheckableTypes>
+// ): ITypeDescription<allCheckableTypes[getKey<T, allCheckableTypes>]> {
+//     return TypeDescription.create<allCheckableTypes, getKey<T, allCheckableTypes>>(propertyDescriptions);
+// }
 
-    constructor() {
-        super()
-    }
-}
-export class TypeSystem extends BaseTypeSystem<checkableTypes & primitiveTypes> {
-    constructor() {
-        super(new AllTypeDescriptions())
-    }
-}
+
+type Diff1<T, U> = { [k in keyof T]: k extends keyof U ? IsExact<T[k], U[k]> extends true ? never : k : k };
+type Diff<T, U> = { [k in keyof T]: k extends keyof U ? IsExact<T[k], U[k]> extends true ? never : k : k }[keyof T]
+    | { [k in keyof U]: k extends keyof T ? never : k }[keyof U]
+type x = Diff<{ a: 0, b: 0, c: 0 }, { a: 0, c: 1, d: 0 }>
+type sdfafd = { a: 0, b: 0, c: 0 } | { a: 0, c: 1, d: 0 }
+
+type almostAllTypeDescriptions = { [K in Exclude<keyof AllTypeDescriptions, keyof BaseTypeDescriptions>]: AllTypeDescriptions[K] };
+type differenceBetweenExpected = Diff<almostAllTypeDescriptions, TypeDescriptionsFor<checkableTypes>>;
+type differencePart1 = almostAllTypeDescriptions[differenceBetweenExpected];
+type differencePart2 = TypeDescriptionsFor<checkableTypes>[differenceBetweenExpected];
+assert<IsExact<TypeDescriptionsFor<checkableTypes>, almostAllTypeDescriptions>>(true);
+
 
 describe('tests', () => {
-    it('test number', () => {
+    it('null is not b?', () => {
+        const nullIsBQ = typeSystem.check('b?')(null);
+        if (nullIsBQ)
+            throw new Error();
+    });
+    it('null is nullable b', () => {
+        const nullIsBQQ = typeSystem.assert('nullable b')(null);
+        if (!nullIsBQQ)
+            throw new Error();
+    });
+    it('null is nullable b?', () => {
+        const nullIsBQQQ = typeSystem.assert('nullable b?')(null);
+        if (!nullIsBQQQ)
+            throw new Error();
+    });
+    it('undefined is b?', () => {
+        const undefinedIsBQ = typeSystem.check('b?')(undefined);
+        if (!undefinedIsBQ)
+            throw new Error();
+    });
+    it('undefined is not nullable b', () => {
+        const undefinedIsBQQ = typeSystem.check('nullable b')(undefined);
+        if (undefinedIsBQQ)
+            throw new Error();
+    });
+    it('undefined is nullable b?', () => {
+        const undefinedIsBQQQ = typeSystem.assert('nullable b?')(undefined);
+        if (!undefinedIsBQQQ)
+            throw new Error();
+    });
+    it('{ x: "s", b: undefined } is a', () => {
+        const isA = typeSystem.assert('a')({ x: "s", b: undefined });
+        if (!isA)
+            throw new Error();
+    });
+    it('{ x: "s", b: undefined } is a', () => {
+        const isA = typeSystem.assert('a')({ x: "s", b: undefined });
+        if (!isA)
+            throw new Error();
+    });
+    it('{ x: "s", b: new B() } is a', () => {
         debugger;
-        const typeSystem = new TypeSystem();
-        typeSystem.assert('a')(null);
-
-    })
+        const isA = typeSystem.assert('a')({ x: "s", b: new B() });
+        if (!isA)
+            throw new Error();
+    });
+    it('{ x: "s" } is not a', () => {
+        const isA = typeSystem.check('a')({ x: "s" });
+        if (isA) // because the property b? is missing
+            throw new Error();
+    });
 });

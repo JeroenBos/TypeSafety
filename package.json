@@ -1,13 +1,13 @@
 {
-  "name": "template",
+  "name": "typesafety",
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "test": "webpack && mocha dist/test.js",
-    "testonly": "mocha dist/test.js"
+    "testbuild": "webpack && mocha dist/test.js",
+    "test": "mocha dist/test.js"
   },
   "private": true,
   "author": "Jeroen Bos",

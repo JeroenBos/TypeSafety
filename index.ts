@@ -1,4 +1,4 @@
-import { TypeSystem } from "./tests/test";
+import { format } from "url";
 
 /**
  * Asserts at compile time that the provided type argument's type resolves to the expected boolean literal type.
@@ -100,20 +100,52 @@ type withParameterIfError<T, Types extends Russell> = withParameterIf<KIsError<T
 export type primitiveTypes = {
     'null': null,
     'undefined': undefined,
+
     'number': number,
     'string': string,
-    // 'boolean': boolean,
-    // 'number?': number | undefined,
-    // 'number|null': number | null,
-    // 'number?|null': number | undefined | null,
+    'boolean': boolean,
+
+    'optional string': string | Missing,
+    'optional number': number | Missing,
+    'optional boolean': boolean | Missing,
+
+    'string?': string | undefined,
+    'number?': number | undefined,
+    'boolean?': boolean | undefined,
+
+    'nullable string': string | null,
+    'nullable number': number | null,
+    'nullable boolean': boolean | null,
+
+    'nullable string?': string | null | undefined,
+    'nullable number?': number | null | undefined,
+    'nullable boolean?': boolean | null | undefined,
 }
 
 export class BaseTypeDescriptions implements TypeDescriptionsFor<primitiveTypes> {
 
     'null' = nullDescription;
     'undefined' = undefinedDescription
+
     'number' = numberDescription;
     'string' = stringDescription;
+    'boolean' = booleanDescription;
+
+    'optional string' = optional(numberDescription);
+    'optional number' = optional(numberDescription);
+    'optional boolean' = optional(booleanDescription);
+
+    'string?' = possiblyUndefined(stringDescription);
+    'number?' = possiblyUndefined(numberDescription);
+    'boolean?' = possiblyUndefined(booleanDescription);
+
+    'nullable string' = nullable(stringDescription);
+    'nullable number' = nullable(numberDescription);
+    'nullable boolean' = nullable(booleanDescription);
+
+    'nullable string?' = possiblyNullOrUndefined(stringDescription);
+    'nullable number?' = possiblyNullOrUndefined(numberDescription);
+    'nullable boolean?' = possiblyNullOrUndefined(booleanDescription);
 }
 function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): ITypeDescription<primitiveTypes[p]> {
     return ({
@@ -122,6 +154,25 @@ function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): IType
         },
     });
 }
+class missingType { }
+const missing = Object.freeze(new missingType());
+export type Missing = missingType | undefined
+export function nullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | null> {
+    return composeDescriptions(nullDescription, description1);
+}
+export function optional<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing> {
+    return composeDescriptions(missingDescription, description1);
+}
+export function optionalNullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing | null> {
+    return composeDescriptions(missingOrNullDescription, description1);
+}
+export function possiblyUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined> {
+    return composeDescriptions(undefinedDescription, description1);
+}
+export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined | null> {
+    return composeDescriptions(undefinedOrNullDescription, description1);
+}
+
 export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
     return ({
         is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
@@ -129,11 +180,15 @@ export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, 
         },
     });
 }
-export const undefinedDescription: ITypeDescription<undefined> = ({ is(obj: any): obj is undefined { return obj === undefined; } })
-export const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { return obj === null; } })
+
+const missingDescription: ITypeDescription<Missing> = ({ is(obj: any): obj is Missing { return obj === undefined || obj === missing; } });
+const missingOrNullDescription: ITypeDescription<Missing | null> = ({ is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; } })
+const undefinedOrNullDescription: ITypeDescription<undefined | null> = ({ is(obj: any): obj is undefined | null { return obj === undefined || obj === null; } })
+const undefinedDescription: ITypeDescription<undefined> = ({ is(obj: any): obj is undefined { return obj === undefined; } })
+const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { return obj === null; } })
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
-// export const booleanDescription = createPrimitiveDescription('boolean');
+export const booleanDescription = createPrimitiveDescription('boolean');
 
 type primitiveTypeDescriptions = { [K in keyof primitiveTypes]: ITypeDescription<primitiveTypes[K]> };
 export interface Russell {
@@ -145,7 +200,9 @@ type SelectTypeDescriptionsFor<
     Types extends { [K in keyof Types]: Types[K] },
     Keys extends keyof Types>
     = { [K in Keys]: ITypeDescription<Types[K]> }
+
 export type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
+
 
 type TypeDescriptionsForNonPrimitives<Types extends { [K in (keyof Types | keyof primitiveTypes)]: Types[K] }> =
     SelectTypeDescriptionsFor<Types, Exclude<keyof Types, keyof primitiveTypes>>;
@@ -163,7 +220,7 @@ type withPrimitives<Types extends { [K in keyof Types]: Types[K] }>
 
 type typeDescriptions<Types extends { [K in keyof Types]: Types[K] }> = ITypeDescription<Types[keyof Types]>;
 type TypeConstraint<Types> = { [K in keyof (Types & primitiveTypes)]: (Types & primitiveTypes)[K] };
-export class BaseTypeSystem<Types extends TypeConstraint<Types>> {
+export class TypeSystem<Types extends TypeConstraint<Types>> {
     // private readonly typeDescriptions = new mapToTypeDescriptions<Types>();
     private readonly typeDescriptions = new Map<keyof Types, typeDescriptions<Types>>();
     private _add(
@@ -185,8 +242,14 @@ export class BaseTypeSystem<Types extends TypeConstraint<Types>> {
             this.add(key, value);
         }
     }
+    // only difference with 
+    assert<K extends keyof Types>(key: K): (arg: Types[K]) => arg is Types[K] {
+        return this.check(key);
+        //const f: castArg<(obj: any) => obj is Types[K], Types[K]> = this.check(key);
+        //return f as any;
+    }
 
-    assert<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
+    check<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
         return ((obj: any) => this._check(obj, key)) as any;
     }
     private _check<K extends keyof Types>(obj: any, key: K): obj is Types[K] {
@@ -200,18 +263,13 @@ export class BaseTypeSystem<Types extends TypeConstraint<Types>> {
         return description;
     }
 }
+type notAny<T> = IsAny<T> extends true ? never : T
+export type nonAnyFunction<T, K extends keyof T> = IsAny<K> extends true ? never : IsAny<T[K]> extends true ? never : (arg: T[K]) => arg is T[K];
+assert<IsExact<nonAnyFunction<string, any>, never>>(true);
+type replaceAnyByNever<T> = IsAny<T> extends true ? never : T;
+type castArg<F extends (arg: any) => any, TArgResult> = F extends (arg: any) => infer TResult ? (arg: TArgResult) => TResult : never;
+assert<IsExact<castArg<(i: number) => 4, string>, (s: string) => 4>>(true);
 
-type TypeDescriptions<T, K extends keyof T> = ITypeDescription<T[K]>
-
-interface X {
-    key: 3;
-}
-interface subX {
-    key: 4;
-}
-interface NoKey {
-    key: 3;
-}
 export function is<T extends { key: K } | undefined | null | string | number, K>(arg: T, key: K): arg is T {
     throw new Error('not implemented');
 }
@@ -231,7 +289,6 @@ type t = {
         g: 'u'
     }
 };
-type asdf = getK<string, t>;
 
 
 
@@ -241,8 +298,6 @@ export type getKey<T, Types extends { [k in keyof Types]: Types[k] }> =
 type asfaddfs = t[keyof t];
 type asdf2 = getKey<string, t>;
 type adfsasdfasdf2 = t[getKey<string, t>];
-/// this is a type from T to 
-export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[K]]: getKey<Types[K][u], Types> }
 
 
 export type lookupValueContains<Types extends { [k in keyof Types]: Types[k] }, T> =
@@ -319,16 +374,36 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
     }
 
     is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Types[K] {
+        if (obj === undefined || obj === null || obj === missing) {
+            return false;
+        }
+        const expectedProperties = Object.assign({}, this.propertyDescriptions);
+
+        // remove properties that are allowed to be missing:
+        for (const possiblyOptionalPropertyName in expectedProperties) {
+            const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
+            const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
+            if (possiblyOptionalDescription.is(missing, getSubdescription)) {
+                throw new Error('missing properties arent supported yet');
+                delete expectedProperties[possiblyOptionalPropertyName];
+            }
+        }
+
         for (const propertyName in obj) {
             if (!this.isValidKey(propertyName)) {
-                throw new Error();
+                continue; // throw new Error(`The object has an extra property '${propertyName}'`);
             }
+            delete expectedProperties[propertyName];
             const property = obj[propertyName];
             const propertyKey = this.propertyDescriptions[propertyName];
-            const description = getSubdescription(propertyKey);
-            if (!description.is(property, getSubdescription)) {
+            const propertyDescription = getSubdescription(propertyKey);
+            const _isOfPropertyType = propertyDescription.is(property, getSubdescription)
+            if (!_isOfPropertyType) {
                 return false;
             }
+        }
+        for (const missingPropertyName in expectedProperties) {
+            return false; // throw new Error(`${missingPropertyName} is missing`);
         }
         return true;
     }
@@ -337,12 +412,95 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
 }
-type TypeSystemType<Types> = BaseTypeSystem<Types & primitiveTypes>;
+export type KeysOfType<T, U> = { [K in keyof T]: T[K] extends U ? K : never }[keyof T];
+export type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];
+export type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
 
-type asdfdfdfs<Types> = { [K in keyof Types]: Types[K] extends any ? K : never }[keyof Types];
-type test = asdfdfdfs<{ a: 'b', c: 'd' }>;
+assert<IsExact<OptionalKeys<{}>, never>>(true);
+assert<IsExact<OptionalKeys<{ a?: string }>, 'a'>>(true);
+assert<IsExact<OptionalKeys<{ a: undefined }>, never>>(true);
+assert<IsExact<OptionalKeys<{ a: string | undefined }>, never>>(true);
 
-type asdfdfdfs2<Types> = keyof { [K in keyof Types]: Types[K] extends any ? K : never };
-type test2 = asdfdfdfs2<{ a: 'b', c: 'd' }>;
+type Optionals<T> = { [K in OptionalKeys<T>]: T[K] }
 
-type test2134 = IsExact<asdfdfdfs<{}>, asdfdfdfs2<{}>>;
+assert<IsExact<Optionals<{}>, {}>>(true);
+assert<IsExact<Optionals<{ a?: string }>, { a: string | undefined }>>(true);
+assert<IsExact<Optionals<{ a: undefined }>, {}>>(true);
+assert<IsExact<Optionals<{ a: string | undefined }>, {}>>(true);
+
+
+export type OptionalsWithUndefined<T> = { [K in OptionalKeys<T>]: T[K] | undefined }
+
+assert<IsExact<OptionalsWithUndefined<{}>, {}>>(true);
+assert<IsExact<OptionalsWithUndefined<{ a?: string }>, { a: string | undefined }>>(true);
+assert<IsExact<OptionalsWithUndefined<{ a: undefined }>, {}>>(true);
+assert<IsExact<OptionalsWithUndefined<{ a: string | undefined }>, {}>>(true);
+assert<IsExact<OptionalsWithUndefined<{ c?: number; e: number; }>, { c: number | undefined; }>>(true);
+
+
+
+type OptionalsWithMissing<T> = { [K in OptionalKeys<T>]: T[K] | Missing }
+
+assert<IsExact<OptionalsWithMissing<{}>, {}>>(true);
+assert<IsExact<OptionalsWithMissing<{ a?: string }>, { a: string | Missing }>>(true);
+assert<IsExact<OptionalsWithMissing<{ a: undefined }>, {}>>(true);
+assert<IsExact<OptionalsWithMissing<{ a: string | undefined }>, {}>>(true);
+assert<IsExact<OptionalsWithMissing<{ a?: { c: number } }>, { a: Missing | { c: number } }>>(true);
+
+
+assert<IsExact<OptionalsWithMissing<{ a?: { c?: 0, d: number } }>, { a: { c: 0 | Missing } | Missing }>>(true);
+
+
+export type Requireds<T> = { [K in RequiredKeys<T>]: T[K] }
+
+assert<IsExact<Requireds<{}>, {}>>(true);
+assert<IsExact<Requireds<{ a?: string }>, {}>>(true);
+assert<IsExact<Requireds<{ a: undefined }>, { a: undefined }>>(true);
+assert<IsExact<Requireds<{ a: string | undefined }>, { a: string | undefined }>>(true);
+
+export type OptionalToMissing<T> = OptionalsWithMissing<T> & Requireds<T>
+
+assert<IsExact<OptionalToMissing<{}>, {}>>(true);
+type fa1 = OptionalToMissing<{ a?: string }>;
+assert<IsExact<OptionalToMissing<{ a?: string }>, { a: string | Missing }>>(true);
+assert<IsExact<OptionalToMissing<{ a: undefined }>, { a: undefined }>>(true);
+assert<IsExact<OptionalToMissing<{ a: string | undefined }>, { a: string | undefined }>>(true);
+
+
+
+export type MyRequired<T> = OptionalsWithUndefined<T> & Requireds<T>
+
+
+assert<IsExact<MyRequired<{}>, {}>>(true);
+assert<IsExact<MyRequired<{ a?: string }>, { a: string | undefined }>>(true);
+assert<IsExact<MyRequired<{ a: undefined }>, { a: undefined }>>(true);
+assert<IsExact<MyRequired<{ a: string | undefined }>, { a: string | undefined }>>(true);
+assert<IsExact<MyRequired<{ c?: number; e: number; }>, { c: number | undefined, e: number }>>(true);
+assert<IsExact<MyRequired<{ c?: number; d: undefined; e: number }>, { c: number | undefined; d: undefined; e: number }>>(true);
+
+
+
+export type DescriptionKeyspart<K extends keyof Types, Types> = { [u in keyof Types[K]]: getKey<Types[K][u], Types> }
+
+
+// assert<IsExact<dkpHelper<object, dkp1e>, { a: ITypeDescription<object> }>>(true);
+// assert<IsExact<DescriptionKeyspart<never, { a?: string }>, { a: ITypeDescription<string | Missing> }>>(true);
+// assert<IsExact<DescriptionKeyspart<never, { a: undefined }>, { a: undefined }>>(true);
+// assert<IsExact<DescriptionKeyspart<never, { a: string | undefined }>, { a: string | undefined }>>(true);
+// assert<IsExact<DescriptionKeyspart<never, { c?: number; e: number; }>, { c: number | undefined, e: number }>>(true);
+// assert<IsExact<DescriptionKeyspart<never, { c?: number; d: undefined; e: number }>, { c: number | undefined; d: undefined; e: number }>>(true);
+
+
+export type DescriptionKeys<K extends keyof Types, Types> = DescriptionKeyspart<K, Types>;
+
+
+
+
+
+export function createCreateFunction<Types, T extends object & Types[keyof Types]>()
+    : (propertyDescriptions: DescriptionKeys<getKey<T, Types>, Types>) => ITypeDescription<Types[getKey<T, Types>]> {
+    {
+        return (propertyDescriptions: DescriptionKeys<getKey<T, Types>, Types>) =>
+            TypeDescription.create<Types, getKey<T, Types>>(propertyDescriptions);
+    }
+}
