@@ -1,4 +1,6 @@
-import { BaseTypeDescriptions, TypeDescriptionsFor, possiblyUndefined, OptionalToMissing, nullable, possiblyNullOrUndefined, optional, createCreateFunction, primitiveTypes, TypeSystem, Missing } from ".";
+import { OptionalToMissing, createCreateFunction, TypeSystem } from ".";
+import { primitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
+import { TypeDescriptionsFor } from "./ITypeDescription";
 
 export class A {
     x: string = 'a';

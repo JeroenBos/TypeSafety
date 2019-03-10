@@ -1,132 +1,17 @@
 import { IsAny, IsExact, assert, IsExactOrAny, Has, IsNotNever } from "./typeHelper";
+import { primitiveTypes, missing, Missing } from "./built-ins";
+import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
 
 
 
-export type MapType<T extends { [property in keyof T]: T[property] }> = T;
-export type ExcludeKeysFromMapType<T extends { [property in keyof T]: T[property] }, TKeysToExclude extends keyof T>
-    = { [property in Exclude<keyof T, TKeysToExclude>]: T[property] }
-export type ExcludePrimitiveTypes<T extends { [property in (keyof primitiveTypes | keyof T)]: T[property] }>
-    = ExcludeKeysFromMapType<T, keyof primitiveTypes>;
-
-type Filter<T, U> = T extends U ? T : never;  // Remove types from T that are not assignable to U
-type error = 'no such type';
-export type K<T, Types extends Russell> = T extends undefined | null ? T
-    : Exclude<T, undefined | null> extends { key: infer k; } ? k extends keyof Types ? k | Filter<T, undefined | null> : error
-    : error;
-
-type withOptionalParameter<R> = (obj: any, optional?: undefined) => R;
-type withMandatoryParameter<R> = (obj: any, no_description_was_defined_for_the_generic_type_specified_to_getKey: undefined) => R;
-type withParameterIf<B extends boolean, R> = B extends true ? withMandatoryParameter<R> : withOptionalParameter<R>;
-type KIsError<T, Types extends Russell> = K<T, Types> extends error ? true : false;
-type withParameterIfError<T, Types extends Russell> = withParameterIf<KIsError<T, Types>, T>;
-
-
-
-export type primitiveTypes = {
-    'null': null,
-    'undefined': undefined,
-
-    'number': number,
-    'string': string,
-    'boolean': boolean,
-
-    'optional string': string | Missing,
-    'optional number': number | Missing,
-    'optional boolean': boolean | Missing,
-
-    'string?': string | undefined,
-    'number?': number | undefined,
-    'boolean?': boolean | undefined,
-
-    'nullable string': string | null,
-    'nullable number': number | null,
-    'nullable boolean': boolean | null,
-
-    'nullable string?': string | null | undefined,
-    'nullable number?': number | null | undefined,
-    'nullable boolean?': boolean | null | undefined,
-}
-
-export class BaseTypeDescriptions implements TypeDescriptionsFor<primitiveTypes> {
-
-    'null' = nullDescription;
-    'undefined' = undefinedDescription
-
-    'number' = numberDescription;
-    'string' = stringDescription;
-    'boolean' = booleanDescription;
-
-    'optional string' = optional(numberDescription);
-    'optional number' = optional(numberDescription);
-    'optional boolean' = optional(booleanDescription);
-
-    'string?' = possiblyUndefined(stringDescription);
-    'number?' = possiblyUndefined(numberDescription);
-    'boolean?' = possiblyUndefined(booleanDescription);
-
-    'nullable string' = nullable(stringDescription);
-    'nullable number' = nullable(numberDescription);
-    'nullable boolean' = nullable(booleanDescription);
-
-    'nullable string?' = possiblyNullOrUndefined(stringDescription);
-    'nullable number?' = possiblyNullOrUndefined(numberDescription);
-    'nullable boolean?' = possiblyNullOrUndefined(booleanDescription);
-}
-function createPrimitiveDescription<p extends keyof primitiveTypes>(s: p): ITypeDescription<primitiveTypes[p]> {
-    return ({
-        is(obj: any): obj is primitiveTypes[p] {
-            return typeof obj === s;
-        },
-    });
-}
-class missingType { }
-const missing = Object.freeze(new missingType());
-export type Missing = missingType | undefined
-export function nullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | null> {
-    return composeDescriptions(nullDescription, description1);
-}
-export function optional<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing> {
-    return composeDescriptions(missingDescription, description1);
-}
-export function optionalNullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing | null> {
-    return composeDescriptions(missingOrNullDescription, description1);
-}
-export function possiblyUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined> {
-    return composeDescriptions(undefinedDescription, description1);
-}
-export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined | null> {
-    return composeDescriptions(undefinedOrNullDescription, description1);
-}
-
-export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
-    return ({
-        is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
-            return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
-        },
-    });
-}
-
-const missingDescription: ITypeDescription<Missing> = ({ is(obj: any): obj is Missing { return obj === undefined || obj === missing; } });
-const missingOrNullDescription: ITypeDescription<Missing | null> = ({ is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; } })
-const undefinedOrNullDescription: ITypeDescription<undefined | null> = ({ is(obj: any): obj is undefined | null { return obj === undefined || obj === null; } })
-const undefinedDescription: ITypeDescription<undefined> = ({ is(obj: any): obj is undefined { return obj === undefined; } })
-const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { return obj === null; } })
-export const stringDescription = createPrimitiveDescription('string');
-export const numberDescription = createPrimitiveDescription('number');
-export const booleanDescription = createPrimitiveDescription('boolean');
 
 type primitiveTypeDescriptions = { [K in keyof primitiveTypes]: ITypeDescription<primitiveTypes[K]> };
-export interface Russell {
-    readonly 'number': ITypeDescription<number>,
-    readonly 'string': ITypeDescription<string>,
-    readonly 'boolean': ITypeDescription<boolean>,
-};
+
 type SelectTypeDescriptionsFor<
     Types extends { [K in keyof Types]: Types[K] },
     Keys extends keyof Types>
     = { [K in Keys]: ITypeDescription<Types[K]> }
 
-export type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
 
 
 type TypeDescriptionsForNonPrimitives<Types extends { [K in (keyof Types | keyof primitiveTypes)]: Types[K] }> =
@@ -199,9 +84,6 @@ export function is<T extends { key: K } | undefined | null | string | number, K>
     throw new Error('not implemented');
 }
 
-export interface ITypeDescription<T> {
-    is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is T;
-}
 export type getK<T, Types extends { [k in keyof Types]: Types[k] }> =
     { [K in keyof Types]: Types[K] extends T ? K : never };
 

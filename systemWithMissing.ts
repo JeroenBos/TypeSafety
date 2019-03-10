@@ -1,5 +1,6 @@
-import { TypeDescriptionsFor, OptionalToMissing, createCreateFunction, primitiveTypes, DescriptionKeys, getKey, MyRequired } from ".";
+import {  OptionalToMissing, createCreateFunction, DescriptionKeys, getKey, MyRequired } from ".";
 import { IsExact, assert } from "./typeHelper";
+import { primitiveTypes } from "./built-ins";
 
 export class C {
     c?: number = 0;
@@ -37,7 +38,7 @@ assert<IsExact<{ c: number | undefined; d: undefined; e: number }, dkc>>(true);
 type dks = DescriptionKeys<getKey<C, allCheckableTypes>, allCheckableTypes>;
 // assert<IsExact<{ c: number | undefined; d: undefined; e: number }, dks>>(true);
 
-type descriptions = TypeDescriptionsFor<allCheckableTypes>;
+// type descriptions = TypeDescriptionsFor<allCheckableTypes>;
 
 // export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
 //     public readonly C = create<C>()({ c: p});

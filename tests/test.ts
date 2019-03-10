@@ -1,7 +1,9 @@
 import 'mocha';
-import { ITypeDescription, BaseTypeDescriptions, TypeDescriptionsFor,  getKey } from '..';
+import {  getKey } from '..';
 import { typeSystem, checkableTypes, AllTypeDescriptions, A, B, allCheckableTypes } from '../system';
 import { assert, IsExact, IsExactOrAny } from '../typeHelper';
+import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
+import { BaseTypeDescriptions } from '../built-ins';
 
 
 assert<IsExact<A['b'], B | undefined>>(true);

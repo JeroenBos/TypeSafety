@@ -1,5 +1,6 @@
-import { OptionalToMissing, primitiveTypes, getKey, MyRequired, DescriptionKeys } from ".";
+import { OptionalToMissing, getKey, MyRequired, DescriptionKeys } from ".";
 import { IsExact, assert } from "./typeHelper";
+import { primitiveTypes } from "./built-ins";
 
 export class C {
     c: number | undefined = 0;
