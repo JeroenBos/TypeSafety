@@ -1,4 +1,5 @@
-import { BaseTypeDescriptions, TypeDescriptionsFor, possiblyUndefined, OptionalToMissing, nullable, possiblyNullOrUndefined, optional, createCreateFunction, primitiveTypes, TypeSystem, Missing, DescriptionKeys, getKey, OptionalKeys, OptionalsWithUndefined, Requireds, assert, IsExact, MyRequired, DescriptionKeyspart, ITypeDescription } from ".";
+import { TypeDescriptionsFor, OptionalToMissing, createCreateFunction, primitiveTypes, DescriptionKeys, getKey, MyRequired } from ".";
+import { IsExact, assert } from "./typeHelper";
 
 export class C {
     c?: number = 0;

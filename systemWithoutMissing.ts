@@ -1,9 +1,10 @@
-import { OptionalToMissing, primitiveTypes, getKey, assert, IsExact, DescriptionKeyspart, MyRequired } from ".";
+import { OptionalToMissing, primitiveTypes, getKey, MyRequired, DescriptionKeys } from ".";
+import { IsExact, assert } from "./typeHelper";
 
 export class C {
     c: number | undefined = 0;
     d: undefined;
-    e: number = 0;
+    e: string ='';
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,9 +18,10 @@ export type allCheckableTypes = MyRequired<checkableTypes> & primitiveTypes;
 type expectedDescriptionsC = {
     c: 'number?';
     d: 'undefined';
-    e: 'number';
+    e: 'string';
 }
-type resultDescriptionsC = DescriptionKeyspart<getKey<C, allCheckableTypes>, allCheckableTypes>;
+type key = getKey<C, allCheckableTypes>;
+type resultDescriptionsC = DescriptionKeys<getKey<C, allCheckableTypes>, allCheckableTypes>;
 assert<IsExact<resultDescriptionsC, expectedDescriptionsC>>(true);
 
 
