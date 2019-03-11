@@ -1,6 +1,7 @@
-import { IsAny, IsExact, assert, IsExactOrAny, Has, IsNotNever } from "./typeHelper";
 import { PrimitiveTypes, missing, Missing } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
+import { GetKey, assert, IsExact } from "./typeHelper";
+import { allCheckableTypes } from "./system";
 
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
@@ -42,7 +43,6 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     }
 }
 
-export type GetKey<T, Types> = { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
 
 
 /**
@@ -100,16 +100,6 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
 }
-
-
-
-//  assert<IsExact<dkpHelper<object, dkp1e>, { a: ITypeDescription<object> }>>(true);
-// assert<IsExact<DescriptionKeyspart<never, { a?: string }>, { a: ITypeDescription<string | Missing> }>>(true);
-// assert<IsExact<DescriptionKeyspart<never, { a: undefined }>, { a: undefined }>>(true);
-// assert<IsExact<DescriptionKeyspart<never, { a: string | undefined }>, { a: string | undefined }>>(true);
-// assert<IsExact<DescriptionKeyspart<never, { c?: number; e: number; }>, { c: number | undefined, e: number }>>(true);
-// assert<IsExact<DescriptionKeyspart<never, { c?: number; d: undefined; e: number }>, { c: number | undefined; d: undefined; e: number }>>(true);
-
 
 export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[K]]: GetKey<Types[K][u], Types> };
 

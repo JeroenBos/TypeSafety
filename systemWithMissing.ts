@@ -1,5 +1,5 @@
-import {  createCreateFunction, DescriptionKeys, GetKey } from ".";
-import { IsExact, assert, OptionalToMissing, MyRequired } from "./typeHelper";
+import {  createCreateFunction, DescriptionKeys } from ".";
+import { IsExact, assert, OptionalToMissing, MyRequired, GetKey } from "./typeHelper";
 import { PrimitiveTypes } from "./built-ins";
 
 export class C {

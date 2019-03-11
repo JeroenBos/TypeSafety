@@ -128,3 +128,13 @@ assert<IsExact<MyRequired<{ a: undefined }>, { a: undefined }>>(true);
 assert<IsExact<MyRequired<{ a: string | undefined }>, { a: string | undefined }>>(true);
 assert<IsExact<MyRequired<{ c?: number; e: number; }>, { c: number | undefined, e: number }>>(true);
 assert<IsExact<MyRequired<{ c?: number; d: undefined; e: number }>, { c: number | undefined; d: undefined; e: number }>>(true);
+
+/**
+ * Gets the key `K` such that `L[K] === T`. If there are multiple `K`s, you get the union. TODO: restrict L to be a function, i.e. that the L[keyof L] are unique.
+ * 
+ * L: for TLookup
+ */
+export type GetKey<T/* extends TLookup[keyof TLookup]*/, TLookup> =
+    {
+        [K in keyof TLookup]: TLookup[K] extends T ? IsExactOrAny<T, TLookup[K]> extends true ? K : never : never
+    }[keyof TLookup];

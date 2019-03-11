@@ -1,7 +1,6 @@
 import 'mocha';
-import {  GetKey } from '..';
 import { typeSystem, checkableTypes, AllTypeDescriptions, A, B, allCheckableTypes } from '../system';
-import { assert, IsExact, IsExactOrAny } from '../typeHelper';
+import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
 import { BaseTypeDescriptions } from '../built-ins';
 
