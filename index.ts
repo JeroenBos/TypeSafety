@@ -104,6 +104,11 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
 export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[K]]: GetKey<Types[K][u], Types> };
 
 
+// I tried to replace DescriptionKeys<GetKey<T, Types>, Types> by attemptDescriptionKeys<T, Types>
+export type attemptDescriptionKeys<Types> = { [ U in keyof Types]: Types[U] }[keyof Types]// keyof { [K in keyof { [ U in keyof Types]: Types[U] }]: Types[K] };
+
+type deDebug = attemptDescriptionKeys<{ a: { b: string, c: number }, d: { e: undefined }}>;
+
 
 
 
