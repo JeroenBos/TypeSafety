@@ -111,11 +111,12 @@ type attemptDescriptionKeys<Types> = { [U in keyof Types]: Types[U] }[keyof Type
 type deDebug = attemptDescriptionKeys<{ a: { b: string, c: number }, d: { e: undefined } }>;
 
 
-export function createCreateFunction<Types, T extends object & Types[keyof Types]>()
-    : (propertyDescriptions: DescriptionKeys<GetKey<T, Types>, Types>) => ITypeDescription<Types[GetKey<T, Types>]> {
+type P<T> = T & PrimitiveTypes
+export function createCreateFunction<Types, T extends object & P<Types>[keyof P<Types>]>()
+    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescription<P<Types>[GetKey<T, P<Types>>]> {
     {
-        return (propertyDescriptions: DescriptionKeys<GetKey<T, Types>, Types>) =>
-            TypeDescription.create<Types, GetKey<T, Types>>(propertyDescriptions);
+        return (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) =>
+            TypeDescription.create<P<Types>, GetKey<T, P<Types>>>(propertyDescriptions);
     }
 }
 

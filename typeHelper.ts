@@ -260,3 +260,5 @@ assert<IsExact<NotNeverValues<{}>, {}>>(true);
 assert<IsExact<NotNeverValues<never>, never>>(true);
 assert<IsExact<NotNeverValues<{ a: never, b: never }>, {}>>(true);
 assert<IsExact<NotNeverValues<{ a: string, b: number, c: never }>, { a: string, b: number }>>(true);
+
+export type Eval<T> = { [K in keyof T]: T[K] }
