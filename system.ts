@@ -1,7 +1,7 @@
 import { createCreateFunction, TypeSystem } from ".";
 import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
 import { TypeDescriptionsFor } from "./ITypeDescription";
-import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever } from "./typeHelper";
+import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue } from "./typeHelper";
 
 export class A {
     x: string = 'a';
@@ -69,66 +69,17 @@ interface E {
     d: string
 }
 interface F {
-    
+
     b: boolean | 1;
     c: boolean | 4;
 }
 
-type ValuesOf<T> = T[keyof T]
-type AllEqual<TLookup, TValue> = IsExact<TLookup[keyof TLookup], TValue>
-type Or<TLookup extends { [k: string]: Boolean }> = IsNever<TLookup> extends true ? never : IsNotNever<ValuesOf<{ [k in keyof TLookup]: TLookup[k] extends true ? true : never }>>
-type And<TLookup extends { [k: string]: Boolean }> = IsNever<TLookup> extends true ? never : IsExact<TLookup, {}> extends true ? false : IsNever<ValuesOf<{ [k in keyof TLookup]: TLookup[k] extends true ? never : true }>>
-assert<Or<{ a: true }>>(true);
-assert<Or<{ a: false }>>(false);
-assert<Or<{ a: true, b: false }>>(true);
-assert<Or<{}>>(false);
 
-assert<And<{ a: true }>>(true);
-assert<And<{ a: false }>>(false);
-assert<And<{ a: true, b: false }>>(false);
-assert<And<{}>>(false);
 
-type SContainsPropertyWithExactTypeT<T, S> = IsExact<S, {}> extends true ? false : Or<{ [K in keyof S]: IsExact<S[K], T> }>
-assert<SContainsPropertyWithExactTypeT<C, {}>>(false);
-assert<SContainsPropertyWithExactTypeT<C, Types>>(true);
-assert<SContainsPropertyWithExactTypeT<D, Types>>(true);
-// assert<SContainsPropertyWithExactTypeT<{}, Types>>(false);
-assert<SContainsPropertyWithExactTypeT<string, C>>(true);
-assert<SContainsPropertyWithExactTypeT<number, C>>(false);
-assert<SContainsPropertyWithExactTypeT<number | string, C>>(true);
-assert<SContainsPropertyWithExactTypeT<D, C>>(true);
 
-type or<T extends [boolean, boolean] | [boolean, boolean, boolean]> = T[0] extends true ? true : T[1] extends true ? true : T[2] extends true ? true : false
-assert<or<[boolean, boolean]>>(false);
-assert<or<[false, false]>>(false);
-assert<or<[true, false]>>(true);
-assert<or<[false, true]>>(true);
-assert<or<[false, false, false]>>(false);
-assert<or<[true, false, false]>>(true);
-assert<or<[false, true, false]>>(true);
-assert<or<[false, false, true]>>(true);
-
-type and<T extends [boolean, boolean] | [boolean, boolean, boolean]> = T[0] extends false ? false : T[1] extends false ? false : T[2] extends false ? false : true
-assert<and<[false, false]>>(false);
-assert<and<[true, false]>>(false);
-assert<and<[false, true]>>(false);
-assert<and<[true, true]>>(true);
-assert<and<[false, false, false]>>(false);
-assert<and<[true, false, false]>>(false);
-assert<and<[false, true, false]>>(false);
-assert<and<[false, false, true]>>(false);
-assert<and<[false, true, true]>>(false);
-assert<and<[true, true, true]>>(true);
-
-type or2<T extends [boolean, boolean, boolean]> = T[0] | T[1] | T[2]
-assert<or2<[false, false, false]>>(false);
-assert<or2<[true, false, false]>>(true);
-assert<or2<[false, true, false]>>(true);
-assert<or2<[false, false, true]>>(true);
-
-type SPropertyTypesContainsTPropertyTypes<T, S> = or<[ValuesOf<{ [K in keyof ExcludePrimitive<T>]: SContainsPropertyWithExactTypeT<ExcludePrimitive<T>[K], S> }>
-                                                , IsNever<T>
-                                                , IsExact<T, {}>]>
+type SPropertyTypesContainsTPropertyTypes<T, S> = Or<[ValuesOf<{ [K in keyof ExcludePrimitive<T>]: ContainsExactValue<ExcludePrimitive<T>[K], S> }>
+    , IsNever<T>
+    , IsExact<T, {}>]>
 assert<SPropertyTypesContainsTPropertyTypes<C, { x: string; f: undefined }>>(false);
 assert<SPropertyTypesContainsTPropertyTypes<C, { x: string; f: undefined, s: string | number, d: D }>>(false);
 assert<SPropertyTypesContainsTPropertyTypes<C, Types & PrimitiveTypes>>(true); // r | string is not int Types & PrimitiveTypes
@@ -137,13 +88,13 @@ assert<SPropertyTypesContainsTPropertyTypes<{ 'x': number | string }, Types>>(tr
 assert<SPropertyTypesContainsTPropertyTypes<never, {}>>(true);
 assert<SPropertyTypesContainsTPropertyTypes<{}, Types>>(true);
 
-type NotNeverValues<TLookup> = { [U in { [K in keyof TLookup]: IsNever<TLookup[K]> extends true ? never : K}[keyof TLookup]]: TLookup[U] }
-type nn = NotNeverValues<{a: never, b: string}>
+type NotNeverValues<TLookup> = { [U in { [K in keyof TLookup]: IsNever<TLookup[K]> extends true ? never : K }[keyof TLookup]]: TLookup[U] }
+type nn = NotNeverValues<{ a: never, b: string }>
 
-type AllSPINTDebug<T, S> = { [K in keyof T]: SPropertyTypesContainsTPropertyTypes<Exclude<T[K], string | number>, S> extends false ? [T[K], K]: never  }[keyof T]
+type AllSPINTDebug<T, S> = { [K in keyof T]: SPropertyTypesContainsTPropertyTypes<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
 type allSPINTDebug = AllSPINTDebug<Types, Types & PrimitiveTypes>[0]
 
-type l1Debug<T, S> = NotNeverValues<{ [K in keyof T]: SContainsPropertyWithExactTypeT<T[K], S> extends true ? never : T[K] }>
+type l1Debug<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
 type debug3 = l1Debug<C, Types & PrimitiveTypes>
 
 type ExcludePrimitive<T> = Exclude<T, string | number | boolean>

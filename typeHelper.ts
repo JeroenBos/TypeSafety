@@ -138,3 +138,94 @@ export type GetKey<T /*extends TLookup[keyof TLookup]*/, TLookup> =
     {
         [K in keyof TLookup]: TLookup[K] extends T ? IsExactOrAny<T, TLookup[K]> extends true ? K : never : never
     }[keyof TLookup];
+
+
+export type ValuesOf<T> = T[keyof T];
+
+/**
+ * Gets whether any of the array or lookup values in the specified type is `true`.
+ */
+export type Or<T extends
+    { [k: string]: Boolean }
+    | [boolean]
+    | [boolean, boolean]
+    | [boolean, boolean, boolean]
+    | [boolean, boolean, boolean, boolean]
+    >
+    = IsNever<T> extends true ? never
+    : T[0] extends true ? true
+    : T[1] extends true ? true
+    : T[2] extends true ? true
+    : T[3] extends true ? true
+    : T extends { [k: string]: Boolean } ? IsNotNever<ValuesOf<{ [k in keyof T]: T[k] extends true ? true : never }>>
+    : false
+
+assert<Or<[boolean, boolean]>>(false);
+assert<Or<[false, false]>>(false);
+assert<Or<[true, false]>>(true);
+assert<Or<[false, true]>>(true);
+assert<Or<[false, false, false]>>(false);
+assert<Or<[true, false, false]>>(true);
+assert<Or<[false, true, false]>>(true);
+assert<Or<[false, false, true]>>(true);
+assert<Or<{ a: true }>>(true);
+assert<Or<{ a: false }>>(false);
+assert<Or<{ a: true, b: false }>>(true);
+assert<Or<{}>>(false);
+
+/**
+ * Gets whether all of the array or lookup values in the specified type are `true`.
+ */
+export type And<T extends
+    { [k: string]: Boolean }
+    | [boolean]
+    | [boolean, boolean]
+    | [boolean, boolean, boolean]
+    | [boolean, boolean, boolean, boolean]
+    >
+    = IsNever<T> extends true ? never
+    : IsExact<T, {}> extends true ? false
+    : T[0] extends false ? false
+    : T[1] extends false ? false
+    : T[2] extends false ? false
+    : T[3] extends false ? false
+    : T extends { [k: string]: Boolean } ? IsNever<ValuesOf<{ [k in keyof T]: T[k] extends true ? never : true }>>
+    : true
+
+assert<And<[false, false]>>(false);
+assert<And<[true, false]>>(false);
+assert<And<[false, true]>>(false);
+assert<And<[true, true]>>(true);
+assert<And<[false, false, false]>>(false);
+assert<And<[true, false, false]>>(false);
+assert<And<[false, true, false]>>(false);
+assert<And<[false, false, true]>>(false);
+assert<And<[false, true, true]>>(false);
+assert<And<[true, true, true]>>(true);
+assert<And<{}>>(false); // I don't know whether this should ne false....
+assert<And<{ a: true }>>(true);
+assert<And<{ a: true, b: false }>>(false);
+assert<And<{ a: true, b: true }>>(true);
+
+
+/**
+ * Gets whether `L` contains a value of exactly type `T`. This does not include optional values.
+ * Functions are included too, because under the hood they're simply properties.
+ */
+export type ContainsExactValue<T, L>
+    = IsExact<L, {}> extends true ? false
+    : Or<{ [K in keyof L]: IsExact<L[K], T> }>
+
+type cev1 = { a: string }
+assert<ContainsExactValue<number, cev1>>(false);
+assert<ContainsExactValue<string, cev1>>(true);
+assert<ContainsExactValue<string | undefined, cev1>>(false);
+type cev2 = { a?: string }
+assert<ContainsExactValue<number, cev2>>(false);
+assert<ContainsExactValue<string, cev2>>(false);
+assert<IsExact<cev2['a'], string | undefined>>(true);
+assert<ContainsExactValue<string | undefined, cev2>>(false); // missing properties are not included by `ContainsExactValue`
+type cev3 = { f(): void }
+assert<ContainsExactValue<Function, cev3>>(false);
+assert<ContainsExactValue<() => void, cev3>>(true);
+
