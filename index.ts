@@ -1,22 +1,4 @@
-import { assert, OptionalToMissing, IsExact } from './typeHelper';
-import { PrimitiveTypes, BaseTypeDescriptions, nullable, optional, optionalNullable, possiblyUndefined, possiblyNullOrUndefined, composeDescriptions } from './built-ins';
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from './typesystem';
-import { TypeDescriptionsFor } from './ITypeDescription';
-
-export default {
-    assert,
-    // OptionalToMissing,
-    // IsExact,
-    // PrimitiveTypes,
-    BaseTypeDescriptions,
-    nullable,
-    optional,
-    optionalNullable,
-    possiblyUndefined,
-    possiblyNullOrUndefined,
-    composeDescriptions,
-    createCreateFunction,
-    TypeSystem,
-    // DebugTypeSystem,
-    // TypeDescriptionsFor,
-}
+export { assert, OptionalToMissing, IsExact } from './typeHelper';
+export { PrimitiveTypes, BaseTypeDescriptions, nullable, optional, optionalNullable, possiblyUndefined, possiblyNullOrUndefined, composeDescriptions } from './built-ins';
+export { createCreateFunction, TypeSystem, DebugTypeSystem } from './typesystem';
+export { TypeDescriptionsFor } from './ITypeDescription';
