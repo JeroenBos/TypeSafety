@@ -246,3 +246,17 @@ assert<ContainsExactValues<{ _: string }, ces>>(true);
 assert<ContainsExactValues<{ _: string | undefined }, ces>>(false);
 assert<ContainsExactValues<{ _: string, __: undefined }, ces>>(true);
 assert<ContainsExactValues<{ _: string, __: string }, ces>>(true);
+
+/**
+ * Removes the entries in lookup type `L` for which the value is `never`.
+ */
+export type NotNeverValues<L>
+    = IsNever<L> extends true ? never
+    : { [U in { [K in keyof L]: IsNever<L[K]> extends true ? never : K }[keyof L]]: L[U] }
+
+assert<IsExact<NotNeverValues<{ a: undefined }>, { a: undefined }>>(true);
+assert<IsExact<NotNeverValues<{ a: never }>, {}>>(true);
+assert<IsExact<NotNeverValues<{}>, {}>>(true);
+assert<IsExact<NotNeverValues<never>, never>>(true);
+assert<IsExact<NotNeverValues<{ a: never, b: never }>, {}>>(true);
+assert<IsExact<NotNeverValues<{ a: string, b: number, c: never }>, { a: string, b: number }>>(true);

@@ -1,7 +1,7 @@
 import { createCreateFunction, TypeSystem } from ".";
-import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives } from "./built-ins";
 import { TypeDescriptionsFor } from "./ITypeDescription";
-import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues } from "./typeHelper";
+import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "./typeHelper";
 
 export class A {
     x: string = 'a';
@@ -14,10 +14,9 @@ export class B {
     a: A = new A();
 }
 
+///////////////////////////
 
-
-
-export type checkableTypes = OptionalToMissing<{
+type checkableTypes = OptionalToMissing<{
     'a': A,
     'b': B,
     'b?': B | undefined,
@@ -27,11 +26,9 @@ export type checkableTypes = OptionalToMissing<{
 }>
 export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
-
 const create = <T extends object>() => createCreateFunction<allCheckableTypes, T>();
 
-
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
+class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
     public readonly a = create<A>()({ x: 'string', b: 'b?' });
     public readonly b = create<B>()({ a: 'a' });
     public readonly 'b?' = possiblyUndefined(this.b);
@@ -40,11 +37,10 @@ export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDes
     public readonly 'optional b' = optional(this.b);
 }
 
-
-
 export const typeSystem = new TypeSystem(new AllTypeDescriptions());
 
 
+///////////////////////////
 
 
 export type Types = {
@@ -78,18 +74,14 @@ interface F {
 
 
 
-type NotNeverValues<TLookup> = { [U in { [K in keyof TLookup]: IsNever<TLookup[K]> extends true ? never : K }[keyof TLookup]]: TLookup[U] }
-type nn = NotNeverValues<{ a: never, b: string }>
-
 type AllSPINTDebug<T, S> = { [K in keyof T]: ContainsExactValues<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
 type allSPINTDebug = AllSPINTDebug<Types, Types & PrimitiveTypes>[0]
 
 type l1Debug<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
 type debug3 = l1Debug<C, Types & PrimitiveTypes>
 
-type ExcludePrimitive<T> = Exclude<T, string | number | boolean>
 
-type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitive<T[K]>, S>, ExcludePrimitive<T[K]>, ContainsExactValues<ExcludePrimitive<T[K]>, S>] }
+type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitives<T[K]>, S>, ExcludePrimitives<T[K]>, ContainsExactValues<ExcludePrimitives<T[K]>, S>] }
 type debug = AllSPINT<Types, Types & PrimitiveTypes>;
 type debugc = debug['c'][0]
 type debugd = debug['d'][0]
