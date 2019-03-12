@@ -229,3 +229,20 @@ type cev3 = { f(): void }
 assert<ContainsExactValue<Function, cev3>>(false);
 assert<ContainsExactValue<() => void, cev3>>(true);
 
+
+/**
+ * Gets whether all values in the lookup type `T` are exactly contained as values in the lookup type `L`.
+ */
+export type ContainsExactValues<T, L>
+    = IsNever<T> extends true ? true
+    : IsExact<T, {}> extends true ? true
+    : ValuesOf<{ [K in keyof T]: ContainsExactValue<T[K], L> }>
+
+assert<ContainsExactValues<{}, {}>>(true);
+assert<ContainsExactValues<{ _: undefined }, {}>>(false);
+type ces = { s: string, f: undefined };
+assert<ContainsExactValues<{}, ces>>(true);
+assert<ContainsExactValues<{ _: string }, ces>>(true);
+assert<ContainsExactValues<{ _: string | undefined }, ces>>(false);
+assert<ContainsExactValues<{ _: string, __: undefined }, ces>>(true);
+assert<ContainsExactValues<{ _: string, __: string }, ces>>(true);

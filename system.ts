@@ -1,7 +1,7 @@
 import { createCreateFunction, TypeSystem } from ".";
 import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional } from "./built-ins";
 import { TypeDescriptionsFor } from "./ITypeDescription";
-import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue } from "./typeHelper";
+import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues } from "./typeHelper";
 
 export class A {
     x: string = 'a';
@@ -77,21 +77,11 @@ interface F {
 
 
 
-type SPropertyTypesContainsTPropertyTypes<T, S> = Or<[ValuesOf<{ [K in keyof ExcludePrimitive<T>]: ContainsExactValue<ExcludePrimitive<T>[K], S> }>
-    , IsNever<T>
-    , IsExact<T, {}>]>
-assert<SPropertyTypesContainsTPropertyTypes<C, { x: string; f: undefined }>>(false);
-assert<SPropertyTypesContainsTPropertyTypes<C, { x: string; f: undefined, s: string | number, d: D }>>(false);
-assert<SPropertyTypesContainsTPropertyTypes<C, Types & PrimitiveTypes>>(true); // r | string is not int Types & PrimitiveTypes
-assert<SPropertyTypesContainsTPropertyTypes<D, Types & PrimitiveTypes>>(true);
-assert<SPropertyTypesContainsTPropertyTypes<{ 'x': number | string }, Types>>(true);
-assert<SPropertyTypesContainsTPropertyTypes<never, {}>>(true);
-assert<SPropertyTypesContainsTPropertyTypes<{}, Types>>(true);
 
 type NotNeverValues<TLookup> = { [U in { [K in keyof TLookup]: IsNever<TLookup[K]> extends true ? never : K }[keyof TLookup]]: TLookup[U] }
 type nn = NotNeverValues<{ a: never, b: string }>
 
-type AllSPINTDebug<T, S> = { [K in keyof T]: SPropertyTypesContainsTPropertyTypes<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
+type AllSPINTDebug<T, S> = { [K in keyof T]: ContainsExactValues<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
 type allSPINTDebug = AllSPINTDebug<Types, Types & PrimitiveTypes>[0]
 
 type l1Debug<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
@@ -99,7 +89,7 @@ type debug3 = l1Debug<C, Types & PrimitiveTypes>
 
 type ExcludePrimitive<T> = Exclude<T, string | number | boolean>
 
-type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitive<T[K]>, S>, ExcludePrimitive<T[K]>, SPropertyTypesContainsTPropertyTypes<ExcludePrimitive<T[K]>, S>] }
+type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitive<T[K]>, S>, ExcludePrimitive<T[K]>, ContainsExactValues<ExcludePrimitive<T[K]>, S>] }
 type debug = AllSPINT<Types, Types & PrimitiveTypes>;
 type debugc = debug['c'][0]
 type debugd = debug['d'][0]
@@ -107,12 +97,12 @@ type debugf = debug['f'][0]
 type debug2 = AllSPINT<Types, Types & PrimitiveTypes>;
 type debugbool4 = debug2['bool or 4']
 
-type DEBUG<T, S> = NotNeverValues<{ [K in keyof T]: SPropertyTypesContainsTPropertyTypes<T[K], S> extends false ? l1Debug<T[K], S> : never }>
+type DEBUG<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValues<T[K], S> extends false ? l1Debug<T[K], S> : never }>
 type finalDebug = DEBUG<Types, Types & PrimitiveTypes> // also add e.g. `r: D | string` to `C` and see it pop up
 // only down side is that it isn't perfectly filtered yet, there are too many nevers not contracted by NotNeverValues yet
 assert<IsExact<finalDebug, {}>>(true); // if you remove 'f' from Types it'll work
 
-type s1 = SPropertyTypesContainsTPropertyTypes<C, Types>
+type s1 = ContainsExactValues<C, Types>
 
 class error { }
 type allAcceptedTypes = Types[keyof Types][keyof Types[keyof Types]];
