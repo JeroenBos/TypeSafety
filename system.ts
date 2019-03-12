@@ -1,4 +1,4 @@
-import { createCreateFunction, TypeSystem } from ".";
+import { createCreateFunction, TypeSystem, DebugTypeSystem } from ".";
 import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives } from "./built-ins";
 import { TypeDescriptionsFor } from "./ITypeDescription";
 import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "./typeHelper";
@@ -39,8 +39,12 @@ class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptio
 
 export const typeSystem = new TypeSystem(new AllTypeDescriptions());
 
-
 ///////////////////////////
+
+type erroneousTypes = DebugTypeSystem<Types>
+assert<IsExact<erroneousTypes, {}>>(true);
+
+
 
 
 export type Types = {
@@ -74,25 +78,6 @@ interface F {
 
 
 
-type AllSPINTDebug<T, S> = { [K in keyof T]: ContainsExactValues<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
-type allSPINTDebug = AllSPINTDebug<Types, Types & PrimitiveTypes>[0]
-
-type l1Debug<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
-type debug3 = l1Debug<C, Types & PrimitiveTypes>
-
-
-type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitives<T[K]>, S>, ExcludePrimitives<T[K]>, ContainsExactValues<ExcludePrimitives<T[K]>, S>] }
-type debug = AllSPINT<Types, Types & PrimitiveTypes>;
-type debugc = debug['c'][0]
-type debugd = debug['d'][0]
-type debugf = debug['f'][0]
-type debug2 = AllSPINT<Types, Types & PrimitiveTypes>;
-type debugbool4 = debug2['bool or 4']
-
-type DEBUG<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValues<T[K], S> extends false ? l1Debug<T[K], S> : never }>
-type finalDebug = DEBUG<Types, Types & PrimitiveTypes> // also add e.g. `r: D | string` to `C` and see it pop up
-// only down side is that it isn't perfectly filtered yet, there are too many nevers not contracted by NotNeverValues yet
-assert<IsExact<finalDebug, {}>>(true); // if you remove 'f' from Types it'll work
 
 type s1 = ContainsExactValues<C, Types>
 

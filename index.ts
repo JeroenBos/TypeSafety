@@ -1,6 +1,6 @@
-import { PrimitiveTypes, missing, Missing } from "./built-ins";
+import { PrimitiveTypes, missing, Missing, ExcludePrimitives } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
-import { GetKey } from "./typeHelper";
+import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact } from "./typeHelper";
 
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
@@ -118,3 +118,21 @@ export function createCreateFunction<Types, T extends object & Types[keyof Types
             TypeDescription.create<Types, GetKey<T, Types>>(propertyDescriptions);
     }
 }
+
+
+// type AllSPINTDebug<T, S> = { [K in keyof T]: ContainsExactValues<Exclude<T[K], string | number>, S> extends false ? [T[K], K] : never }[keyof T]
+// type AllSPINT<T, S> = { [K in keyof T]: [l1Debug<ExcludePrimitives<T[K]>, S>, ExcludePrimitives<T[K]>, ContainsExactValues<ExcludePrimitives<T[K]>, S>] }
+
+type debugTypeSystemType<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
+type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
+
+/**
+ * Tells you compile time which types don't adhere to the assumptions underlying the type system.
+ * Example usage: 
+ * 
+ * type erroneousTypes = DebugTypeSystem<T_Without_Primitives>
+ * assert<IsExact<erroneousTypes, {}>>(true);
+ */
+export type DebugTypeSystem<T>
+    = T extends PrimitiveTypes ? "The generic type argument to DebugTypeSystem shouldn't contain the primitive types"
+    : debugTypeSystem<T, T & PrimitiveTypes>
