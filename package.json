@@ -1,6 +1,6 @@
 {
   "name": "jbsnorro-typesafety",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A small type-safe type guard framework. Contains a function which can check whether Javascript object adheres to a Typescript type definition, and moreover, this function tells you at compile time whether it will be able to perform that check or not.",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,7 @@
   },
   "author": "Jeroen Bos",
   "license": "ISC",
-  "dependencies": {
-    "rxjs": "5.5.6",
-    "zone.js": "0.8.26"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "3.4.34",
     "@types/glob": "7.1.0",
