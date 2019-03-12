@@ -1,7 +1,6 @@
 import { PrimitiveTypes, missing, Missing } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
-import { GetKey, assert, IsExact } from "./typeHelper";
-import { allCheckableTypes } from "./system";
+import { GetKey } from "./typeHelper";
 
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
@@ -16,14 +15,17 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         }
     }
 
-
-    // only difference with 
+    /**
+     * Checks compile time and runtime whether `arg` is assignable to `Types[K]`.
+     */
     assert<K extends keyof Types>(key: K): (arg: Types[K]) => arg is Types[K] {
         return this.check(key);
         //const f: castArg<(obj: any) => obj is Types[K], Types[K]> = this.check(key);
         //return f as any;
     }
-
+    /**
+     * Checks only at runtime whether `arg` is assignable to `Types[K]`.
+     */
     check<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
         return ((obj: any) => this._check(obj, key)) as any;
     }
@@ -105,11 +107,8 @@ export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[
 
 
 // I tried to replace DescriptionKeys<GetKey<T, Types>, Types> by attemptDescriptionKeys<T, Types>
-export type attemptDescriptionKeys<Types> = { [ U in keyof Types]: Types[U] }[keyof Types]// keyof { [K in keyof { [ U in keyof Types]: Types[U] }]: Types[K] };
-
-type deDebug = attemptDescriptionKeys<{ a: { b: string, c: number }, d: { e: undefined }}>;
-
-
+type attemptDescriptionKeys<Types> = { [U in keyof Types]: Types[U] }[keyof Types]// keyof { [K in keyof { [ U in keyof Types]: Types[U] }]: Types[K] };
+type deDebug = attemptDescriptionKeys<{ a: { b: string, c: number }, d: { e: undefined } }>;
 
 
 export function createCreateFunction<Types, T extends object & Types[keyof Types]>()
