@@ -49,7 +49,7 @@ var mainConfig = {
 var testConfig = {
     ...sharedConfig,
     name: 'test',
-    entry: './tests/test.ts',
+    entry: './tests/runtime.tests.ts',
     output: { filename: './dist/test.js' },
 };
 
