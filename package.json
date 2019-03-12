@@ -1,7 +1,7 @@
 {
-  "name": "typesafety",
+  "name": "jbsnorro-typesafety",
   "version": "0.1.0",
-  "description": "",
+  "description": "A small type-safe type guard framework. Contains a function which can check whether Javascript object adheres to a Typescript type definition, and moreover, this function tells you at compile time whether it will be able to perform that check or not.",
   "main": "index.js",
   "scripts": {
     "build": "webpack",
@@ -9,7 +9,6 @@
     "testbuild": "webpack && mocha dist/test.js",
     "test": "mocha dist/test.js"
   },
-  "private": true,
   "author": "Jeroen Bos",
   "license": "ISC",
   "dependencies": {
@@ -34,5 +33,20 @@
     "webpack": "3.10.0",
     "webpack-config-utils": "2.3.0",
     "webpack-dev-server": "2.10.1"
-  }
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeroenBos/TypeSafety.git"
+  },
+  "keywords": [
+    "type guard",
+    "type safety"
+  ],
+  "bugs": {
+    "url": "https://github.com/JeroenBos/TypeSafety/issues"
+  },
+  "homepage": "https://github.com/JeroenBos/TypeSafety#readme"
 }
