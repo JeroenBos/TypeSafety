@@ -3,20 +3,8 @@ import { PrimitiveTypes, BaseTypeDescriptions, nullable, optional, optionalNulla
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from './typesystem';
 import { TypeDescriptionsFor } from './ITypeDescription';
 
-export default {
-    assert,
-    // OptionalToMissing,
-    // IsExact,
-    // PrimitiveTypes,
-    BaseTypeDescriptions,
-    nullable,
-    optional,
-    optionalNullable,
-    possiblyUndefined,
-    possiblyNullOrUndefined,
-    composeDescriptions,
-    createCreateFunction,
-    TypeSystem,
-    // DebugTypeSystem,
-    // TypeDescriptionsFor,
-}
+export type OptionalToMissing<T> = OptionalToMissing<T>;
+export type IsExact<T, U> = IsExact<T, U>;
+export type PrimitiveTypes = PrimitiveTypes;
+export type DebugTypeSystem<T> = DebugTypeSystem<T>;
+export type TypeDescriptionsFor<T extends { [K in keyof T]: T[K] }> = TypeDescriptionsFor<T>;
