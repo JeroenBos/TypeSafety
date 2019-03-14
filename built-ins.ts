@@ -23,6 +23,26 @@ export type PrimitiveTypes = {
     'nullable string?': string | null | undefined,
     'nullable number?': number | null | undefined,
     'nullable boolean?': boolean | null | undefined,
+
+    'string[]': string[],
+    'number[]': number[],
+    'boolean[]': boolean[],
+
+    'string[]?': string[] | undefined,
+    'number[]?': number[] | undefined,
+    'boolean[]?': boolean[] | undefined,
+
+    'nullable string[]': string[] | null,
+    'nullable number[]': number[] | null,
+    'nullable boolean[]': boolean[] | null,
+
+    'nullable string[]?': string[] | null | undefined,
+    'nullable number[]?': number[] | null | undefined,
+    'nullable boolean[]?': boolean[] | null | undefined,
+
+    '(nullable string)[]': (string | null)[],
+    '(nullable number)[]': (number | null)[],
+    '(nullable boolean)[]': (boolean | null)[],
 }
 
 export type ExcludePrimitives<T> = Exclude<T, string | number | boolean>
@@ -51,6 +71,27 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
     'nullable string?' = possiblyNullOrUndefined(stringDescription);
     'nullable number?' = possiblyNullOrUndefined(numberDescription);
     'nullable boolean?' = possiblyNullOrUndefined(booleanDescription);
+
+
+    'string[]' = stringArrayDescription;
+    'number[]' = numberArrayDescription;
+    'boolean[]' = booleanArrayDescription;
+
+    'string[]?' = possiblyUndefined(stringArrayDescription);
+    'number[]?' = possiblyUndefined(numberArrayDescription);
+    'boolean[]?' = possiblyUndefined(booleanArrayDescription);
+
+    'nullable string[]' = nullable(stringArrayDescription);
+    'nullable number[]' = nullable(numberArrayDescription);
+    'nullable boolean[]' = nullable(booleanArrayDescription);
+
+    'nullable string[]?' = possiblyNullOrUndefined(stringArrayDescription);
+    'nullable number[]?' = possiblyNullOrUndefined(numberArrayDescription);
+    'nullable boolean[]?' = possiblyNullOrUndefined(booleanArrayDescription);
+
+    '(nullable string)[]' = array(this['nullable string']);
+    '(nullable number)[]' = array(this['nullable number']);
+    '(nullable boolean)[]' = array(this['nullable boolean']);
 }
 
 
@@ -63,6 +104,9 @@ const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { r
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
 export const booleanDescription = createPrimitiveDescription('boolean');
+export const stringArrayDescription = array(stringDescription);
+export const numberArrayDescription = array(numberDescription);
+export const booleanArrayDescription = array(booleanDescription);
 
 function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescription<PrimitiveTypes[p]> {
     return ({
@@ -90,6 +134,20 @@ export function possiblyUndefined<TBase>(description1: ITypeDescription<TBase>):
 }
 export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined | null> {
     return composeDescriptions(undefinedOrNullDescription, description1);
+}
+export function array<TElement>(elementDescription: ITypeDescription<TElement>): ITypeDescription<TElement[]> {
+    return ({
+        is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
+            if (!Array.isArray(obj))
+                return false;
+            for (let index = 0; index < obj.length; index++) {
+                const element = obj[index];
+                if (!elementDescription.is(element, getSubdescription))
+                    return false;
+            }
+            return true;
+        },
+    });
 }
 
 export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {

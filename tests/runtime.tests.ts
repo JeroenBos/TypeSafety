@@ -140,4 +140,14 @@ describe('tests', () => {
         if (isA) // because the property b? is missing
             throw new Error();
     });
+    it('{ s = [] } is { s: string[] }', () => {
+        const isA = typeSystem.check('C')({ s: [] });
+        if (!isA)
+            throw new Error();
+    });
+    it('{ s = ["a"] } is { s: string[] }', () => {
+        const isA = typeSystem.check('C')({ s: ['a'] });
+        if (!isA)
+            throw new Error();
+    });
 });

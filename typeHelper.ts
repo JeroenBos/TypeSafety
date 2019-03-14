@@ -228,6 +228,9 @@ assert<ContainsExactValue<string | undefined, cev2>>(false); // missing properti
 type cev3 = { f(): void }
 assert<ContainsExactValue<Function, cev3>>(false);
 assert<ContainsExactValue<() => void, cev3>>(true);
+type cev4 = { x: string[] }
+assert<ContainsExactValue<string[], cev4>>(true);
+assert<ContainsExactValue<string[] | undefined, cev4>>(false);
 
 
 /**

@@ -60,7 +60,7 @@ export type DebugTypeSystem<T>
 
 // these types help construct DebugTypeSystem<T>:
 type debugTypeSystemType<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
-type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
+type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[] ? never : ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
 
 
 

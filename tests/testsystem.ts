@@ -14,6 +14,10 @@ export class B {
     a: A = new A();
 }
 
+export class C {
+    s: string[] = []
+}
+
 ///////////////////////////
 
 export type checkableTypes = OptionalToMissing<{
@@ -22,7 +26,8 @@ export type checkableTypes = OptionalToMissing<{
     'b?': B | undefined,
     'nullable b': B | null,
     'nullable b?': B | undefined | null,
-    'optional b'?: B
+    'optional b'?: B,
+    'C': C
 }>
 export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
@@ -31,6 +36,7 @@ const create = <T extends object>() => createCreateFunction<allCheckableTypes, T
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
     public readonly a = create<A>()({ x: 'string', b: 'b?' });
     public readonly b = create<B>()({ a: 'a' });
+    public readonly C = create<C>()({ s: 'string[]' });
     public readonly 'b?' = possiblyUndefined(this.b);
     public readonly 'nullable b' = nullable(this.b);
     public readonly 'nullable b?' = possiblyNullOrUndefined(this.b);
