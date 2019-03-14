@@ -17,25 +17,30 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     }
 
     /**
-     * Checks compile time and runtime whether `arg` is assignable to `Types[K]`.
+     * Verifies compile time and runtime whether `obj` is assignable to `Types[K]`.
+     * Throws if `obj` is not assignable to `Types[K]`.
      */
-    assert<K extends keyof Types>(key: K): (arg: Types[K]) => arg is Types[K] {
-        return this.check(key);
-        //const f: castArg<(obj: any) => obj is Types[K], Types[K]> = this.check(key);
-        //return f as any;
+    verify<K extends keyof Types>(key: K, obj: Types[K]): void | never {
+        this.assert(key, obj);
     }
     /**
-     * Checks only at runtime whether `arg` is assignable to `Types[K]`.
+     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
+     * Throws if `obj` is not assignable to `Types[K]`.
      */
-    check<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
-        return ((obj: any) => this._check(obj, key)) as any;
+    assert<K extends keyof Types>(key: K, obj: any): void | never {
+        if (!this.is(key, obj))
+            throw new Error(`The specified object was not of type '${key}'`);
     }
-    private _check<K extends keyof Types>(obj: any, key: K): obj is Types[K] {
+    /**
+     * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
+     */
+    is<K extends keyof Types>(key: K, obj: any): obj is Types[K] {
         const description = this.getDescription(key);
         return description.is(obj, key => this.getDescription(key));
     }
+    
     getDescription<K extends keyof Types>(key: K): TypeDescriptions<Types> {
-        const description = this.typeDescriptions.get(key);
+        const description = this.typeDescriptions.get(key!);
         if (description === undefined)
             throw new Error('description missing for key ' + key);
         return description;

@@ -34,8 +34,3 @@ export const typeSystem = new TypeSystem(new AllTypeDescriptions());
 // because that would exclude other valid options.
 type erroneousTypes = DebugTypeSystem<Types>
 assert<IsExact<erroneousTypes, { C: { e: string | number } }>>(true); 
-
-// typeSystem.assert('a'); this should be an error because `a` is not a key in `Types`
-typeSystem.assert('string');
-typeSystem.assert('optional string');
-typeSystem.assert('C');

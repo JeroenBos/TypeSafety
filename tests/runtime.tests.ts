@@ -90,64 +90,45 @@ assert<IsExact<TypeDescriptionsFor<checkableTypes>, almostAllTypeDescriptions>>(
 
 describe('tests', () => {
     it('null is not b?', () => {
-        const nullIsBQ = typeSystem.check('b?')(null);
-        if (nullIsBQ)
+        const nullIsPossiblyUndefinedB = typeSystem.is('b?', null);
+        if (nullIsPossiblyUndefinedB)
             throw new Error();
     });
     it('null is nullable b', () => {
-        const nullIsBQQ = typeSystem.assert('nullable b')(null);
-        if (!nullIsBQQ)
-            throw new Error();
+        typeSystem.assert('nullable b', null);
     });
     it('null is nullable b?', () => {
-        const nullIsBQQQ = typeSystem.assert('nullable b?')(null);
-        if (!nullIsBQQQ)
-            throw new Error();
+        typeSystem.assert('nullable b?', null);
     });
     it('undefined is b?', () => {
-        const undefinedIsBQ = typeSystem.check('b?')(undefined);
-        if (!undefinedIsBQ)
-            throw new Error();
+        typeSystem.assert('b?', undefined);
     });
     it('undefined is not nullable b', () => {
-        const undefinedIsBQQ = typeSystem.check('nullable b')(undefined);
-        if (undefinedIsBQQ)
+        const undefinedIsNullableB = typeSystem.is('nullable b', undefined);
+        if (undefinedIsNullableB)
             throw new Error();
     });
     it('undefined is nullable b?', () => {
-        const undefinedIsBQQQ = typeSystem.assert('nullable b?')(undefined);
-        if (!undefinedIsBQQQ)
-            throw new Error();
+        typeSystem.assert('nullable b?', undefined);
     });
     it('{ x: "s", b: undefined } is a', () => {
-        const isA = typeSystem.assert('a')({ x: "s", b: undefined });
-        if (!isA)
-            throw new Error();
+        typeSystem.assert('a', { x: "s", b: undefined });
     });
     it('{ x: "s", b: undefined } is a', () => {
-        const isA = typeSystem.assert('a')({ x: "s", b: undefined });
-        if (!isA)
-            throw new Error();
+        typeSystem.assert('a', { x: "s", b: undefined });
     });
     it('{ x: "s", b: new B() } is a', () => {
-        debugger;
-        const isA = typeSystem.assert('a')({ x: "s", b: new B() });
-        if (!isA)
-            throw new Error();
+        typeSystem.assert('a', { x: "s", b: new B() });
     });
     it('{ x: "s" } is not a', () => {
-        const isA = typeSystem.check('a')({ x: "s" });
+        const isA = typeSystem.is('a', { x: "s" });
         if (isA) // because the property b? is missing
             throw new Error();
     });
     it('{ s = [] } is { s: string[] }', () => {
-        const isA = typeSystem.check('C')({ s: [] });
-        if (!isA)
-            throw new Error();
+        typeSystem.assert('C', { s: [] });
     });
     it('{ s = ["a"] } is { s: string[] }', () => {
-        const isA = typeSystem.check('C')({ s: ['a'] });
-        if (!isA)
-            throw new Error();
+        typeSystem.assert('C', { s: ['a'] });
     });
 });
