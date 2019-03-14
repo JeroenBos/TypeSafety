@@ -2,6 +2,7 @@ const nodeEnv = process.env.NODE_ENV || 'development';
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 var sharedConfig = {
+    mode: 'development',
     devtool: 'source-map',
     module: {
         rules: [
@@ -44,13 +45,13 @@ var mainConfig = {
     ...sharedConfig,
     name: 'main',
     entry: './index.ts',
-    output: { filename: './dist/main.js' },
+    output: { filename: './main.js' },
 };
 var testConfig = {
     ...sharedConfig,
     name: 'test',
     entry: './tests/runtime.tests.ts',
-    output: { filename: './dist/test.js' },
+    output: { filename: './test.js' },
 };
 
 module.exports = [mainConfig, testConfig];

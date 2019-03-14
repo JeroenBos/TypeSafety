@@ -1,4 +1,3 @@
-import 'mocha';
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes } from '../built-ins';
