@@ -1,3 +1,4 @@
+assert<undefined extends string ? false : true>(true); // strict mode must be enabled
 import { OptionalToMissing, assert, IsExact } from './typeHelper';
 import { PrimitiveTypes, BaseTypeDescriptions, nullable, optional, optionalNullable, possiblyUndefined, possiblyNullOrUndefined, composeDescriptions } from './built-ins';
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from './typesystem';
