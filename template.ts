@@ -15,7 +15,7 @@ export type checkableTypes = OptionalToMissing<{
 
 const create = <T extends object>() => createCreateFunction<checkableTypes & PrimitiveTypes, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
+class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
     public readonly 'D' = create<D>()({});
 }
 
