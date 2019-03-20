@@ -19,34 +19,36 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Verifies compile time and runtime whether `obj` is assignable to `Types[K]`.
      * At runtime, throws if `obj` is not assignable to `Types[K]`.
      */
-    verify<K extends keyof Types>(key: K, obj: Types[K]): void | never {
+    verify<K extends string & keyof Types>(key: K, obj: Types[K]): void | never {
         this.assert(key, obj);
     }
     /**
      * Gets a function that verifies at compile time and runtime whether its argument is assignable to `Types[K]`.
      * The returned function throws at runtime if its argument is not assignable to `Types[K]`.
      */
-    verifyF<K extends keyof Types>(key: K): (obj: Types[K]) => void | never {
+    verifyF<K extends string & keyof Types>(key: K): (obj: Types[K]) => void | never {
         return obj => this.assert(key, obj);
     }
     /**
      * Checks only at runtime whether `obj` is assignable to `Types[K]`.
      * Throws if `obj` is not assignable to `Types[K]`.
      */
-    assert<K extends keyof Types>(key: K, obj: any): void | never {
+    assert<K extends string & keyof Types>(key: K, obj: any): void | never {
         if (!this.is(key, obj))
             throw new Error(`The specified object was not of type '${key}'`);
     }
     /**
      * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
      */
-    assertF<K extends keyof Types>(key: K): (obj: any) => void | never {
+    assertF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
         return obj => this.assert(key, obj);
     }
     /**
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
-    is<K extends keyof Types>(key: K, obj: any): obj is Types[K] {
+    is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
+        if (typeof key !== 'string') throw new Error('only string keys are supported');
+
         const description = this.getDescription(key);
         return description.is(obj, key => this.getDescription(key));
     }
@@ -54,7 +56,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     /**
      * Returns a function that returns a boolean indicating whether its argument is assignable to `Types[K]`.
      */
-    isF<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
+    isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
         const f = (obj: any) => this.is(key, obj);
         return f as any;
     }
