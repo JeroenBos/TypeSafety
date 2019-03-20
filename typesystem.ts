@@ -2,6 +2,7 @@ import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
+import { DisposableStackElement } from "./DisposableStackElement";
 
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
@@ -50,7 +51,13 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
-        return description.is(obj, key => this.getDescription(key));
+        const stackElem = DisposableStackElement.create(key);
+        try {
+            return description.is(obj, key => this.getDescription(key));
+        }
+        finally {
+            stackElem.dispose();
+        }
     }
 
     /**

@@ -141,4 +141,8 @@ describe('tests', () => {
     it('verifyF', () => {
         typeSystem.verifyF('C')({ s: ['a'] });
     });
+    it('DisposableStack logs error', () => {
+        const isC = typeSystem.is('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
+        if (isC) throw new Error();
+    });
 });

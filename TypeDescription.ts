@@ -1,6 +1,7 @@
 import { missing } from "./built-ins";
 import { ITypeDescription } from "./ITypeDescription";
 import { DescriptionKeys } from "./typesystem";
+import { DisposableStackElement } from "./DisposableStackElement";
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
@@ -36,12 +37,19 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             const property = obj[propertyName];
             const propertyKey = this.propertyDescriptions[propertyName];
             const propertyDescription = getSubdescription(propertyKey);
-            const _isOfPropertyType = propertyDescription.is(property, getSubdescription);
-            if (!_isOfPropertyType) {
-                return false;
+            const stackElem = DisposableStackElement.create(propertyName);
+            try {
+                const _isOfPropertyType = propertyDescription.is(property, getSubdescription);
+                if (!_isOfPropertyType) {
+                    return false;
+                }
+            }
+            finally {
+                stackElem.dispose();
             }
         }
         for (const missingPropertyName in expectedProperties) {
+            console.debug(`'${missingPropertyName}' is missing from object of type ${DisposableStackElement.print(' - ')}`);
             return false; // throw new Error(`${missingPropertyName} is missing`);
         }
         return true;
