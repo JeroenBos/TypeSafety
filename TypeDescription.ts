@@ -49,7 +49,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             }
         }
         for (const missingPropertyName in expectedProperties) {
-            console.debug(`'${missingPropertyName}' is missing from object of type ${DisposableStackElement.print(' - ')}`);
+            console.debug(`'${missingPropertyName}' is missing from object of type ${DisposableStackElement.print(' in type ')}`);
             return false; // throw new Error(`${missingPropertyName} is missing`);
         }
         return true;

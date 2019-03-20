@@ -8,7 +8,7 @@ export class DisposableStackElement {
         return new DisposableStackElement(message);
     }
     public static print(separator: string): string {
-        return DisposableStackElement.stack.map(elem => elem.message).join(separator);
+        return DisposableStackElement.stack.map(elem => `'${elem.message}'`).reverse().join(separator);
     }
     private constructor(private readonly message: string) {
         DisposableStackElement.stack.push(this);

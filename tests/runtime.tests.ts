@@ -145,4 +145,9 @@ describe('tests', () => {
         const isC = typeSystem.is('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
         if (isC) throw new Error();
     });
+    it('nested DisposableStack logs nested error', () => {
+        debugger;
+        const isB = typeSystem.is('b', { a: { } }); // I'm testing here manually, only whether the console.log method was invoked...
+        if (isB) throw new Error();
+    });
 });
