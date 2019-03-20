@@ -130,4 +130,15 @@ describe('tests', () => {
     it('{ s = ["a"] } is { s: string[] }', () => {
         typeSystem.assert('C', { s: ['a'] });
     });
+
+    it('assertF', () => {
+        typeSystem.assertF('C')({ s: ['a'] });
+    });
+    it('isF', () => {
+        const isC = typeSystem.isF('C')({ s: ['a'] });
+        if (!isC) throw new Error();
+    });
+    it('verifyF', () => {
+        typeSystem.verifyF('C')({ s: ['a'] });
+    });
 });

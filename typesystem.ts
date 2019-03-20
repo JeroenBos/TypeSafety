@@ -5,7 +5,6 @@ import { TypeDescription } from "./TypeDescription";
 
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
-    // private readonly typeDescriptions = new mapToTypeDescriptions<Types>();
     private readonly typeDescriptions = new Map<keyof Types, TypeDescriptions<Types>>();
 
     constructor(description: TypeDescriptionsFor<Types>) {
@@ -18,10 +17,17 @@ export class TypeSystem<Types extends PrimitiveTypes> {
 
     /**
      * Verifies compile time and runtime whether `obj` is assignable to `Types[K]`.
-     * Throws if `obj` is not assignable to `Types[K]`.
+     * At runtime, throws if `obj` is not assignable to `Types[K]`.
      */
     verify<K extends keyof Types>(key: K, obj: Types[K]): void | never {
         this.assert(key, obj);
+    }
+    /**
+     * Gets a function that verifies at compile time and runtime whether its argument is assignable to `Types[K]`.
+     * The returned function throws at runtime if its argument is not assignable to `Types[K]`.
+     */
+    verifyF<K extends keyof Types>(key: K): (obj: Types[K]) => void | never {
+        return obj => this.assert(key, obj);
     }
     /**
      * Checks only at runtime whether `obj` is assignable to `Types[K]`.
@@ -32,13 +38,27 @@ export class TypeSystem<Types extends PrimitiveTypes> {
             throw new Error(`The specified object was not of type '${key}'`);
     }
     /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
+     */
+    assertF<K extends keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assert(key, obj);
+    }
+    /**
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
     is<K extends keyof Types>(key: K, obj: any): obj is Types[K] {
         const description = this.getDescription(key);
         return description.is(obj, key => this.getDescription(key));
     }
-    
+
+    /**
+     * Returns a function that returns a boolean indicating whether its argument is assignable to `Types[K]`.
+     */
+    isF<K extends keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.is(key, obj);
+        return f as any;
+    }
+
     getDescription<K extends keyof Types>(key: K): TypeDescriptions<Types> {
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
