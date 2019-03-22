@@ -57,7 +57,7 @@ export type IsUnknown<T> = IsNever<T> extends true ? false
 export type OptionalKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? K : never }[keyof T];
 
 /**
- * Gets the keys of `T` that are optional, i.e. those that are not of the form `name? : type`. 
+ * Gets the keys of `T` that are required, i.e. those that are not of the form `name? : type`. 
  * Properties that are assignable to undefined do not influences whether they are considered to be required in this respect.
  */
 export type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
