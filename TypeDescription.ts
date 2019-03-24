@@ -17,7 +17,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
     }
     is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Types[K] {
         if (obj === undefined || obj === null || obj === missing) {
-            return false;
+            return false; // this type handles composite types, so this is never a primitive type, so false
         }
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
         // remove properties that are allowed to be missing:
@@ -34,18 +34,9 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue; // throw new Error(`The object has an extra property '${propertyName}'`);
             }
             delete expectedProperties[propertyName];
-            const property = obj[propertyName];
-            const propertyKey = this.propertyDescriptions[propertyName];
-            const propertyDescription = getSubdescription(propertyKey);
-            const stackElem = DisposableStackElement.create(propertyName);
-            try {
-                const _isOfPropertyType = propertyDescription.is(property, getSubdescription);
-                if (!_isOfPropertyType) {
-                    return false;
-                }
-            }
-            finally {
-                stackElem.dispose();
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
+            if (!isOfPropertyType) {
+                return false;
             }
         }
         for (const missingPropertyName in expectedProperties) {
@@ -54,8 +45,36 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
         return true;
     }
+    isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<Types[K]> {
+        if (obj === undefined || obj === null || obj === missing) {
+            return false; // this type handles composite types, so this is never a primitive type, so false
+        }
+        for (const propertyName in obj) {
+            if (!this.isValidKey(propertyName)) {
+                return false;
+            }
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
+            if (!isOfPropertyType) {
+                return false;
+            }
+        }
+        return true;
+    }
     private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
+    }
+    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: (key: any) => ITypeDescription<any>): boolean {
+        const property = obj[propertyName];
+        const propertyKey = this.propertyDescriptions[propertyName];
+        const propertyDescription = getSubdescription(propertyKey);
+        const stackElem = DisposableStackElement.create(propertyName);
+        try {
+            const isOfPropertyType = propertyDescription.is(property, getSubdescription);
+            return isOfPropertyType;
+        }
+        finally {
+            stackElem.dispose();
+        }
     }
 }

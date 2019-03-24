@@ -146,8 +146,32 @@ describe('tests', () => {
         if (isC) throw new Error();
     });
     it('nested DisposableStack logs nested error', () => {
-        debugger;
-        const isB = typeSystem.is('b', { a: { } }); // I'm testing here manually, only whether the console.log method was invoked...
+        const isB = typeSystem.is('b', { a: {} }); // I'm testing here manually, only whether the console.log method was invoked...
+        if (isB) throw new Error();
+    });
+    it('B is partial B', () => {
+        typeSystem.assertPartial('b', new B());
+    });
+    it('{} is partial B', () => {
+        typeSystem.assertPartial('b', {});
+    });
+    it('partiality is not transitive over nested properties', () => {
+        const isB = typeSystem.isPartial('b', { a: {} });
+        if (isB) throw new Error();
+    });
+    it('partiality is not transitive over nested properties', () => {
+        const isB = typeSystem.isPartial('b', { a: { x: '' } });
+        if (isB) throw new Error();
+    });
+    it('full B is partial B', () => {
+        typeSystem.assertPartial('b', { a: { x: '', b: undefined } });
+    });
+    it('null is not undefined according to isPartial', () => {
+        const isB = typeSystem.isPartial('b', { a: { x: '', b: null } }); // note that 'null' is not valid here
+        if (isB) throw new Error();
+    });
+    it('isPartial does not allow extraneous properties', () => {
+        const isB = typeSystem.isPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
     });
 });

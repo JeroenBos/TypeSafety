@@ -95,11 +95,11 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
 }
 
 
-const missingDescription: ITypeDescription<Missing> = ({ is(obj: any): obj is Missing { return obj === undefined || obj === missing; } });
-const missingOrNullDescription: ITypeDescription<Missing | null> = ({ is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; } })
-const undefinedOrNullDescription: ITypeDescription<undefined | null> = ({ is(obj: any): obj is undefined | null { return obj === undefined || obj === null; } })
-const undefinedDescription: ITypeDescription<undefined> = ({ is(obj: any): obj is undefined { return obj === undefined; } })
-const nullDescription: ITypeDescription<null> = ({ is(obj: any): obj is null { return obj === null; } })
+const missingDescription: ITypeDescription<Missing> = noPartial(function is(obj: any): obj is Missing { return obj === undefined || obj === missing; });
+const missingOrNullDescription: ITypeDescription<Missing | null> = noPartial(function is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; })
+const undefinedOrNullDescription: ITypeDescription<undefined | null> = noPartial(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
+const undefinedDescription: ITypeDescription<undefined> = noPartial(function is(obj: any): obj is undefined { return obj === undefined; })
+const nullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj === null; })
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
@@ -109,11 +109,10 @@ export const numberArrayDescription = array(numberDescription);
 export const booleanArrayDescription = array(booleanDescription);
 
 function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescription<PrimitiveTypes[p]> {
-    return ({
-        is(obj: any): obj is PrimitiveTypes[p] {
-            return typeof obj === s;
-        },
-    });
+    function is(obj: any): obj is PrimitiveTypes[p] {
+        return typeof obj === s;
+    };
+    return noPartial(is);
 }
 
 
@@ -136,24 +135,26 @@ export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TB
     return composeDescriptions(undefinedOrNullDescription, description1);
 }
 export function array<TElement>(elementDescription: ITypeDescription<TElement>): ITypeDescription<TElement[]> {
-    return ({
-        is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
-            if (!Array.isArray(obj))
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
+        if (!Array.isArray(obj))
+            return false;
+        for (let index = 0; index < obj.length; index++) {
+            const element = obj[index];
+            if (!elementDescription.is(element, getSubdescription))
                 return false;
-            for (let index = 0; index < obj.length; index++) {
-                const element = obj[index];
-                if (!elementDescription.is(element, getSubdescription))
-                    return false;
-            }
-            return true;
-        },
-    });
+        }
+        return true;
+    }
+    return noPartial(is);
+}
+export function noPartial<T>(is: ITypeDescription<T>['is']): ITypeDescription<T> {
+    return { is, isPartial: is };
 }
 
 export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
-    return ({
-        is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
-            return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
-        },
-    });
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
+        return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
+    };
+
+    return { is, isPartial: is };
 }

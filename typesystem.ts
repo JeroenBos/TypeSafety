@@ -45,15 +45,43 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return obj => this.assert(key, obj);
     }
     /**
+     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
+     * Throws if `obj` is not assignable to `Types[K]`.
+     */
+    assertPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isPartial(key, obj))
+            throw new Error(`The specified object was not of type '${key}'`);
+    }
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
+     */
+    assertPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertPartial(key, obj);
+    }
+    /**
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
     is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
+        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.is(obj, getSubdescription));
+    }
+    /**
+     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`; throws otherwise.
+     */
+    isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription));
+    }
+
+    private isImpl<K extends string & keyof Types>(
+        key: K,
+        obj: any,
+        _is: (description: TypeDescriptions<Types>, obj: any, getSubdescription: (key: any) => ITypeDescription<any>) => boolean
+    ): boolean {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
         const stackElem = DisposableStackElement.create(key);
         try {
-            return description.is(obj, key => this.getDescription(key));
+            return _is(description, obj, key => this.getDescription(key));
         }
         finally {
             stackElem.dispose();
@@ -65,6 +93,13 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      */
     isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
         const f = (obj: any) => this.is(key, obj);
+        return f as any;
+    }
+    /**
+     * Returns a function that returns a boolean indicating whether the argument contains only properties that are on `Types[K]` as well.
+     */
+    isPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isPartial(key, obj);
         return f as any;
     }
 
