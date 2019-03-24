@@ -21,7 +21,7 @@ export type Types = OptionalToMissing<{
     'c': C,
     'd': D,
 }>
-const create = <T extends object>() => createCreateFunction<Types & PrimitiveTypes, T>();
+const create = <T extends object>() => createCreateFunction<Types, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
     public readonly 'c' = create<C>()({ s: 'string', d: 'd', e: 'hi', n: 'string?' } as any);

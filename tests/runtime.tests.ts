@@ -1,9 +1,9 @@
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes } from '../built-ins';
-import { checkableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
+import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 
-type allCheckableTypes = checkableTypes & PrimitiveTypes;
+type allCheckableTypes = CheckableTypes & PrimitiveTypes;
 
 assert<IsExact<A['b'], B | undefined>>(true);
 
@@ -81,10 +81,10 @@ type x = Diff<{ a: 0, b: 0, c: 0 }, { a: 0, c: 1, d: 0 }>
 type sdfafd = { a: 0, b: 0, c: 0 } | { a: 0, c: 1, d: 0 }
 
 type almostAllTypeDescriptions = { [K in Exclude<keyof AllTypeDescriptions, keyof BaseTypeDescriptions>]: AllTypeDescriptions[K] };
-type differenceBetweenExpected = Diff<almostAllTypeDescriptions, TypeDescriptionsFor<checkableTypes>>;
+type differenceBetweenExpected = Diff<almostAllTypeDescriptions, TypeDescriptionsFor<CheckableTypes>>;
 type differencePart1 = almostAllTypeDescriptions[differenceBetweenExpected];
-type differencePart2 = TypeDescriptionsFor<checkableTypes>[differenceBetweenExpected];
-assert<IsExact<TypeDescriptionsFor<checkableTypes>, almostAllTypeDescriptions>>(true);
+type differencePart2 = TypeDescriptionsFor<CheckableTypes>[differenceBetweenExpected];
+assert<IsExact<TypeDescriptionsFor<CheckableTypes>, almostAllTypeDescriptions>>(true);
 
 
 describe('tests', () => {

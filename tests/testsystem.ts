@@ -20,7 +20,7 @@ export class C {
 
 ///////////////////////////
 
-export type checkableTypes = OptionalToMissing<{
+export type CheckableTypes = OptionalToMissing<{
     'a': A,
     'b': B,
     'b?': B | undefined,
@@ -29,11 +29,10 @@ export type checkableTypes = OptionalToMissing<{
     'optional b'?: B,
     'C': C
 }>
-export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
-const create = <T extends object>() => createCreateFunction<allCheckableTypes, T>();
+const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
+export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
     public readonly a = create<A>()({ x: 'string', b: 'b?' });
     public readonly b = create<B>()({ a: 'a' });
     public readonly C = create<C>()({ s: 'string[]' });
@@ -47,5 +46,5 @@ export const typeSystem = new TypeSystem(new AllTypeDescriptions());
 
 ///////////////////////////
 
-type erroneousTypes = DebugTypeSystem<checkableTypes>
+type erroneousTypes = DebugTypeSystem<CheckableTypes>
 assert<IsExact<erroneousTypes, {}>>(true);

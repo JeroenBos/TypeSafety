@@ -17,7 +17,7 @@ export type Types = OptionalToMissing<{
     'C': C,
     // 'D': D // I expected that when this is uncommented, it would show up in erroneousTypes. Instead it gives an error at the description of d, which is good enough
 }>
-const create = <T extends object>() => createCreateFunction<Types & PrimitiveTypes, T>();
+const create = <T extends object>() => createCreateFunction<Types, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
     public readonly 'C' = create<C>()({ e: 'number' } as any);
