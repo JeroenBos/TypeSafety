@@ -109,6 +109,7 @@ assert<IsExact<Requireds<{ a: string | undefined }>, { a: string | undefined }>>
 /**
  * Gets a type similar to `T`, but where all properties of the form `name?: type` are replaced by `name: type | Missing`.
  */
+// note: this type doesn't really do anything yet. It is related to an as-of-yet-unsupported feature, namely optional properties, e.g. { a?: string }.
 export type OptionalToMissing<T> = OptionalsWithMissing<T> & Requireds<T>
 assert<IsExact<OptionalToMissing<{}>, {}>>(true);
 assert<IsExact<OptionalToMissing<{ a?: string }>, { a: string | Missing }>>(true);
