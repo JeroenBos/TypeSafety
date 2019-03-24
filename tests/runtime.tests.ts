@@ -174,4 +174,30 @@ describe('tests', () => {
         const isB = typeSystem.isPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
     });
+    it('B is exactly B', () => {
+        typeSystem.assertExact('b', new B());
+    });
+    it('{} is not exactly B', () => {
+        const isB = typeSystem.isExact('b', {});
+        if (isB) throw new Error();
+    });
+    it('exact check requires nested properties to match', () => {
+        const isB = typeSystem.isExact('b', { a: {} });
+        if (isB) throw new Error();
+    });
+    it('exact check requires nested properties to match', () => {
+        const isB = typeSystem.isExact('b', { a: { x: '' } });
+        if (isB) throw new Error();
+    });
+    it('full B is exact B', () => {
+        typeSystem.assertExact('b', { a: { x: '', b: undefined } });
+    });
+    it('null is not undefined according to isExact', () => {
+        const isB = typeSystem.isExact('b', { a: { x: '', b: null } }); // note that 'null' is not valid here
+        if (isB) throw new Error();
+    });
+    it('isExact does not allow extraneous properties', () => {
+        const isB = typeSystem.isExact('b', { Y: undefined }); // note that 'Y' does not exist on B
+        if (isB) throw new Error();
+    });
 });

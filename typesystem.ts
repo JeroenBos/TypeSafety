@@ -59,6 +59,21 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return obj => this.assertPartial(key, obj);
     }
     /**
+     * Checks only at runtime whether `obj` is assignable to `Types[K]` and that `obj` has no extraneous properties.
+     * Throws if `obj` is not assignable to `Types[K]`.
+     */
+    assertExact<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isExact(key, obj))
+            throw new Error(`The specified object was not exactly of type '${key}'`);
+    }
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
+     */
+    assertExactF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertExact(key, obj);
+    }
+
+    /**
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
     is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
@@ -69,6 +84,13 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      */
     isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
         return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription));
+    }
+    /**
+     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
+     * and all properties on `Types[K]` are present; throws otherwise.
+     */
+    isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isPartial(key, obj) && this.is(key, obj);
     }
 
     private isImpl<K extends string & keyof Types>(
