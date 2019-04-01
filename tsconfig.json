@@ -14,10 +14,12 @@
       "dom"
     ],
     "outDir": "dist",
-    "jsx": "react"
+    "jsx": "react",
+    "declaration": true,
+    "declarationDir": "dist\\types"
   },
   "exclude": [
-    "bin",
+    "dist",
     "node_modules"
   ],
   "atom": {

@@ -116,7 +116,7 @@ function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): IType
 }
 
 
-class missingType { }
+export class missingType { }
 export const missing = Object.freeze(new missingType());
 export type Missing = missingType | undefined
 export function nullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | null> {
