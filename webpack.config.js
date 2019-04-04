@@ -49,6 +49,7 @@ var mainConfig = {
         filename: './jbsnorro_typesafety.js',
         library: 'default',
         libraryTarget: 'umd',
+        globalObject: 'typeof self !== \'undefined\' ? self : this', // webpack bug workaround, see https://github.com/webpack/webpack/issues/6784
     },
 };
 var testConfig = {
