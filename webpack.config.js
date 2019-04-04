@@ -47,6 +47,8 @@ var mainConfig = {
     entry: './index.ts',
     output: {
         filename: './jbsnorro_typesafety.js',
+        library: 'default',
+        libraryTarget: 'umd',
     },
 };
 var testConfig = {
