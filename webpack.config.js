@@ -45,7 +45,9 @@ var mainConfig = {
     ...sharedConfig,
     name: 'main',
     entry: './index.ts',
-    output: { filename: './main.js' },
+    output: {
+        filename: './jbsnorro_typesafety.js',
+    },
 };
 var testConfig = {
     ...sharedConfig,

@@ -2,7 +2,8 @@
   "name": "jbsnorro-typesafety",
   "version": "0.8.0",
   "description": "A small type-safety framework. Contains a function which can check whether Javascript object adheres to a Typescript type definition, and moreover, this function tells you at compile time whether it will be able to perform that check or not.",
-  "main": "main.js",
+  "main": "dist/jbsnorro_typesafety.js",
+  "types": "dist/jbsnorro_typesafety.d.ts",
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
