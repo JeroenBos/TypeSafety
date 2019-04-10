@@ -53,9 +53,7 @@ assert<IsExact<{ x: 'string', b: 'b?' }, reala>>(true);
 type realb = realwrapper<'b'>;
 assert<IsExact<{ a: 'a' }, realb>>(true);
 
-export type real<K extends keyof Types, Types> = { [u in keyof Types[K]]: getKeyL<Types[K][u], allCheckableTypes> }
-export type getKeyL<T, Types extends { [k in keyof Types]: Types[k] }> =
-    { [K in keyof Types]: Types[K] extends T ? IsExactOrAny<T, Types[K]> extends true ? K : never : never }[keyof Types];
+export type real<K extends keyof Types, Types> = { [u in keyof Types[K]]: GetKey<Types[K][u], allCheckableTypes> }
 
 
 
