@@ -198,4 +198,15 @@ describe('tests', () => {
         const isB = typeSystem.isExact('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
     });
+    it('any description works', () => {
+        const isAny = typeSystem.isExact('AnyContainer', { x: '' });
+        if (!isAny)
+            throw new Error();
+    });
+    it('undefined is allowed by anyDescription', () => {
+        debugger;
+        const isAny = typeSystem.isExact('AnyContainer', { x: undefined });
+        if (!isAny)
+            throw new Error();
+    });
 });

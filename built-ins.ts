@@ -1,6 +1,7 @@
 import { TypeDescriptionsFor, ITypeDescription } from "./ITypeDescription";
 
 export type PrimitiveTypes = {
+    'any': any,
     'null': null,
     'undefined': undefined,
 
@@ -48,7 +49,7 @@ export type PrimitiveTypes = {
 export type ExcludePrimitives<T> = Exclude<T, string | number | boolean>
 
 export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes> {
-
+    'any' = anyDescription;
     'null' = nullDescription;
     'undefined' = undefinedDescription
 
@@ -100,6 +101,7 @@ const missingOrNullDescription: ITypeDescription<Missing | null> = noPartial(fun
 const undefinedOrNullDescription: ITypeDescription<undefined | null> = noPartial(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription: ITypeDescription<undefined> = noPartial(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj === null; })
+export const anyDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== missing; })
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');

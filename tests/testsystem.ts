@@ -1,5 +1,5 @@
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives } from "../built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives, anyDescription } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";
 
@@ -18,6 +18,10 @@ export class C {
     s: string[] = []
 }
 
+export class AnyContainer {
+    x: any;
+}
+
 ///////////////////////////
 
 export type CheckableTypes = OptionalToMissing<{
@@ -27,7 +31,9 @@ export type CheckableTypes = OptionalToMissing<{
     'nullable b': B | null,
     'nullable b?': B | undefined | null,
     'optional b'?: B,
-    'C': C
+    'C': C,
+    'AnyContainer': AnyContainer,
+    'Any': any
 }>
 
 const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
@@ -40,6 +46,8 @@ export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDes
     public readonly 'nullable b' = nullable(this.b);
     public readonly 'nullable b?' = possiblyNullOrUndefined(this.b);
     public readonly 'optional b' = optional(this.b);
+    public readonly 'Any' = anyDescription;
+    public readonly 'AnyContainer' = create<AnyContainer>()({ x: 'any' });
 }
 
 export const typeSystem = new TypeSystem(new AllTypeDescriptions());

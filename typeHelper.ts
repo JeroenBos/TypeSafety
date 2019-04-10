@@ -137,7 +137,7 @@ assert<IsExact<MyRequired<{ c?: number; d: undefined; e: number }>, { c: number 
  */
 export type GetKey<T /*extends TLookup[keyof TLookup]*/, TLookup> =
     {
-        [K in keyof TLookup]: TLookup[K] extends T ? IsExactOrAny<T, TLookup[K]> extends true ? K : never : never
+        [K in keyof TLookup]: TLookup[K] extends T ? IsExact<T, TLookup[K]> extends true ? K : never : never
     }[keyof TLookup];
 
 
