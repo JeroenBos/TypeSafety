@@ -2,6 +2,7 @@ import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
+import { typesystem, X } from '../example/example';
 
 type allCheckableTypes = CheckableTypes & PrimitiveTypes;
 
@@ -252,6 +253,26 @@ describe('tests', () => {
     it('non-null,defined is allowed by definedDescription', () => {
         const _is = definedDescription.is(0, null as any);
         if (!_is)
+            throw new Error();
+    });
+    it('test X, which contains properties of type any, nonnull and nonundefined', () => {
+        const x: X = {
+            x: null,
+            y: null,
+            z: undefined
+        };
+        const _isX = typesystem.is('X', x);
+        if (!_isX)
+            throw new Error();
+    });
+    it('test X, which contains properties of type any, nonnull and nonundefined', () => {
+        const x: X = {
+            x: null,
+            y: null,
+            z: null as any
+        };
+        const _isX = typesystem.is('X', x);
+        if (_isX)
             throw new Error();
     });
 });
