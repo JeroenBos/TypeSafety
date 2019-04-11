@@ -155,7 +155,9 @@ type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[]
 
 
 
-export type DescriptionKeys<K extends keyof Types, Types> = { [u in keyof Types[K]]: GetKey<Types[K][u], Types> };
+export type DescriptionKeys<K extends keyof Types, Types> = {
+    [u in keyof Types[K]]: (GetKey<Types[K][u], Types> | 'any')
+};
 type P<T> = T & PrimitiveTypes;
 
 /**
