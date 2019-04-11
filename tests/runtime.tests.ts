@@ -1,6 +1,6 @@
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
-import { BaseTypeDescriptions, PrimitiveTypes } from '../built-ins';
+import { BaseTypeDescriptions, PrimitiveTypes, nonnullOrUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 
 type allCheckableTypes = CheckableTypes & PrimitiveTypes;
@@ -204,9 +204,54 @@ describe('tests', () => {
             throw new Error();
     });
     it('undefined is allowed by anyDescription', () => {
-        debugger;
         const isAny = typeSystem.isExact('AnyContainer', { x: undefined });
         if (!isAny)
+            throw new Error();
+    });
+    it('undefined is allowed by nonnullOrUndefinedDescription', () => {
+        const _is = nonnullOrUndefinedDescription.is(undefined, null as any);
+        if (!_is)
+            throw new Error();
+    });
+    it('null is not allowed by nonnullOrUndefinedDescription', () => {
+        const _is = nonnullOrUndefinedDescription.is(null, null as any);
+        if (_is)
+            throw new Error();
+    });
+    it('non-null,defined is allowed by nonnullOrUndefinedDescription', () => {
+        const _is = nonnullOrUndefinedDescription.is(0, null as any);
+        if (!_is)
+            throw new Error();
+    });
+    it('undefined is not allowed by nonnullDescription', () => {
+        const _is = nonnullDescription.is(undefined, null as any);
+        if (_is)
+            throw new Error();
+    });
+    it('null is not allowed by nonnullDescription', () => {
+        const _is = nonnullDescription.is(null, null as any);
+        if (_is)
+            throw new Error();
+    });
+    it('non-null,defined is allowed by nonnullDescription', () => {
+        const _is = nonnullDescription.is(0, null as any);
+        if (!_is)
+            throw new Error();
+    });
+
+    it('undefined is not allowed by definedDescription', () => {
+        const _is = definedDescription.is(undefined, null as any);
+        if (_is)
+            throw new Error();
+    });
+    it('null is allowed by definedDescription', () => {
+        const _is = definedDescription.is(null, null as any);
+        if (!_is)
+            throw new Error();
+    });
+    it('non-null,defined is allowed by definedDescription', () => {
+        const _is = definedDescription.is(0, null as any);
+        if (!_is)
             throw new Error();
     });
 });

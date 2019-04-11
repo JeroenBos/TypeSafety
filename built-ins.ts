@@ -5,6 +5,10 @@ export type PrimitiveTypes = {
     'null': null,
     'undefined': undefined,
 
+    'nonnull': any,
+    'defined': any,
+    'nonnull | undefined': any,
+
     'number': number,
     'string': string,
     'boolean': boolean,
@@ -52,6 +56,13 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
     'any' = anyDescription;
     'null' = nullDescription;
     'undefined' = undefinedDescription
+
+    /** Describes a type being anything else but `null` or `undefined`. */
+    'nonnull' = nonnullDescription;
+    /** Describes a type being anything else but `undefined`. */
+    'defined' = definedDescription;
+    /** Describes a type being anything else but `null`. */
+    'nonnull | undefined' = nonnullOrUndefinedDescription;
 
     'number' = numberDescription;
     'string' = stringDescription;
@@ -102,6 +113,9 @@ const undefinedOrNullDescription: ITypeDescription<undefined | null> = noPartial
 const undefinedDescription: ITypeDescription<undefined> = noPartial(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj === null; })
 export const anyDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== missing; })
+export const nonnullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== null; })
+export const definedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined; })
+export const nonnullOrUndefinedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== null; })
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
