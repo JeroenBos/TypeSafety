@@ -1,6 +1,6 @@
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
-import { BaseTypeDescriptions, PrimitiveTypes, nonnullOrUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
+import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 
 type allCheckableTypes = CheckableTypes & PrimitiveTypes;
@@ -208,24 +208,24 @@ describe('tests', () => {
         if (!isAny)
             throw new Error();
     });
-    it('undefined is allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullOrUndefinedDescription.is(undefined, null as any);
-        if (!_is)
+    it('undefined is not allowed by nonnullNorUndefinedDescription', () => {
+        const _is = nonnullNorUndefinedDescription.is(undefined, null as any);
+        if (_is)
             throw new Error();
     });
     it('null is not allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullOrUndefinedDescription.is(null, null as any);
+        const _is = nonnullNorUndefinedDescription.is(null, null as any);
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullOrUndefinedDescription.is(0, null as any);
+        const _is = nonnullNorUndefinedDescription.is(0, null as any);
         if (!_is)
             throw new Error();
     });
-    it('undefined is not allowed by nonnullDescription', () => {
+    it('undefined is allowed by nonnullDescription', () => {
         const _is = nonnullDescription.is(undefined, null as any);
-        if (_is)
+        if (!_is)
             throw new Error();
     });
     it('null is not allowed by nonnullDescription', () => {
