@@ -113,9 +113,9 @@ const undefinedOrNullDescription: ITypeDescription<undefined | null> = noPartial
 const undefinedDescription: ITypeDescription<undefined> = noPartial(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj === null; })
 export const anyDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== missing; })
-export const nonnullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== null; })
-export const definedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined; })
-export const nonnullNorUndefinedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== null; })
+export const nonnullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== null && obj !== missing; })
+export const definedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== missing; })
+export const nonnullNorUndefinedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== null && obj !== missing; })
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
