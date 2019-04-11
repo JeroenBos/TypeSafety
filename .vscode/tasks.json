@@ -2,9 +2,52 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "npm_build",
             "type": "npm",
             "script": "build",
-            "problemMatcher": []
+            "presentation": {
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "npm_install",
+            "type": "npm",
+            "script": "install",
+            "presentation": {
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "npm_rebuild",
+            "type": "npm",
+            "script": "rebuild",
+            "presentation": {
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "npm_watch",
+            "type": "npm",
+            "script": "watch",
+            "presentation": {
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "npm_test",
+            "type": "npm",
+            "script": "test",
+            "presentation": {
+                "showReuseMessage": false
+            }
+        },
+        {
+            "label": "npm_build_test",
+            "type": "npm",
+            "script": "buildAndTest",
+            "presentation": {
+                "showReuseMessage": false
+            }
         }
     ]
 }

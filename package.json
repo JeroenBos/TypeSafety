@@ -7,8 +7,9 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "testbuild": "webpack && mocha dist/test.js",
-    "test": "mocha dist/test.js"
+    "buildAndTest": "webpack && mocha dist/test.js",
+    "test": "mocha dist/test.js",
+    "rebuild": "npm install && webpack"
   },
   "author": "Jeroen Bos",
   "license": "ISC",
