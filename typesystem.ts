@@ -1,6 +1,6 @@
 import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
-import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact } from "./typeHelper";
+import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
 
@@ -156,7 +156,18 @@ type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[]
 
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
-    [u in keyof Types[K]]: (GetKey<Types[K][u], Types> | 'any')
+    [u in keyof Types[K]]: (
+        IsNever<GetKey<Types[K][u], Types>> extends false ? GetKey<Types[K][u], Types> :
+        (
+            IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
+            (
+                null extends Types[K][u] ?
+                    undefined extends Types[K][u] ? 'any' : '!undefined'
+                : 
+                    undefined extends Types[K][u] ? '!null' : 'any!'
+            )
+        )
+    )
 };
 type P<T> = T & PrimitiveTypes;
 
