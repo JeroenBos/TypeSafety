@@ -171,6 +171,8 @@ export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, 
     function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
         return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
     };
-
-    return { is, isPartial: is };
+    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<K1 | K2> {
+        return description1.isPartial(obj, getSubdescription) || description2.isPartial(obj, getSubdescription);
+    };
+    return { is, isPartial };
 }
