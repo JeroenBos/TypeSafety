@@ -1,4 +1,4 @@
-import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
+import { PrimitiveTypes, Missing, ExcludePrimitives, BaseTypeDescriptions } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
@@ -162,9 +162,9 @@ export type DescriptionKeys<K extends keyof Types, Types> = {
             IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
             (
                 null extends Types[K][u] ?
-                    undefined extends Types[K][u] ? 'any' : '!undefined'
-                : 
-                    undefined extends Types[K][u] ? '!null' : 'any!'
+                undefined extends Types[K][u] ? 'any' : '!undefined'
+                :
+                undefined extends Types[K][u] ? '!null' : 'any!'
             )
         )
     )
@@ -182,3 +182,7 @@ export function createCreateFunction<Types, T extends object & P<Types>[keyof P<
     }
 }
 
+/**
+ * An implementation of a type system describing only the primitive types.
+ */
+export const PrimitiveTypeSystem = new TypeSystem(new BaseTypeDescriptions());
