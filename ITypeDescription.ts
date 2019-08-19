@@ -1,5 +1,6 @@
 export interface ITypeDescription<T> {
     is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is T;
+    /** Gets whether all properties on any are in T, possibly with a few missing, but at least not properties not in T. */
     isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<T>;
 }
 
