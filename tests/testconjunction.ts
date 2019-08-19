@@ -26,4 +26,48 @@ export const typeSystem = new TypeSystem(new AllTypeDescriptions());
 ///////////////////////////
 
 type erroneousTypes = DebugTypeSystem<Types>
-assert<IsExact<erroneousTypes, { }>>(true); 
+assert<IsExact<erroneousTypes, {}>>(true);
+
+
+describe('conjunction', () => {
+    it('C', () => {
+        const c: C = {
+            s: '',
+            n: ''
+        };
+        const isC = typeSystem.is('c', c);
+        if (!isC)
+            throw new Error();
+    });
+
+    it('partial C is no C', () => {
+        const c = {
+            s: '',
+        };
+        const isC = typeSystem.is('c', c);
+        if (isC)
+            throw new Error();
+    });
+
+    it('too large C is not exact C', () => {
+        const c = {
+            s: '',
+            n: '',
+            f: ''
+        };
+        const isExaclyC = typeSystem.isExact('c', c);
+        if (isExaclyC)
+            throw new Error();
+    });
+
+    it('exactly C is partial C', () => {
+        debugger;
+        const c = {
+            s: '',
+            n: '',
+        };
+        const isC = typeSystem.isPartial('c', c);
+        if (!isC)
+            throw new Error();
+    });
+});
