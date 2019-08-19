@@ -13,6 +13,14 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
     public static create<Types, K extends keyof Types>(propertyDescriptions: DescriptionKeys<K, Types>): ITypeDescription<Types[K]> {
         return new TypeDescription(propertyDescriptions);
     }
+    public static compose<K1 extends keyof Types, K2 extends keyof Types, Types>(description1: TypeDescription<any, any>, description2: TypeDescription<any, any>): TypeDescription<K1 & K2, Types> {
+        // TODO: check for overlap, in which case this is never going to work anyway?
+        return new TypeDescription({ ...description1.propertyDescriptions, ...description2.propertyDescriptions } as any);
+    }
+    public static isObjectDescription<K extends keyof Types, Types>(description: ITypeDescription<Types[K]>): description is TypeDescription<K, Types> {
+        return 'is' in description && 'isPartial' in description && 'isValidKey' in description && 'checkProperty' in description;
+    }
+
     private constructor(private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
     is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Types[K] {

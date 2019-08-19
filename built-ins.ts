@@ -1,4 +1,5 @@
 import { TypeDescriptionsFor, ITypeDescription } from "./ITypeDescription";
+import { TypeDescription } from "./TypeDescription";
 
 export type PrimitiveTypes = {
     'any': any,
@@ -178,6 +179,10 @@ export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescri
 }
 
 export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 & K2> {
+    if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
+        return  TypeDescription.compose(description1, description2);
+    }
+
     function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 & K2 {
         return description1.is(obj, getSubdescription) && description2.is(obj, getSubdescription);
     };
