@@ -136,19 +136,19 @@ export class missingType { }
 export const missing = Object.freeze(new missingType());
 export type Missing = missingType | undefined
 export function nullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | null> {
-    return composeDescriptions(nullDescription, description1);
+    return composeAlternativeDescriptions(nullDescription, description1);
 }
 export function optional<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing> {
-    return composeDescriptions(missingDescription, description1);
+    return composeAlternativeDescriptions(missingDescription, description1);
 }
 export function optionalNullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing | null> {
-    return composeDescriptions(missingOrNullDescription, description1);
+    return composeAlternativeDescriptions(missingOrNullDescription, description1);
 }
 export function possiblyUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined> {
-    return composeDescriptions(undefinedDescription, description1);
+    return composeAlternativeDescriptions(undefinedDescription, description1);
 }
 export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined | null> {
-    return composeDescriptions(undefinedOrNullDescription, description1);
+    return composeAlternativeDescriptions(undefinedOrNullDescription, description1);
 }
 export function array<TElement>(elementDescription: ITypeDescription<TElement>): ITypeDescription<TElement[]> {
     function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
@@ -167,7 +167,7 @@ export function noPartial<T>(is: ITypeDescription<T>['is']): ITypeDescription<T>
     return { is, isPartial: is };
 }
 
-export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
+export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
     function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
         return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
     };
