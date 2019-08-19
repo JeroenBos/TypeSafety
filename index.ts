@@ -37,6 +37,8 @@ export {
     composeAlternativeDescriptions,
     createCreateFunction,
     TypeSystem,
+    array,
+    composeConjunctDescriptions,
 };
 
 export default {
