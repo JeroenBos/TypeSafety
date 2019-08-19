@@ -17,7 +17,9 @@ import {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeAlternativeDescriptions
+    composeAlternativeDescriptions,
+    array,
+    composeConjunctDescriptions
 } from './built-ins';
 import {
     createCreateFunction,
@@ -32,7 +34,7 @@ export {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeAlternativeDescriptions as composeDescriptions,
+    composeAlternativeDescriptions,
     createCreateFunction,
     TypeSystem,
 };
@@ -45,7 +47,9 @@ export default {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeDescriptions: composeAlternativeDescriptions,
+    composeAlternativeDescriptions,
+    array,
+    composeConjunctDescriptions,
     createCreateFunction,
     TypeSystem,
 };
