@@ -176,3 +176,15 @@ export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescri
     };
     return { is, isPartial };
 }
+
+export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 & K2> {
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 & K2 {
+        return description1.is(obj, getSubdescription) && description2.is(obj, getSubdescription);
+    };
+    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<K1 & K2> {
+        return description1.isPartial(obj, getSubdescription) && description2.isPartial(obj, getSubdescription);
+    };
+    return { is, isPartial };
+}
+
+export const compose = composeConjunctDescriptions;
