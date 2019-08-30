@@ -3,7 +3,6 @@ import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 import { typesystem, X } from '../example/example';
-import './testconjunction';
 
 type allCheckableTypes = CheckableTypes & PrimitiveTypes;
 
