@@ -1,4 +1,4 @@
-import { TypeDescriptionsFor, ITypeDescription } from "./ITypeDescription";
+import { TypeDescriptionsFor, ITypeDescription, ILogger } from "./ITypeDescription";
 import { TypeDescription } from "./TypeDescription";
 
 export type PrimitiveTypes = {
@@ -152,12 +152,12 @@ export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TB
     return composeAlternativeDescriptions(undefinedOrNullDescription, description1);
 }
 export function array<TElement>(elementDescription: ITypeDescription<TElement>): ITypeDescription<TElement[]> {
-    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is TElement[] {
         if (!Array.isArray(obj))
             return false;
         for (let index = 0; index < obj.length; index++) {
             const element = obj[index];
-            if (!elementDescription.is(element, getSubdescription))
+            if (!elementDescription.is(element, getSubdescription, log))
                 return false;
         }
         return true;
@@ -169,25 +169,25 @@ export function noPartial<T>(is: ITypeDescription<T>['is']): ITypeDescription<T>
 }
 
 export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
-    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
-        return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is K1 | K2 {
+        return description1.is(obj, getSubdescription, log) || description2.is(obj, getSubdescription, log);
     };
-    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<K1 | K2> {
-        return description1.isPartial(obj, getSubdescription) || description2.isPartial(obj, getSubdescription);
+    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<K1 | K2> {
+        return description1.isPartial(obj, getSubdescription, log) || description2.isPartial(obj, getSubdescription, log);
     };
     return { is, isPartial };
 }
 
 export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 & K2> {
     if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
-        return  TypeDescription.compose(description1, description2);
+        return TypeDescription.compose(description1, description2);
     }
 
-    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 & K2 {
-        return description1.is(obj, getSubdescription) && description2.is(obj, getSubdescription);
+    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is K1 & K2 {
+        return description1.is(obj, getSubdescription, log) && description2.is(obj, getSubdescription, log);
     };
-    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<K1 & K2> {
-        return description1.isPartial(obj, getSubdescription) && description2.isPartial(obj, getSubdescription);
+    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<K1 & K2> {
+        return description1.isPartial(obj, getSubdescription, log) && description2.isPartial(obj, getSubdescription, log);
     };
     return { is, isPartial };
 }

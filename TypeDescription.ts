@@ -1,5 +1,5 @@
 import { missing } from "./built-ins";
-import { ITypeDescription } from "./ITypeDescription";
+import { ITypeDescription, ILogger } from "./ITypeDescription";
 import { DescriptionKeys } from "./typesystem";
 import { DisposableStackElement } from "./DisposableStackElement";
 
@@ -23,7 +23,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
 
     private constructor(private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
-    is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Types[K] {
+    is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Types[K] {
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
@@ -32,7 +32,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         for (const possiblyOptionalPropertyName in expectedProperties) {
             const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
             const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
-            if (possiblyOptionalDescription.is(missing, getSubdescription)) {
+            if (possiblyOptionalDescription.is(missing, getSubdescription, log)) {
                 throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
             }
         }
@@ -41,7 +41,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue; // throw new Error(`The object has an extra property '${propertyName}'`);
             }
             delete expectedProperties[propertyName];
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 return false;
             }
@@ -52,7 +52,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
         return true;
     }
-    isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<Types[K]> {
+    isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<Types[K]> {
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
@@ -60,7 +60,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             if (!this.isValidKey(propertyName)) {
                 return false;
             }
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 return false;
             }
@@ -71,13 +71,13 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
-    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: (key: any) => ITypeDescription<any>): boolean {
+    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): boolean {
         const property = obj[propertyName];
         const propertyKey = this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
         const stackElem = DisposableStackElement.create(propertyName);
         try {
-            const isOfPropertyType = propertyDescription.is(property, getSubdescription);
+            const isOfPropertyType = propertyDescription.is(property, getSubdescription, log);
             return isOfPropertyType;
         }
         finally {
