@@ -1,5 +1,8 @@
-import { TypeSystem, OptionalToMissing, createCreateFunction, BaseTypeDescriptions, TypeDescriptionsFor, possiblyUndefined, nullable, possiblyNullOrUndefined, optional } from "..";
-import { anyDescription } from "../built-ins";
+import { anyDescription, BaseTypeDescriptions, possiblyUndefined } from "../built-ins";
+import { errorMessage_Missing } from "../TypeDescription";
+import { OptionalToMissing } from "../typeHelper";
+import { createCreateFunction, TypeSystem } from "../typesystem";
+import { TypeDescriptionsFor } from "../ITypeDescription";
 
 interface L1 {
     x: string;
