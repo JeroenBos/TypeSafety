@@ -128,5 +128,5 @@ export function errorMessage_Wrong(path: string, missingPropertyName: string, ty
 
 export function errorMessage_Extra(path: string, extraPropertyName: string, type: string): string {
     const extraDot = path == '' ? '' : '.';
-    return `'${path}${extraDot}${extraPropertyName}' is not an accepted property${type == '' ? '' : ` on type ${type}`}`;
+    return `'${path}${extraDot}${extraPropertyName}' is not an accepted property${type == '' ? '' : ` (on type ${type})`}`;
 }
