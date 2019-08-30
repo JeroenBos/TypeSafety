@@ -41,19 +41,16 @@ function assertSequenceEquals(result: string[], expectation: string[]): void {
     }
 }
 
-function missing(propertyName: string): string {
-    return propertyName;
-}
-
 describe('Test logging', () => {
-    it('Test testing setup', () => {
+    it('{} ∈ a', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [];
+        const expectedLogStatements: string[] = [errorMessage_Missing('x', '', 'a')];
 
         // act
         debugger;
+        typesystem.is('a', {});
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);
