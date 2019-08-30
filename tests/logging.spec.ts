@@ -1,5 +1,5 @@
 import { anyDescription, BaseTypeDescriptions, possiblyUndefined } from "../built-ins";
-import { errorMessage_Missing } from "../TypeDescription";
+import { errorMessage_Missing, errorMessage_Wrong } from "../TypeDescription";
 import { OptionalToMissing } from "../typeHelper";
 import { createCreateFunction, TypeSystem } from "../typesystem";
 import { TypeDescriptionsFor } from "../ITypeDescription";
@@ -47,7 +47,7 @@ describe('Test logging', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('x', 'obj', 'L1'), errorMessage_Missing('b', 'obj', 'L1')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('obj', 'x', 'L1'), errorMessage_Missing('obj', 'b', 'L1')];
 
         // act
         typesystem.is('L1', {});
@@ -60,10 +60,25 @@ describe('Test logging', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('c', 'obj.b', 'L2'), errorMessage_Missing('s', 'obj.b', 'L2')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('obj.b', 'c', 'L2'), errorMessage_Missing('obj.b', 's', 'L2')];
 
         // act
+        debugger;
         typesystem.is('L1', { x: '', b: {} });
+
+        // assert
+        assertSequenceEquals(logStatements, expectedLogStatements);
+    });
+
+
+    it(`{ x: null, b: null } ∈ a`, () => {
+        // arrange
+        const logStatements: string[] = [];
+        const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
+        const expectedLogStatements: string[] = [errorMessage_Wrong('obj', 'x', 'string', 'null'), errorMessage_Wrong('obj', 'b', 'L2', 'null')];
+
+        // act
+        typesystem.is('L1', { x: null, b: null });
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);

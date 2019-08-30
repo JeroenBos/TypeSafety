@@ -43,14 +43,14 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue;
             }
             delete expectedProperties[propertyName];
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
-            if (!isOfPropertyType) {
-                result = false; if (log === undefined) { return result; }
+            const isOfPropertyTypeRail = this.checkProperty(obj, propertyName, getSubdescription, log);
+            if (!isOfPropertyTypeRail) {
+                result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached
             }
         }
         for (const missingPropertyName in expectedProperties) {
             const { path, type } = DisposableStackElement.toString();
-            log(errorMessage_Missing(missingPropertyName, path, type));
+            log(errorMessage_Missing(path, missingPropertyName, type));
             result = false; if (log === undefined) { return result; }
         }
         return result;
@@ -79,18 +79,38 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const propertyKey = this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
         const stackElem = DisposableStackElement.enter(propertyName, propertyKey as any);
+        let isOfPropertyType;
+
+        let loggedError = false; // this boolean indicates whether checking this property has already resulted in logging errors, in which case we won't add anything here
+        function _log(s: string): void {
+            loggedError = true;
+            log(s);
+        }
         try {
-            const isOfPropertyType = propertyDescription.is(property, getSubdescription, log);
-            return isOfPropertyType;
+            isOfPropertyType = propertyDescription.is(property, getSubdescription, _log);
         }
         finally {
             stackElem.dispose();
         }
+
+        if (!isOfPropertyType && !loggedError) {
+            const { path, type } = DisposableStackElement.toString();
+            log(errorMessage_Wrong(path, propertyName, propertyKey as any, property));
+        }
+        return isOfPropertyType;
     }
 }
 
+function isTypeDescription<K extends keyof Types, Types>(typeDescription: ITypeDescription<Types[K]>): typeDescription is TypeDescription<K, Types> {
+    return typeDescription instanceof TypeDescription;
+}
 
-export function errorMessage_Missing(missingPropertyName: string, path: string, type: string): string {
+export function errorMessage_Missing(path: string, missingPropertyName: string, type: string): string {
     const extraDot = path == '' ? '' : '.';
     return `'${path}${extraDot}${missingPropertyName}' is missing ${type == '' ? '' : `(type = ${type})`}`;
+}
+
+export function errorMessage_Wrong(path: string, missingPropertyName: string, type: string, property: any): string {
+    const extraDot = path == '' ? '' : '.';
+    return `'${path}${extraDot}${missingPropertyName}' has an invalid value '${property}'${type == '' ? '' : `: it must be of type ${type}`}`;
 }
