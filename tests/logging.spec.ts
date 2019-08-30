@@ -47,7 +47,7 @@ describe('Test logging', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('x', 'obj', 'L1')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('x', 'obj', 'L1'), errorMessage_Missing('b', 'obj', 'L1')];
 
         // act
         typesystem.is('L1', {});
@@ -60,7 +60,7 @@ describe('Test logging', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('c', 'obj.b', 'L2')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('c', 'obj.b', 'L2'), errorMessage_Missing('s', 'obj.b', 'L2')];
 
         // act
         typesystem.is('L1', { x: '', b: {} });

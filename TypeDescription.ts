@@ -27,6 +27,8 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
+
+        let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
         // remove properties that are allowed to be missing:
         for (const possiblyOptionalPropertyName in expectedProperties) {
@@ -38,20 +40,20 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
         for (const propertyName in obj) {
             if (!this.isValidKey(propertyName)) {
-                continue; // throw new Error(`The object has an extra property '${propertyName}'`);
+                continue;
             }
             delete expectedProperties[propertyName];
             const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
-                return false;
+                result = false; if (log === undefined) { return result; }
             }
         }
         for (const missingPropertyName in expectedProperties) {
             const { path, type } = DisposableStackElement.toString();
             log(errorMessage_Missing(missingPropertyName, path, type));
-            return false;
+            result = false; if (log === undefined) { return result; }
         }
-        return true;
+        return result;
     }
     isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<Types[K]> {
         if (obj === undefined || obj === null || obj === missing) {
