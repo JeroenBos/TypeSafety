@@ -10,6 +10,7 @@ interface L1 {
 }
 interface L2 {
     a: L1 | undefined;
+    s: string;
 }
 
 ///////////////////////////
@@ -25,7 +26,7 @@ const create = <T extends object>() => createCreateFunction<CheckableTypes, T>()
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
     public readonly a = create<L1>()({ x: 'string', b: 'b' });
-    public readonly b = create<L2>()({ a: 'a?' });
+    public readonly b = create<L2>()({ a: 'a?', s: 'string' });
     public readonly 'a?' = possiblyUndefined(this.a);
     public readonly 'b?' = possiblyUndefined(this.b);
 }
