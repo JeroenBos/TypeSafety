@@ -4,13 +4,27 @@
  */
 export class DisposableStackElement {
     private static stack: DisposableStackElement[] = [];
-    public static create(message: string): DisposableStackElement {
-        return new DisposableStackElement(message);
+    public static enterType(typeName: string): DisposableStackElement {
+        return new DisposableStackElement(typeName, true);
     }
-    public static print(separator: string): string {
-        return DisposableStackElement.stack.map(elem => `'${elem.message}'`).reverse().join(separator);
+    public static enterProperty(propertyName: string): DisposableStackElement {
+        return new DisposableStackElement(propertyName, false);
     }
-    private constructor(private readonly message: string) {
+    public static toString(): { path: string, type: string } {
+        const path = j(false);
+        const type = j(true);
+
+        return { path, type };
+
+        function j(isType: boolean) {
+            return DisposableStackElement.stack
+                .filter(elem => elem.isType == isType)
+                .map(elem => elem.message)
+                .reverse()
+                .join('.');
+        }
+    }
+    private constructor(private readonly message: string, private readonly isType: boolean) {
         DisposableStackElement.stack.push(this);
     }
     public dispose() {

@@ -47,8 +47,9 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             }
         }
         for (const missingPropertyName in expectedProperties) {
-            console.debug(`'${missingPropertyName}' is missing from object of type ${DisposableStackElement.print(' in type ')}`);
-            return false; // throw new Error(`${missingPropertyName} is missing`);
+            const { path, type } = DisposableStackElement.toString();
+            log(errorMessage_Missing(missingPropertyName, path, type));
+            return false;
         }
         return true;
     }
@@ -75,7 +76,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const property = obj[propertyName];
         const propertyKey = this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
-        const stackElem = DisposableStackElement.create(propertyName);
+        const stackElem = DisposableStackElement.enterType(propertyName);
         try {
             const isOfPropertyType = propertyDescription.is(property, getSubdescription, log);
             return isOfPropertyType;
@@ -84,4 +85,10 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             stackElem.dispose();
         }
     }
+}
+
+
+export function errorMessage_Missing(missingPropertyName: string, path: string, type: string): string {
+    const extraSpace = type != '' && path != '' ? ' ' : '';
+    return `'${missingPropertyName}' is missing ${type == '' ? '' : `from '${type}'`}${extraSpace}${path == '' ? '' : `at '${path}'`}`;
 }
