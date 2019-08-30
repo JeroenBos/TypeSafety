@@ -43,14 +43,14 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue;
             }
             delete expectedProperties[propertyName];
-            const isOfPropertyTypeRail = this.checkProperty(obj, propertyName, getSubdescription, log);
-            if (!isOfPropertyTypeRail) {
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
+            if (!isOfPropertyType) {
                 result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached
+                // logging is done in this.checkProperty
             }
         }
         for (const missingPropertyName in expectedProperties) {
-            const { path, type } = DisposableStackElement.toString();
-            log(errorMessage_Missing(path, missingPropertyName, type));
+            log(stackErrorMessage_Missing(missingPropertyName));
             result = false; if (log === undefined) { return result; }
         }
         return result;
@@ -59,16 +59,20 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
+        let result = true;
         for (const propertyName in obj) {
             if (!this.isValidKey(propertyName)) {
-                return false;
-            }
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
-            if (!isOfPropertyType) {
-                return false;
+                log(stackErrorMessage_Extra(propertyName));
+                result = false; if (log === undefined) return result;
+            } else {
+                const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
+                if (!isOfPropertyType) {
+                    result = false; if (log === undefined) return result;
+                    // logging is done in this.checkProperty
+                }
             }
         }
-        return true;
+        return result;
     }
     private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
         const propertyDescriptions: object = this.propertyDescriptions;
@@ -94,23 +98,35 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
 
         if (!isOfPropertyType && !loggedError) {
-            const { path, type } = DisposableStackElement.toString();
-            log(errorMessage_Wrong(path, propertyName, propertyKey as any, property));
+            log(stackErrorMessage_Wrong(propertyName, propertyKey as any, property));
         }
         return isOfPropertyType;
     }
 }
-
-function isTypeDescription<K extends keyof Types, Types>(typeDescription: ITypeDescription<Types[K]>): typeDescription is TypeDescription<K, Types> {
-    return typeDescription instanceof TypeDescription;
+function stackErrorMessage_Missing(missingPropertyName: string): string {
+    const { path, type } = DisposableStackElement.toString();
+    return errorMessage_Missing(path, missingPropertyName, type);
 }
+function stackErrorMessage_Wrong(missingPropertyName: string, type: string, property: any): string {
+    const { path } = DisposableStackElement.toString();
+    return errorMessage_Wrong(path, missingPropertyName, type, property);
+}
+function stackErrorMessage_Extra(extraPropertyName: string): string {
+    const { path, type } = DisposableStackElement.toString();
+    return errorMessage_Extra(path, extraPropertyName, type);
+}
+
 
 export function errorMessage_Missing(path: string, missingPropertyName: string, type: string): string {
     const extraDot = path == '' ? '' : '.';
     return `'${path}${extraDot}${missingPropertyName}' is missing ${type == '' ? '' : `(type = ${type})`}`;
 }
-
 export function errorMessage_Wrong(path: string, missingPropertyName: string, type: string, property: any): string {
     const extraDot = path == '' ? '' : '.';
     return `'${path}${extraDot}${missingPropertyName}' has an invalid value '${property}'${type == '' ? '' : `: it must be of type ${type}`}`;
+}
+
+export function errorMessage_Extra(path: string, extraPropertyName: string, type: string): string {
+    const extraDot = path == '' ? '' : '.';
+    return `'${path}${extraDot}${extraPropertyName}' is not an accepted property${type == '' ? '' : ` on type ${type}`}`;
 }
