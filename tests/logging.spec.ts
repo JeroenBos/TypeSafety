@@ -9,26 +9,26 @@ interface L1 {
     b: L2;
 }
 interface L2 {
-    a: L1 | undefined;
+    c: L1 | undefined;
     s: string;
 }
 
 ///////////////////////////
 
 export type CheckableTypes = OptionalToMissing<{
-    'a': L1,
-    'b': L2,
-    'a?': L1 | undefined,
-    'b?': L2 | undefined,
+    'L1': L1,
+    'L2': L2,
+    'L1?': L1 | undefined,
+    'L2?': L2 | undefined,
 }>
 
 const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
-    public readonly a = create<L1>()({ x: 'string', b: 'b' });
-    public readonly b = create<L2>()({ a: 'a?', s: 'string' });
-    public readonly 'a?' = possiblyUndefined(this.a);
-    public readonly 'b?' = possiblyUndefined(this.b);
+    public readonly L1 = create<L1>()({ x: 'string', b: 'L2' });
+    public readonly L2 = create<L2>()({ c: 'L1?', s: 'string' });
+    public readonly 'L1?' = possiblyUndefined(this.L1);
+    public readonly 'L2?' = possiblyUndefined(this.L2);
 }
 
 ///////////////////////////
@@ -47,11 +47,23 @@ describe('Test logging', () => {
         // arrange
         const logStatements: string[] = [];
         const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('x', '', 'a')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('x', 'obj', 'L1')];
 
         // act
-        debugger;
-        typesystem.is('a', {});
+        typesystem.is('L1', {});
+
+        // assert
+        assertSequenceEquals(logStatements, expectedLogStatements);
+    });
+
+    it(`{ x: '', b: {} } ∈ a`, () => {
+        // arrange
+        const logStatements: string[] = [];
+        const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
+        const expectedLogStatements: string[] = [errorMessage_Missing('c', 'obj.b', 'L2')];
+
+        // act
+        typesystem.is('L1', { x: '', b: {} });
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);

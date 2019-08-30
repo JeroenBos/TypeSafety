@@ -102,7 +102,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
-        const stackElem = DisposableStackElement.enterType(key);
+        const stackElem = DisposableStackElement.enter('obj', key);
         try {
             return _is(description, obj, key => this.getDescription(key), this.log);
         }

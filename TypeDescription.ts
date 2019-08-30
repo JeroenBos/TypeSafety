@@ -76,7 +76,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const property = obj[propertyName];
         const propertyKey = this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
-        const stackElem = DisposableStackElement.enterType(propertyName);
+        const stackElem = DisposableStackElement.enter(propertyName, propertyKey as any);
         try {
             const isOfPropertyType = propertyDescription.is(property, getSubdescription, log);
             return isOfPropertyType;
@@ -89,6 +89,6 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
 
 
 export function errorMessage_Missing(missingPropertyName: string, path: string, type: string): string {
-    const extraSpace = type != '' && path != '' ? ' ' : '';
-    return `'${missingPropertyName}' is missing ${type == '' ? '' : `from '${type}'`}${extraSpace}${path == '' ? '' : `at '${path}'`}`;
+    const extraDot = path == '' ? '' : '.';
+    return `'${path}${extraDot}${missingPropertyName}' is missing ${type == '' ? '' : `(type = ${type})`}`;
 }

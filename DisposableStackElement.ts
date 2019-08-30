@@ -4,27 +4,19 @@
  */
 export class DisposableStackElement {
     private static stack: DisposableStackElement[] = [];
-    public static enterType(typeName: string): DisposableStackElement {
-        return new DisposableStackElement(typeName, true);
-    }
-    public static enterProperty(propertyName: string): DisposableStackElement {
-        return new DisposableStackElement(propertyName, false);
+    public static enter(propertyName: string, typeName: string) {
+        return new DisposableStackElement(propertyName, typeName);
     }
     public static toString(): { path: string, type: string } {
-        const path = j(false);
-        const type = j(true);
+        const path = DisposableStackElement.stack
+            .map(elem => elem.propertyName)
+            .filter(elem => elem != '')
+            .join('.');
 
+        const type = DisposableStackElement.stack[DisposableStackElement.stack.length - 1].typeName;
         return { path, type };
-
-        function j(isType: boolean) {
-            return DisposableStackElement.stack
-                .filter(elem => elem.isType == isType)
-                .map(elem => elem.message)
-                .reverse()
-                .join('.');
-        }
     }
-    private constructor(private readonly message: string, private readonly isType: boolean) {
+    private constructor(private readonly propertyName: string, private readonly typeName: string) {
         DisposableStackElement.stack.push(this);
     }
     public dispose() {
