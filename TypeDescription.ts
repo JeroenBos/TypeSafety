@@ -1,5 +1,5 @@
 import { missing } from "./built-ins";
-import { ITypeDescription } from "./ITypeDescription";
+import { ITypeDescription, ILogger } from "./ITypeDescription";
 import { DescriptionKeys } from "./typesystem";
 import { DisposableStackElement } from "./DisposableStackElement";
 
@@ -23,36 +23,39 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
 
     private constructor(private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
-    is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Types[K] {
+    is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Types[K] {
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
+
+        let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
         // remove properties that are allowed to be missing:
         for (const possiblyOptionalPropertyName in expectedProperties) {
             const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
             const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
-            if (possiblyOptionalDescription.is(missing, getSubdescription)) {
+            if (possiblyOptionalDescription.is(missing, getSubdescription, log)) {
                 throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
             }
         }
         for (const propertyName in obj) {
             if (!this.isValidKey(propertyName)) {
-                continue; // throw new Error(`The object has an extra property '${propertyName}'`);
+                continue;
             }
             delete expectedProperties[propertyName];
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
-            if (!isOfPropertyType) {
-                return false;
+            const isOfPropertyTypeRail = this.checkProperty(obj, propertyName, getSubdescription, log);
+            if (!isOfPropertyTypeRail) {
+                result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached
             }
         }
         for (const missingPropertyName in expectedProperties) {
-            console.debug(`'${missingPropertyName}' is missing from object of type ${DisposableStackElement.print(' in type ')}`);
-            return false; // throw new Error(`${missingPropertyName} is missing`);
+            const { path, type } = DisposableStackElement.toString();
+            log(errorMessage_Missing(path, missingPropertyName, type));
+            result = false; if (log === undefined) { return result; }
         }
-        return true;
+        return result;
     }
-    isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<Types[K]> {
+    isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<Types[K]> {
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
@@ -60,7 +63,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             if (!this.isValidKey(propertyName)) {
                 return false;
             }
-            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription);
+            const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 return false;
             }
@@ -71,17 +74,43 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
-    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: (key: any) => ITypeDescription<any>): boolean {
+    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): boolean {
         const property = obj[propertyName];
         const propertyKey = this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
-        const stackElem = DisposableStackElement.create(propertyName);
+        const stackElem = DisposableStackElement.enter(propertyName, propertyKey as any);
+        let isOfPropertyType;
+
+        let loggedError = false; // this boolean indicates whether checking this property has already resulted in logging errors, in which case we won't add anything here
+        function _log(s: string): void {
+            loggedError = true;
+            log(s);
+        }
         try {
-            const isOfPropertyType = propertyDescription.is(property, getSubdescription);
-            return isOfPropertyType;
+            isOfPropertyType = propertyDescription.is(property, getSubdescription, _log);
         }
         finally {
             stackElem.dispose();
         }
+
+        if (!isOfPropertyType && !loggedError) {
+            const { path, type } = DisposableStackElement.toString();
+            log(errorMessage_Wrong(path, propertyName, propertyKey as any, property));
+        }
+        return isOfPropertyType;
     }
+}
+
+function isTypeDescription<K extends keyof Types, Types>(typeDescription: ITypeDescription<Types[K]>): typeDescription is TypeDescription<K, Types> {
+    return typeDescription instanceof TypeDescription;
+}
+
+export function errorMessage_Missing(path: string, missingPropertyName: string, type: string): string {
+    const extraDot = path == '' ? '' : '.';
+    return `'${path}${extraDot}${missingPropertyName}' is missing ${type == '' ? '' : `(type = ${type})`}`;
+}
+
+export function errorMessage_Wrong(path: string, missingPropertyName: string, type: string, property: any): string {
+    const extraDot = path == '' ? '' : '.';
+    return `'${path}${extraDot}${missingPropertyName}' has an invalid value '${property}'${type == '' ? '' : `: it must be of type ${type}`}`;
 }

@@ -1,5 +1,5 @@
 import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
-import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
+import { ITypeDescription, TypeDescriptionsFor, ILogger } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
@@ -7,8 +7,9 @@ import { DisposableStackElement } from "./DisposableStackElement";
 type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, TypeDescriptions<Types>>();
-
-    constructor(description: TypeDescriptionsFor<Types>) {
+    private readonly log: ILogger;
+    constructor(description: TypeDescriptionsFor<Types>, logger?: ILogger) {
+        this.log = logger || (() => { });
         for (const k in description) {
             const key = k as keyof TypeDescriptionsFor<Types>;
             const value = description[key];
@@ -77,13 +78,13 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
     is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.is(obj, getSubdescription));
+        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.is(obj, getSubdescription, this.log));
     }
     /**
      * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`; throws otherwise.
      */
     isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription));
+        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription, this.log));
     }
     /**
      * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
@@ -96,14 +97,14 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     private isImpl<K extends string & keyof Types>(
         key: K,
         obj: any,
-        _is: (description: TypeDescriptions<Types>, obj: any, getSubdescription: (key: any) => ITypeDescription<any>) => boolean
+        _is: (description: TypeDescriptions<Types>, obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger) => boolean
     ): boolean {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
-        const stackElem = DisposableStackElement.create(key);
+        const stackElem = DisposableStackElement.enter('obj', key);
         try {
-            return _is(description, obj, key => this.getDescription(key));
+            return _is(description, obj, key => this.getDescription(key), this.log);
         }
         finally {
             stackElem.dispose();
@@ -162,9 +163,9 @@ export type DescriptionKeys<K extends keyof Types, Types> = {
             IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
             (
                 null extends Types[K][u] ?
-                    undefined extends Types[K][u] ? 'any' : '!undefined'
-                : 
-                    undefined extends Types[K][u] ? '!null' : 'any!'
+                undefined extends Types[K][u] ? 'any' : '!undefined'
+                :
+                undefined extends Types[K][u] ? '!null' : 'any!'
             )
         )
     )
