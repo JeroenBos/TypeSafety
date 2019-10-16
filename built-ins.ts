@@ -169,7 +169,6 @@ export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescri
 }
 
 export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
-    debugger;
     if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
         return TypeDescription.compose(description1, description2);
     }
