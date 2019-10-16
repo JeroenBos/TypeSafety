@@ -32,11 +32,11 @@ type descriptionKey<V, u extends keyof V, UKey> =
             undefined extends V[u] ? '!null' : 'any!'
         )
     )
-    
+
 export function isMissing(o: any): o is possiblyMissing<any> {
     return true;
 }
-export class possiblyMissing<T> { constructor(public readonly key: string) { } }
+export class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
 export function optional<T extends string>(s: T): possiblyMissing<T> {
     return new possiblyMissing<T>(s);
 }

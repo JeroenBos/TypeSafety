@@ -29,7 +29,6 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
-
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
         if ((variance & Variance.Partial) == 0) {
@@ -40,7 +39,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                     if (!(possiblyOptionalPropertyName in obj)) {
                         delete expectedProperties[possiblyOptionalPropertyName];
                     } else {
-                        expectedProperties[possiblyOptionalPropertyName] = possiblyOptionalTypeKey.key as any;
+                        expectedProperties[possiblyOptionalPropertyName] = possiblyOptionalTypeKey.key;
                     }
                 }
             }
@@ -54,6 +53,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue;
             }
             delete expectedProperties[propertyName];
+            debugger;
             const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached

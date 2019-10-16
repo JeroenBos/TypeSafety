@@ -100,8 +100,7 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
 }
 
 
-const missingDescription = noVariance<Missing>(function is(obj: any): obj is Missing { return obj === missing; });
-const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return obj === missing || obj === undefined; })
+export const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return obj === missing || obj === undefined; })
 const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | null>(function is(obj: any): obj is Missing | undefined | null { return obj === missing || obj === undefined || obj === null; })
 const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
