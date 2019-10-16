@@ -19,8 +19,11 @@
     "declarationDir": "dist\\types"
   },
   "exclude": [
-    "dist",
-    "node_modules"
+    "dist\\**",
+    "dist\\types\\**",
+    "node_modules",
+    "*.d.ts",
+    "*.js"
   ],
   "atom": {
     "rewriteTsconfig": false
