@@ -18,6 +18,7 @@ assert<IsExact<'string', GetKey<string, allCheckableTypes>>>(true);
 assert<IsExact<'a', GetKey<A, allCheckableTypes>>>(true);
 assert<IsExact<'b', GetKey<B, allCheckableTypes>>>(true);
 assert<IsExact<'b?', GetKey<B | undefined, allCheckableTypes>>>(true);
+type t = GetKey<B | undefined, allCheckableTypes>;
 
 //
 // test allCheckableTypes[getKey]

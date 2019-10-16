@@ -1,5 +1,5 @@
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, possiblyUndefined, anyDescription } from "../built-ins";
+import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, anyDescription } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, } from "../typeHelper";
 
@@ -30,7 +30,6 @@ export type CheckableTypes = OptionalToMissing<{
     'b?': B | undefined,
     'nullable b': B | null,
     'nullable b?': B | undefined | null,
-    'optional b'?: B,
     'C': C,
     'AnyContainer': AnyContainer,
     'Any': any
@@ -45,7 +44,6 @@ export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDes
     public readonly 'b?' = possiblyUndefined(this.b);
     public readonly 'nullable b' = nullable(this.b);
     public readonly 'nullable b?' = possiblyNullOrUndefined(this.b);
-    public readonly 'optional b' = possiblyUndefined(this.b);
     public readonly 'Any' = anyDescription;
     public readonly 'AnyContainer' = create<AnyContainer>()({ x: 'any' });
 }

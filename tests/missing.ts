@@ -39,30 +39,10 @@ type r = { c?: string };
 type r2 = Required<{ c?: string | undefined }>;
 type r3 = { c?: string | undefined };
 
-// reproduce base cases:    
-assert<IsExact<GetKey<r, Types>, 'optional c'>>(true);
-assert<IsExact<GetKey<r2, Types>, 'optional c'>>(false);
-assert<IsExact<GetKey<r3, Types>, 'optional c'>>(true);
-
-
-// continue exceptional case:
-type exptected = ITypeDescriptions<possiblyMissing<'string'>>;
-assert<IsExact<GetKey<r, Types>, exptected>>(true);
-
-
-type lookup = GetKey<r, Types>;
-assert<IsExact<GetKey<r2, Types>, 'optional c'>>(true);
-
-assert<IsExact<GetKey<r2, Types>, 'optional c'>>(false);
-
-
-
-
-
 
 ///////////////////////////
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
-    public readonly 'optional c' = create<Types['optional c']>()({ c: '' });
+    public readonly 'optional c' = create<Types['optional c']>()({ c: optional('string') });
 }
 
 export const typeSystem = new TypeSystem(new AllTypeDescriptions());
