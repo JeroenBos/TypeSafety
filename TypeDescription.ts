@@ -37,7 +37,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
                 const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
                 if (possiblyOptionalDescription.is(missing, Variance.Exact, getSubdescription, log)) {
-                    throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
+                    delete expectedProperties[possiblyOptionalPropertyName];
                 }
             }
         }
