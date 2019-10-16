@@ -1,5 +1,5 @@
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives, array, numberDescription } from "../built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions,  array } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";
 

@@ -1,8 +1,9 @@
-import { PrimitiveTypes, BaseTypeDescriptions } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, Missing, compose, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
-import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
+import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
+import { DescriptionKeys, possiblyMissing } from "./missingHelper";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -99,6 +100,9 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Get the type description object for the specified key.
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
+        if (key instanceof possiblyMissing) {
+            return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
+        }
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
             throw new Error('description missing for key ' + key);
@@ -192,23 +196,19 @@ export type DebugTypeSystem<T>
 type debugTypeSystemType<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
 type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[] ? never : ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
 
+type OptionalPropertyOf<T> = Exclude<{
+    [K in keyof T]: T extends Record<K, T[K]>
+    ? never
+    : K
+}[keyof T], undefined>
+type test = OptionalPropertyOf<{ c: string, d?: string }>;
+type IsOptional<T, K extends keyof T> = K extends OptionalPropertyOf<T> ? true : false;
+assert<IsOptional<{ c: string }, 'c'>>(false);
+assert<IsOptional<{ c?: string }, 'c'>>(true);
 
-
-export type DescriptionKeys<K extends keyof Types, Types> = {
-    [u in keyof Types[K]]: (
-        IsNever<GetKey<Types[K][u], Types>> extends false ? GetKey<Types[K][u], Types> :
-        (
-            IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
-            (
-                null extends Types[K][u] ?
-                undefined extends Types[K][u] ? 'any' : '!undefined'
-                :
-                undefined extends Types[K][u] ? '!null' : 'any!'
-            )
-        )
-    )
-};
 type P<T> = T & PrimitiveTypes;
+
+
 
 /**
  * This constructs a helper function to create type descriptions for custom interfaces/classes.

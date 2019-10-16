@@ -1,7 +1,8 @@
 import { missing } from './built-ins';
-import { ITypeDescription, ILogger, Variance, ITypeDescriptions, DescriptionGetter } from './ITypeDescription';
-import { DescriptionKeys } from './typesystem';
+import { ILogger, Variance, ITypeDescriptions, DescriptionGetter } from './ITypeDescription';
 import { DisposableStackElement } from './DisposableStackElement';
+import { assert, GetKey, IsNever, IsAny } from './typeHelper';
+import { DescriptionKeys, isMissing } from './missingHelper';
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
@@ -28,16 +29,34 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         if (obj === undefined || obj === null || obj === missing) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
-
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
         if ((variance & Variance.Partial) == 0) {
             // remove properties that are allowed to be missing:
             for (const possiblyOptionalPropertyName in expectedProperties) {
                 const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
-                const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
-                if (possiblyOptionalDescription.is(missing, Variance.Exact, getSubdescription, log)) {
-                    throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
+                const description = getSubdescription(possiblyOptionalTypeKey)
+                // if the property is actually missing
+                if (!(possiblyOptionalPropertyName in obj)) {
+                    // if missing is allowed
+                    if (description.is(missing, Variance.Exact, getSubdescription, log)) {
+                        delete expectedProperties[possiblyOptionalPropertyName];
+                    } else {
+                        log(stackErrorMessage_Missing(possiblyOptionalPropertyName));
+                        result = false; if (log === undefined) { return result; }
+                    }
+                } else { // it's not missing
+                    // then omit the part of the description that said it could be missing (it is was described as such)
+                    if (isMissing(possiblyOptionalTypeKey)) {
+                        expectedProperties[possiblyOptionalPropertyName] = possiblyOptionalTypeKey.key;
+                    }
+                }
+
+                if (isMissing(possiblyOptionalTypeKey)) {
+                    if (!(possiblyOptionalPropertyName in obj)) {
+                        delete expectedProperties[possiblyOptionalPropertyName];
+                    } else {
+                    }
                 }
             }
         }
@@ -50,6 +69,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue;
             }
             delete expectedProperties[propertyName];
+            debugger;
             const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached

@@ -95,7 +95,7 @@ assert<IsExact<OptionalsWithMissing<{ a?: string }>, { a: string | Missing }>>(t
 assert<IsExact<OptionalsWithMissing<{ a: undefined }>, {}>>(true);
 assert<IsExact<OptionalsWithMissing<{ a: string | undefined }>, {}>>(true);
 assert<IsExact<OptionalsWithMissing<{ a?: { c: number } }>, { a: Missing | { c: number } }>>(true);
-assert<IsExact<OptionalsWithMissing<{ a?: { c?: 0, d: number } }>, { a: { c: 0 | Missing } | Missing }>>(true);
+assert<IsExact<OptionalsWithMissing<{ a?: { c?: 0, d: number } }>, { a: { c?: 0, d: number } | Missing }>>(true);
 
 /**
  * Gets the subtype of `T` whose properties are required.
