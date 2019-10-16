@@ -24,63 +24,42 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         this.assert(key, obj);
     }
     /**
-     * Gets a function that verifies at compile time and runtime whether its argument is assignable to `Types[K]`.
-     * The returned function throws at runtime if its argument is not assignable to `Types[K]`.
-     */
-    verifyF<K extends string & keyof Types>(key: K): (obj: Types[K]) => void | never {
-        return obj => this.assert(key, obj);
-    }
-    /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
-     * Throws if `obj` is not assignable to `Types[K]`.
+     * Checks only at runtime whether `obj` is assignable to `Types[K]`; throws otherwise.
      */
     assert<K extends string & keyof Types>(key: K, obj: any): void | never {
         if (!this.is(key, obj))
             throw new Error(`The specified object was not of type '${key}'`);
     }
     /**
-     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
-     */
-    assertF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
-        return obj => this.assert(key, obj);
-    }
-    /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
-     * Throws if `obj` is not assignable to `Types[K]`.
+     * Checks only at runtime whether `obj` is assignable to `Partial<Types[K]>`; throws otherwise.
      */
     assertPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
         if (!this.isPartial(key, obj))
-            throw new Error(`The specified object was not of type '${key}'`);
+            throw new Error(`The specified object was not of type 'Partial<${key}>'`);
     }
     /**
-     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
-     */
-    assertPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
-        return obj => this.assertPartial(key, obj);
-    }
-    /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]` and that `obj` has no extraneous properties.
-     * Throws if `obj` is not assignable to `Types[K]`.
+     * Checks only at runtime whether `obj` is assignable to `Types[K]` and that `obj` has no extraneous properties; throws otherwise.
      */
     assertExact<K extends string & keyof Types>(key: K, obj: any): void | never {
         if (!this.isExact(key, obj))
             throw new Error(`The specified object was not exactly of type '${key}'`);
     }
     /**
-     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
+     * Checks only at runtime whether `obj` is assignable to `Partial<Types[K]>`; throws otherwise.
      */
-    assertExactF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
-        return obj => this.assertExact(key, obj);
+    assertNonStrictPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isNonStrictPartial(key, obj))
+            throw new Error(`The specified object was not of type 'Partial<${key}>'`);
     }
 
     /**
-     * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
+     * Returns whether `obj` is assignable to `Types[K]`.
      */
     is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
         return this.isImpl(key, obj, Variance.Extends);
     }
     /**
-     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`; throws otherwise.
+     * Returns whether `obj` is assignable to `Partial<Types[K]>`.
      */
     isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
         return this.isImpl(key, obj, Variance.Partial);
@@ -92,8 +71,8 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return this.isImpl(key, obj, Variance.PartialExtends);
     }
     /**
-     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
-     * and all properties on `Types[K]` are present; throws otherwise.
+     * Returns whether all properties on `obj` are valid properties on `Types[K]`
+     * and all properties on `Types[K]` are present.
      */
     isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
         return this.isImpl(key, obj, Variance.Exact);
@@ -117,20 +96,8 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     }
 
     /**
-     * Returns a function that returns a boolean indicating whether its argument is assignable to `Types[K]`.
+     * Get the type description object for the specified key.
      */
-    isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
-        const f = (obj: any) => this.is(key, obj);
-        return f as any;
-    }
-    /**
-     * Returns a function that returns a boolean indicating whether the argument contains only properties that are on `Types[K]` as well.
-     */
-    isPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
-        const f = (obj: any) => this.isPartial(key, obj);
-        return f as any;
-    }
-
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
@@ -140,6 +107,72 @@ export class TypeSystem<Types extends PrimitiveTypes> {
 
     private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescriptions<Types[TKey]>) {
         this.typeDescriptions.set(key, typeDescription);
+    }
+
+
+    // Function overloads (the convention is that `xxxF` is a wrapper function with specified key for the method `xxx`)
+
+    /**
+     * Gets a function that verifies at compile time and runtime whether its argument is assignable to `Types[K]`.
+     * The returned function throws at runtime if its argument is not assignable to `Types[K]`.
+     */
+    verifyF<K extends string & keyof Types>(key: K): (obj: Types[K]) => void | never {
+        return obj => this.assert(key, obj);
+    }
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
+     */
+    assertF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assert(key, obj);
+    }
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Partial<Types[K]>`.
+     */
+    assertPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertPartial(key, obj);
+    }
+
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
+     */
+    assertExactF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertExact(key, obj);
+    }
+    /**
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
+     */
+    assertNonStrictPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertNonStrictPartial(key, obj);
+    }
+
+
+    /**
+     * Returns a function that returns whether its argument is assignable to `Types[K]`.
+     */
+    isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.is(key, obj);
+        return f as any;
+    }
+    /**
+     * Returns a function that returns whether the argument is assignable to `Partial<Types[K]>`.
+     */
+    isPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isPartial(key, obj);
+        return f as any;
+    }
+    /**
+     * Returns a function that returns whether its argument is assignable to `Types[K]` and has no extra properties.
+     */
+    isExactF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isExact(key, obj);
+        return f as any;
+    }
+    /**
+     * Returns a function that returns whether all properties on its argument that are properties on `Partial<Types[K]>` are valid.
+     */
+    isNonStrictPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isNonStrictPartial(key, obj);
+        return f as any;
     }
 }
 
