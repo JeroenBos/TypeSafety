@@ -7,7 +7,11 @@ var sharedConfig = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /^\.d.ts$/,
+                loader: 'ignore-loader'
+            },
+            {
+                test: /\\.+(?<!\.d).tsx?$/,
                 loader: 'ts-loader'
             },
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
