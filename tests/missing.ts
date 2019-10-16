@@ -43,19 +43,33 @@ assert<IsExact<erroneousTypes, {}>>(true);
 
 describe('missing', () => {
     it('{} is { c?: string }', () => {
-        const x = {};
-        const is = typeSystem.isExact('optional c', x);
+        const is = typeSystem.isExact('optional c', {});
         if (!is)
             throw new Error();
     });
     it(`{ c: ''} is { c?: string }`, () => {
+        const is = typeSystem.isExact('optional c', { c: '' });
+        if (!is)
+            throw new Error();
     });
     it(`{ c: undefined } is { c?: string }`, () => {
+        const is = typeSystem.isExact('optional c', { c: undefined });
+        if (!is)
+            throw new Error();
     });
     it(`{ } is Partial<{ c?: string }>`, () => {
+        const is = typeSystem.isPartial('optional c', {});
+        if (!is)
+            throw new Error();
     });
     it(`{ c: ''} is Partial<{ c?: string }>`, () => {
+        const is = typeSystem.isPartial('optional c', { c: '' });
+        if (!is)
+            throw new Error();
     });
     it(`{ c: undefined } is Partial<{ c?: string }>`, () => {
+        const is = typeSystem.isPartial('optional c', { c: undefined });
+        if (!is)
+            throw new Error();
     });
 });
