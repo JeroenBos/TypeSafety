@@ -1,7 +1,7 @@
 
-import { DescriptionKeys } from "../typesystem";
 import { PrimitiveTypes } from "../built-ins";
-import { OptionalToMissing, assert, IsExact, GetKey } from "../typeHelper";
+import { OptionalToMissing, assert, IsExact } from "../typeHelper";
+import { DescriptionKeys } from "../missingHelper";
 
 class A { }
 interface C {

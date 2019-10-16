@@ -1,8 +1,9 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem, possiblyMissing, optional } from "../typesystem";
+import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
 import { BaseTypeDescriptions, compose, nullable, PrimitiveTypes, Missing } from "../built-ins";
 import { TypeDescriptionsFor, ITypeDescriptions } from "../ITypeDescription";
 import { OptionalToMissing, assert, IsExact, GetKey, Optionals } from "../typeHelper";
+import { optional } from "../missingHelper";
 
 type C = { s: string } & { n: string };
 
@@ -26,21 +27,8 @@ assert<IsExact<GetKey<{ c: string | undefined }, Types>, 'optional c'>>(false);
 assert<IsExact<GetKey<{ c?: string | undefined }, Types>, 'optional c'>>(true);
 
 
-
-export type GetKey2<T /*extends TLookup[keyof TLookup]*/, TLookup> =
-    {
-        [K in keyof TLookup]:
-        TLookup[K] extends Missing ? IsExact<T, Exclude<TLookup[K], Missing> | undefined> extends true ? K : never : 
-        IsExact<T, TLookup[K]> extends true ? K : never
-    }[keyof TLookup];
-
-
-type r = { c?: string };
-type r2 = Required<{ c?: string | undefined }>;
-type r3 = { c?: string | undefined };
-
-
 ///////////////////////////
+
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
     public readonly 'optional c' = create<Types['optional c']>()({ c: optional('string') });
 }
@@ -54,5 +42,21 @@ assert<IsExact<erroneousTypes, {}>>(true);
 
 
 describe('missing', () => {
-    
+    it('{} is { c?: string }', () => {
+        debugger;
+        const x = {};
+        const is = typeSystem.isExact('optional c', x);
+        if (!is)
+            throw new Error();
+    });
+    it(`{ c: ''} is { c?: string }`, () => {
+    });
+    it(`{ c: undefined } is { c?: string }`, () => {
+    });
+    it(`{ } is Partial<{ c?: string }>`, () => {
+    });
+    it(`{ c: ''} is Partial<{ c?: string }>`, () => {
+    });
+    it(`{ c: undefined } is Partial<{ c?: string }>`, () => {
+    });
 });
