@@ -43,7 +43,6 @@ assert<IsExact<erroneousTypes, {}>>(true);
 
 describe('missing', () => {
     it('{} is { c?: string }', () => {
-        debugger;
         const x = {};
         const is = typeSystem.isExact('optional c', x);
         if (!is)

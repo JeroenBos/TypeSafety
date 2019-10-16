@@ -36,9 +36,12 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             // remove properties that are allowed to be missing:
             for (const possiblyOptionalPropertyName in expectedProperties) {
                 const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
-                const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
-                if (possiblyOptionalDescription.is(missing, Variance.Exact, getSubdescription, log)) {
-                    delete expectedProperties[possiblyOptionalPropertyName];
+                if (isMissing(possiblyOptionalTypeKey)) {
+                    if (!(possiblyOptionalPropertyName in obj)) {
+                        delete expectedProperties[possiblyOptionalPropertyName];
+                    } else {
+                        expectedProperties[possiblyOptionalPropertyName] = possiblyOptionalTypeKey.key as any;
+                    }
                 }
             }
         }
