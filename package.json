@@ -5,6 +5,7 @@
   "main": "dist/jbsnorro_typesafety.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
+    "prepublishOnly": "npm install && webpack && mocha dist/test.js",
     "build": "webpack",
     "watch": "webpack --watch",
     "buildAndTest": "webpack && mocha dist/test.js",
