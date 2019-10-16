@@ -13,9 +13,7 @@
   },
   "author": "Jeroen Bos",
   "license": "ISC",
-  "dependencies": {
-    "watch-ignore-webpack-plugin": "1.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "3.4.34",
     "@types/glob": "7.1.0",

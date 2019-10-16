@@ -1,6 +1,5 @@
 const nodeEnv = process.env.NODE_ENV || 'development';
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const WatchIgnorePlugin = require('watch-ignore-webpack-plugin');
 
 var sharedConfig = {
     mode: 'development',
@@ -37,8 +36,7 @@ var sharedConfig = {
     plugins: [
         new CleanWebpackPlugin(['dist'], {
             root: __dirname + '//..' // see https://github.com/johnagan/clean-webpack-plugin/issues/76#issuecomment-369813202
-        }),
-        new WatchIgnorePlugin(['*.d.ts']),
+        })
     ],
     watchOptions: {
         aggregateTimeout: 300
