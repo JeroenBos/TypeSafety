@@ -2,7 +2,7 @@
 
 export { OptionalToMissing, IsExact } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
-export { DebugTypeSystem } from './typesystem';
+export { DebugTypeSystem, PrimitiveTypeSystem } from './typesystem';
 export { TypeDescriptionsFor } from './ITypeDescription';
 
 // JS:

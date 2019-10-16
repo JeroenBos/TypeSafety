@@ -1,4 +1,4 @@
-import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions } from "./built-ins";
 import { ITypeDescription, TypeDescriptionsFor, ILogger } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
@@ -183,3 +183,7 @@ export function createCreateFunction<Types, T extends object & P<Types>[keyof P<
     }
 }
 
+/**
+ * An implementation of a type system describing only the primitive types.
+ */
+export const PrimitiveTypeSystem = new TypeSystem(new BaseTypeDescriptions());
