@@ -27,7 +27,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Checks only at runtime whether `obj` is assignable to `Types[K]`; throws otherwise.
      */
     assert<K extends string & keyof Types>(key: K, obj: any): void | never {
-        if (!this.is(key, obj))
+        if (!this.extends(key, obj))
             throw new Error(`The specified object was not of type '${key}'`);
     }
     /**
@@ -55,7 +55,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     /**
      * Returns whether `obj` is assignable to `Types[K]`.
      */
-    is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
+    extends<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
         return this.isImpl(key, obj, Variance.Extends);
     }
     /**
@@ -149,8 +149,8 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     /**
      * Returns a function that returns whether its argument is assignable to `Types[K]`.
      */
-    isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
-        const f = (obj: any) => this.is(key, obj);
+    extendsF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.extends(key, obj);
         return f as any;
     }
     /**

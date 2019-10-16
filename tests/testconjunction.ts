@@ -35,7 +35,7 @@ describe('conjunction', () => {
             s: '',
             n: ''
         };
-        const isC = typeSystem.is('c', c);
+        const isC = typeSystem.extends('c', c);
         if (!isC)
             throw new Error();
     });
@@ -44,7 +44,7 @@ describe('conjunction', () => {
         const c = {
             s: '',
         };
-        const isC = typeSystem.is('c', c);
+        const isC = typeSystem.extends('c', c);
         if (isC)
             throw new Error();
     });

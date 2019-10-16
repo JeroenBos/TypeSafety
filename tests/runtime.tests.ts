@@ -88,7 +88,7 @@ assert<IsExact<TypeDescriptionsFor<CheckableTypes>, almostAllTypeDescriptions>>(
 
 describe('tests', () => {
     it('null is not b?', () => {
-        const nullIsPossiblyUndefinedB = typeSystem.is('b?', null);
+        const nullIsPossiblyUndefinedB = typeSystem.extends('b?', null);
         if (nullIsPossiblyUndefinedB)
             throw new Error();
     });
@@ -102,7 +102,7 @@ describe('tests', () => {
         typeSystem.assert('b?', undefined);
     });
     it('undefined is not nullable b', () => {
-        const undefinedIsNullableB = typeSystem.is('nullable b', undefined);
+        const undefinedIsNullableB = typeSystem.extends('nullable b', undefined);
         if (undefinedIsNullableB)
             throw new Error();
     });
@@ -119,7 +119,7 @@ describe('tests', () => {
         typeSystem.assert('a', { x: "s", b: new B() });
     });
     it('{ x: "s" } is not a', () => {
-        const isA = typeSystem.is('a', { x: "s" });
+        const isA = typeSystem.extends('a', { x: "s" });
         if (isA) // because the property b? is missing
             throw new Error();
     });
@@ -134,18 +134,18 @@ describe('tests', () => {
         typeSystem.assertF('C')({ s: ['a'] });
     });
     it('isF', () => {
-        const isC = typeSystem.isF('C')({ s: ['a'] });
+        const isC = typeSystem.extendsF('C')({ s: ['a'] });
         if (!isC) throw new Error();
     });
     it('verifyF', () => {
         typeSystem.verifyF('C')({ s: ['a'] });
     });
     it('DisposableStack logs error', () => {
-        const isC = typeSystem.is('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
+        const isC = typeSystem.extends('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
         if (isC) throw new Error();
     });
     it('nested DisposableStack logs nested error', () => {
-        const isB = typeSystem.is('b', { a: {} }); // I'm testing here manually, only whether the console.log method was invoked...
+        const isB = typeSystem.extends('b', { a: {} }); // I'm testing here manually, only whether the console.log method was invoked...
         if (isB) throw new Error();
     });
     it('B is partial B', () => {
@@ -266,7 +266,7 @@ describe('tests', () => {
             y: null,
             z: undefined
         };
-        const _isX = typesystem.is('X', x);
+        const _isX = typesystem.extends('X', x);
         if (!_isX)
             throw new Error();
     });
@@ -276,7 +276,7 @@ describe('tests', () => {
             y: null,
             z: null as any
         };
-        const _isX = typesystem.is('X', x);
+        const _isX = typesystem.extends('X', x);
         if (_isX)
             throw new Error();
     });

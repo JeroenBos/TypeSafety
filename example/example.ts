@@ -36,7 +36,7 @@ function f(obj: Example) {
     typesystem.verify('Example', obj);
 }
 function g(obj: any) {
-    if (typesystem.is('Example', obj)) {
+    if (typesystem.extends('Example', obj)) {
         // ...
     }
 }

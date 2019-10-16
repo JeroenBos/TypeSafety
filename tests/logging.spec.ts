@@ -50,7 +50,7 @@ describe('Test logging', () => {
         const expectedLogStatements: string[] = [errorMessage_Missing('obj', 'x', 'L1'), errorMessage_Missing('obj', 'b', 'L1')];
 
         // act
-        typesystem.is('L1', {});
+        typesystem.extends('L1', {});
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);
@@ -64,7 +64,7 @@ describe('Test logging', () => {
 
         // act
         debugger;
-        typesystem.is('L1', { x: '', b: {} });
+        typesystem.extends('L1', { x: '', b: {} });
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);
@@ -78,7 +78,7 @@ describe('Test logging', () => {
         const expectedLogStatements: string[] = [errorMessage_Wrong('obj', 'x', 'string', 'null'), errorMessage_Wrong('obj', 'b', 'L2', 'null')];
 
         // act
-        typesystem.is('L1', { x: null, b: null });
+        typesystem.extends('L1', { x: null, b: null });
 
         // assert
         assertSequenceEquals(logStatements, expectedLogStatements);
