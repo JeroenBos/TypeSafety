@@ -1,9 +1,9 @@
-import { PrimitiveTypes, BaseTypeDescriptions, Missing } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, Missing, compose, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
-import { DescriptionKeys } from "./missingHelper";
+import { DescriptionKeys, possiblyMissing } from "./missingHelper";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -100,6 +100,9 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Get the type description object for the specified key.
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
+        if (key instanceof possiblyMissing) {
+            return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
+        }
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
             throw new Error('description missing for key ' + key);
