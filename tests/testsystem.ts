@@ -1,7 +1,7 @@
 import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, optional, ExcludePrimitives, anyDescription } from "../built-ins";
+import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, possiblyUndefined, anyDescription } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
-import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";
+import { OptionalToMissing, IsExact, assert, } from "../typeHelper";
 
 export class A {
     x: string = 'a';
@@ -45,7 +45,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDes
     public readonly 'b?' = possiblyUndefined(this.b);
     public readonly 'nullable b' = nullable(this.b);
     public readonly 'nullable b?' = possiblyNullOrUndefined(this.b);
-    public readonly 'optional b' = optional(this.b);
+    public readonly 'optional b' = possiblyUndefined(this.b);
     public readonly 'Any' = anyDescription;
     public readonly 'AnyContainer' = create<AnyContainer>()({ x: 'any' });
 }

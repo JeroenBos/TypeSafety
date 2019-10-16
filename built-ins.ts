@@ -139,9 +139,6 @@ export type Missing = typeof missing | undefined
 export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
     return composeAlternativeDescriptions(nullDescription, description1);
 }
-export function optional<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing> {
-    return composeAlternativeDescriptions(missingOrUndefinedDescription, description1);
-}
 export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
     return composeAlternativeDescriptions(missingOrUndefinedOrNullDescription, description1);
 }
