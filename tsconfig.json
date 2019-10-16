@@ -19,7 +19,7 @@
     "declarationDir": "dist\\types"
   },
   "exclude": [
-    "dist\\**",
+    "dist",
     "node_modules"
   ],
   "atom": {
