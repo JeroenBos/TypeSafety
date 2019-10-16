@@ -58,11 +58,11 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
     'null' = nullDescription;
     'undefined' = undefinedDescription
 
-    /** Describes a type being anything else but `null`. */
+    /** Describes a type being anything but `null`. */
     '!null' = nonnullDescription;
-    /** Describes a type being anything else but `undefined`. */
+    /** Describes a type being anything but `undefined`. */
     '!undefined' = definedDescription;
-    /** Describes a type being anything else but `null` or `undefined`. */
+    /** Describes a type being anything but `null` or `undefined`. */
     'any!' = nonnullNorUndefinedDescription;
 
     'number' = numberDescription;
@@ -108,15 +108,16 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
 }
 
 
-const missingDescription = noVariance<Missing>(function is(obj: any): obj is Missing { return obj === undefined || obj === missing; });
-const missingOrNullDescription = noVariance<Missing | null>(function is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; })
+const missingDescription = noVariance<Missing>(function is(obj: any): obj is Missing { return obj === missing; });
+const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return obj === missing || obj === undefined; })
+const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | null>(function is(obj: any): obj is Missing | undefined | null { return obj === missing || obj === undefined || obj === null; })
 const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription = noVariance<null>(function is(obj: any): obj is null { return obj === null; })
-export const anyDescription: ITypeDescriptions<null> = { is: function (obj: any): obj is null { return obj !== missing; } };
-export const nonnullDescription: ITypeDescriptions<null> = noVariance<null>(function is(obj: any): obj is null { return obj !== null && obj !== missing; })
-export const definedDescription: ITypeDescriptions<null> = noVariance<null>(function is(obj: any): obj is null { return obj !== undefined && obj !== missing; })
-export const nonnullNorUndefinedDescription = noVariance<null>(function is(obj: any): obj is null { return obj !== undefined && obj !== null && obj !== missing; })
+export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== missing };
+export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && obj !== missing }
+export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && obj !== missing }
+export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && obj !== missing }
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
@@ -139,10 +140,10 @@ export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDe
     return composeAlternativeDescriptions(nullDescription, description1);
 }
 export function optional<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing> {
-    return composeAlternativeDescriptions(missingDescription, description1);
+    return composeAlternativeDescriptions(missingOrUndefinedDescription, description1);
 }
 export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
-    return composeAlternativeDescriptions(missingOrNullDescription, description1);
+    return composeAlternativeDescriptions(missingOrUndefinedOrNullDescription, description1);
 }
 export function possiblyUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined> {
     return composeAlternativeDescriptions(undefinedDescription, description1);

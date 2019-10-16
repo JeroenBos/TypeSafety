@@ -215,17 +215,17 @@ describe('tests', () => {
             throw new Error();
     });
     it('undefined is not allowed by nonnullNorUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(undefined, Variance.Exact, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(undefined);
         if (_is)
             throw new Error();
     });
     it('null is not allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(null, Variance.Exact, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(null);
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(0, Variance.Exact, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(0);
         if (!_is)
             throw new Error();
     });
