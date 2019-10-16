@@ -1,12 +1,11 @@
 import { PrimitiveTypes, Missing, ExcludePrimitives } from "./built-ins";
-import { ITypeDescription, TypeDescriptionsFor, ILogger } from "./ITypeDescription";
+import { ITypeDescription, TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
 
-type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
-    private readonly typeDescriptions = new Map<keyof Types, TypeDescriptions<Types>>();
+    private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
     private readonly log: ILogger;
     constructor(description: TypeDescriptionsFor<Types>, logger?: ILogger) {
         this.log = logger || (() => { });
@@ -78,13 +77,13 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
      */
     is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.is(obj, getSubdescription, this.log));
+        return this.isImpl(key, obj, Variance.Extends);
     }
     /**
      * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`; throws otherwise.
      */
     isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription, this.log));
+        return this.isImpl(key, obj, Variance.Partial);
     }
     /**
      * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
@@ -97,14 +96,14 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     private isImpl<K extends string & keyof Types>(
         key: K,
         obj: any,
-        _is: (description: TypeDescriptions<Types>, obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger) => boolean
+        variance: Variance
     ): boolean {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
         const stackElem = DisposableStackElement.enter('obj', key);
         try {
-            return _is(description, obj, key => this.getDescription(key), this.log);
+            return description.is(obj, variance, key => this.getDescription(key), this.log);
         }
         finally {
             stackElem.dispose();
@@ -126,14 +125,14 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return f as any;
     }
 
-    getDescription<K extends keyof Types>(key: K): TypeDescriptions<Types> {
+    getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
             throw new Error('description missing for key ' + key);
         return description;
     }
 
-    private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescription<Types[TKey]>) {
+    private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescriptions<Types[TKey]>) {
         this.typeDescriptions.set(key, typeDescription);
     }
 }
@@ -176,7 +175,7 @@ type P<T> = T & PrimitiveTypes;
  * This constructs a helper function to create type descriptions for custom interfaces/classes.
  */
 export function createCreateFunction<Types, T extends object & P<Types>[keyof P<Types>]>()
-    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescription<P<Types>[GetKey<T, P<Types>>]> {
+    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescriptions<P<Types>[GetKey<T, P<Types>>]> {
     {
         return (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) =>
             TypeDescription.create<P<Types>, GetKey<T, P<Types>>>(propertyDescriptions);

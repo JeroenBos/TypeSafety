@@ -1,5 +1,5 @@
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
-import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
+import { ITypeDescription, TypeDescriptionsFor, ITypeDescriptions, Variance } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 import { typesystem, X } from '../example/example';
@@ -31,10 +31,10 @@ assert<IsExact<B | undefined, allCheckableTypes[GetKey<B | undefined, allCheckab
 //
 // test type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
 //
-assert<IsExact<ITypeDescription<null>, TypeDescriptionsFor<allCheckableTypes>['null']>>(true);
-assert<IsExact<ITypeDescription<string>, TypeDescriptionsFor<allCheckableTypes>['string']>>(true);
-assert<IsExact<ITypeDescription<B>, TypeDescriptionsFor<allCheckableTypes>['b']>>(true);
-assert<IsExact<ITypeDescription<B | undefined>, TypeDescriptionsFor<allCheckableTypes>['b?']>>(true);
+assert<IsExact<ITypeDescriptions<null>, TypeDescriptionsFor<allCheckableTypes>['null']>>(true);
+assert<IsExact<ITypeDescriptions<string>, TypeDescriptionsFor<allCheckableTypes>['string']>>(true);
+assert<IsExact<ITypeDescriptions<B>, TypeDescriptionsFor<allCheckableTypes>['b']>>(true);
+assert<IsExact<ITypeDescriptions<B | undefined>, TypeDescriptionsFor<allCheckableTypes>['b?']>>(true);
 
 //
 // test type descriptionDebug
@@ -210,48 +210,48 @@ describe('tests', () => {
             throw new Error();
     });
     it('undefined is not allowed by nonnullNorUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(undefined, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('null is not allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(null, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(null, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(0, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('undefined is allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(undefined, null as any, () => { });
+        const _is = nonnullDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('null is not allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(null, null as any, () => { });
+        const _is = nonnullDescription.is(null, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(0, null as any, () => { });
+        const _is = nonnullDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
 
     it('undefined is not allowed by definedDescription', () => {
-        const _is = definedDescription.is(undefined, null as any, () => { });
+        const _is = definedDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('null is allowed by definedDescription', () => {
-        const _is = definedDescription.is(null, null as any, () => { });
+        const _is = definedDescription.is(null, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('non-null,defined is allowed by definedDescription', () => {
-        const _is = definedDescription.is(0, null as any, () => { });
+        const _is = definedDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
