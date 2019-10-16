@@ -13,11 +13,12 @@ import {
 import {
     BaseTypeDescriptions,
     nullable,
-    optional,
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeDescriptions
+    composeAlternativeDescriptions,
+    array,
+    composeConjunctDescriptions
 } from './built-ins';
 import {
     createCreateFunction,
@@ -28,24 +29,28 @@ export {
     assert,
     BaseTypeDescriptions,
     nullable,
-    optional,
+    possiblyUndefined as optional,
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeDescriptions,
+    composeAlternativeDescriptions,
     createCreateFunction,
     TypeSystem,
+    array,
+    composeConjunctDescriptions,
 };
 
 export default {
     assert,
     BaseTypeDescriptions,
     nullable,
-    optional,
+    optional: possiblyUndefined,
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeDescriptions,
+    composeAlternativeDescriptions,
+    array,
+    composeConjunctDescriptions,
     createCreateFunction,
     TypeSystem,
 };

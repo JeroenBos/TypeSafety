@@ -1,8 +1,7 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem, DescriptionKeys } from "../typesystem";
-import { PrimitiveTypes, possiblyUndefined, nullable, possiblyNullOrUndefined, optional, BaseTypeDescriptions, missingType } from "../built-ins";
-import { TypeDescriptionsFor } from "../ITypeDescription";
-import { OptionalToMissing, assert, IsExact, GetKey } from "../typeHelper";
+import { PrimitiveTypes } from "../built-ins";
+import { OptionalToMissing, assert, IsExact } from "../typeHelper";
+import { DescriptionKeys } from "../missingHelper";
 
 class A { }
 interface C {

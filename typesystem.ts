@@ -1,14 +1,15 @@
-import { PrimitiveTypes, Missing, ExcludePrimitives, BaseTypeDescriptions } from "./built-ins";
-import { ITypeDescription, TypeDescriptionsFor } from "./ITypeDescription";
-import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny } from "./typeHelper";
+import { PrimitiveTypes, BaseTypeDescriptions, Missing, compose, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
+import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
+import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
+import { DescriptionKeys, possiblyMissing } from "./missingHelper";
 
-type TypeDescriptions<Types> = ITypeDescription<Types[keyof Types]>;
 export class TypeSystem<Types extends PrimitiveTypes> {
-    private readonly typeDescriptions = new Map<keyof Types, TypeDescriptions<Types>>();
-
-    constructor(description: TypeDescriptionsFor<Types>) {
+    private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
+    private readonly log: ILogger;
+    constructor(description: TypeDescriptionsFor<Types>, logger?: ILogger) {
+        this.log = logger || (() => { });
         for (const k in description) {
             const key = k as keyof TypeDescriptionsFor<Types>;
             const value = description[key];
@@ -24,19 +25,103 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         this.assert(key, obj);
     }
     /**
+     * Checks only at runtime whether `obj` is assignable to `Types[K]`; throws otherwise.
+     */
+    assert<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.extends(key, obj))
+            throw new Error(`The specified object was not of type '${key}'`);
+    }
+    /**
+     * Checks only at runtime whether `obj` is assignable to `Partial<Types[K]>`; throws otherwise.
+     */
+    assertPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isPartial(key, obj))
+            throw new Error(`The specified object was not of type 'Partial<${key}>'`);
+    }
+    /**
+     * Checks only at runtime whether `obj` is assignable to `Types[K]` and that `obj` has no extraneous properties; throws otherwise.
+     */
+    assertExact<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isExact(key, obj))
+            throw new Error(`The specified object was not exactly of type '${key}'`);
+    }
+    /**
+     * Checks only at runtime whether `obj` is assignable to `Partial<Types[K]>`; throws otherwise.
+     */
+    assertNonStrictPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
+        if (!this.isNonStrictPartial(key, obj))
+            throw new Error(`The specified object was not of type 'Partial<${key}>'`);
+    }
+
+    /**
+     * Returns whether `obj` is assignable to `Types[K]`.
+     */
+    extends<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
+        return this.isImpl(key, obj, Variance.Extends);
+    }
+    /**
+     * Returns whether `obj` is assignable to `Partial<Types[K]>`.
+     */
+    isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isImpl(key, obj, Variance.Partial);
+    }
+    /**
+     * Returns whether all properties on `obj` that are properties on `Types[K]` are valid.
+     */
+    isNonStrictPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isImpl(key, obj, Variance.PartialExtends);
+    }
+    /**
+     * Returns whether all properties on `obj` are valid properties on `Types[K]`
+     * and all properties on `Types[K]` are present.
+     */
+    isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isImpl(key, obj, Variance.Exact);
+    }
+
+    private isImpl<K extends string & keyof Types>(
+        key: K,
+        obj: any,
+        variance: Variance
+    ): boolean {
+        if (typeof key !== 'string') throw new Error('only string keys are supported');
+
+        const description = this.getDescription(key);
+        const stackElem = DisposableStackElement.enter('obj', key);
+        try {
+            return description.is(obj, variance, key => this.getDescription(key), this.log);
+        }
+        finally {
+            stackElem.dispose();
+        }
+    }
+
+    /**
+     * Get the type description object for the specified key.
+     */
+    getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
+        if (key instanceof possiblyMissing) {
+            return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
+        }
+        const description = this.typeDescriptions.get(key!);
+        if (description === undefined)
+            throw new Error('description missing for key ' + key);
+        return description;
+    }
+
+    private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescriptions<Types[TKey]>) {
+        this.typeDescriptions.set(key, typeDescription);
+    }
+
+
+    // Function overloads (the convention is that `xxxF` is a wrapper function with specified key for the method `xxx`)
+
+    /**
      * Gets a function that verifies at compile time and runtime whether its argument is assignable to `Types[K]`.
      * The returned function throws at runtime if its argument is not assignable to `Types[K]`.
      */
     verifyF<K extends string & keyof Types>(key: K): (obj: Types[K]) => void | never {
         return obj => this.assert(key, obj);
-    }
-    /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
-     * Throws if `obj` is not assignable to `Types[K]`.
-     */
-    assert<K extends string & keyof Types>(key: K, obj: any): void | never {
-        if (!this.is(key, obj))
-            throw new Error(`The specified object was not of type '${key}'`);
     }
     /**
      * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
@@ -45,95 +130,53 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return obj => this.assert(key, obj);
     }
     /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]`.
-     * Throws if `obj` is not assignable to `Types[K]`.
-     */
-    assertPartial<K extends string & keyof Types>(key: K, obj: any): void | never {
-        if (!this.isPartial(key, obj))
-            throw new Error(`The specified object was not of type '${key}'`);
-    }
-    /**
-     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]`.
+     * Gets a function that verifies at runtime whether its argument is assignable to `Partial<Types[K]>`.
      */
     assertPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
         return obj => this.assertPartial(key, obj);
     }
-    /**
-     * Checks only at runtime whether `obj` is assignable to `Types[K]` and that `obj` has no extraneous properties.
-     * Throws if `obj` is not assignable to `Types[K]`.
-     */
-    assertExact<K extends string & keyof Types>(key: K, obj: any): void | never {
-        if (!this.isExact(key, obj))
-            throw new Error(`The specified object was not exactly of type '${key}'`);
-    }
+
     /**
      * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
      */
     assertExactF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
         return obj => this.assertExact(key, obj);
     }
-
     /**
-     * Returns a boolean indicating whether `obj` is assignable to `Types[K]`.
+     * Gets a function that verifies at runtime whether its argument is assignable to `Types[K]` and has no extraneous properties.
      */
-    is<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.is(obj, getSubdescription));
-    }
-    /**
-     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`; throws otherwise.
-     */
-    isPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
-        return this.isImpl(key, obj, (description, obj, getSubdescription) => description.isPartial(obj, getSubdescription));
-    }
-    /**
-     * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
-     * and all properties on `Types[K]` are present; throws otherwise.
-     */
-    isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
-        return this.isPartial(key, obj) && this.is(key, obj);
+    assertNonStrictPartialF<K extends string & keyof Types>(key: K): (obj: any) => void | never {
+        return obj => this.assertNonStrictPartial(key, obj);
     }
 
-    private isImpl<K extends string & keyof Types>(
-        key: K,
-        obj: any,
-        _is: (description: TypeDescriptions<Types>, obj: any, getSubdescription: (key: any) => ITypeDescription<any>) => boolean
-    ): boolean {
-        if (typeof key !== 'string') throw new Error('only string keys are supported');
-
-        const description = this.getDescription(key);
-        const stackElem = DisposableStackElement.create(key);
-        try {
-            return _is(description, obj, key => this.getDescription(key));
-        }
-        finally {
-            stackElem.dispose();
-        }
-    }
 
     /**
-     * Returns a function that returns a boolean indicating whether its argument is assignable to `Types[K]`.
+     * Returns a function that returns whether its argument is assignable to `Types[K]`.
      */
-    isF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
-        const f = (obj: any) => this.is(key, obj);
+    extendsF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.extends(key, obj);
         return f as any;
     }
     /**
-     * Returns a function that returns a boolean indicating whether the argument contains only properties that are on `Types[K]` as well.
+     * Returns a function that returns whether the argument is assignable to `Partial<Types[K]>`.
      */
     isPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
         const f = (obj: any) => this.isPartial(key, obj);
         return f as any;
     }
-
-    getDescription<K extends keyof Types>(key: K): TypeDescriptions<Types> {
-        const description = this.typeDescriptions.get(key!);
-        if (description === undefined)
-            throw new Error('description missing for key ' + key);
-        return description;
+    /**
+     * Returns a function that returns whether its argument is assignable to `Types[K]` and has no extra properties.
+     */
+    isExactF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isExact(key, obj);
+        return f as any;
     }
-
-    private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescription<Types[TKey]>) {
-        this.typeDescriptions.set(key, typeDescription);
+    /**
+     * Returns a function that returns whether all properties on its argument that are properties on `Partial<Types[K]>` are valid.
+     */
+    isNonStrictPartialF<K extends string & keyof Types>(key: K): (obj: any) => obj is Types[K] {
+        const f = (obj: any) => this.isNonStrictPartial(key, obj);
+        return f as any;
     }
 }
 
@@ -153,29 +196,25 @@ export type DebugTypeSystem<T>
 type debugTypeSystemType<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
 type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[] ? never : ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
 
+type OptionalPropertyOf<T> = Exclude<{
+    [K in keyof T]: T extends Record<K, T[K]>
+    ? never
+    : K
+}[keyof T], undefined>
+type test = OptionalPropertyOf<{ c: string, d?: string }>;
+type IsOptional<T, K extends keyof T> = K extends OptionalPropertyOf<T> ? true : false;
+assert<IsOptional<{ c: string }, 'c'>>(false);
+assert<IsOptional<{ c?: string }, 'c'>>(true);
 
-
-export type DescriptionKeys<K extends keyof Types, Types> = {
-    [u in keyof Types[K]]: (
-        IsNever<GetKey<Types[K][u], Types>> extends false ? GetKey<Types[K][u], Types> :
-        (
-            IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
-            (
-                null extends Types[K][u] ?
-                undefined extends Types[K][u] ? 'any' : '!undefined'
-                :
-                undefined extends Types[K][u] ? '!null' : 'any!'
-            )
-        )
-    )
-};
 type P<T> = T & PrimitiveTypes;
+
+
 
 /**
  * This constructs a helper function to create type descriptions for custom interfaces/classes.
  */
 export function createCreateFunction<Types, T extends object & P<Types>[keyof P<Types>]>()
-    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescription<P<Types>[GetKey<T, P<Types>>]> {
+    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescriptions<P<Types>[GetKey<T, P<Types>>]> {
     {
         return (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) =>
             TypeDescription.create<P<Types>, GetKey<T, P<Types>>>(propertyDescriptions);

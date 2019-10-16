@@ -11,8 +11,8 @@
                 "999999",
                 "--colors",
                 "${workspaceFolder}/dist/test.js",
-                // "--fgrep",
-                // "*"
+                "--fgrep",
+                "Test logging"
             ],
             "console": "internalConsole",
             "internalConsoleOptions": "neverOpen",

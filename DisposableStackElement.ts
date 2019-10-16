@@ -4,13 +4,19 @@
  */
 export class DisposableStackElement {
     private static stack: DisposableStackElement[] = [];
-    public static create(message: string): DisposableStackElement {
-        return new DisposableStackElement(message);
+    public static enter(propertyName: string, typeName: string) {
+        return new DisposableStackElement(propertyName, typeName);
     }
-    public static print(separator: string): string {
-        return DisposableStackElement.stack.map(elem => `'${elem.message}'`).reverse().join(separator);
+    public static toString(): { path: string, type: string } {
+        const path = DisposableStackElement.stack
+            .map(elem => elem.propertyName)
+            .filter(elem => elem != '')
+            .join('.');
+
+        const type = DisposableStackElement.stack[DisposableStackElement.stack.length - 1].typeName;
+        return { path, type };
     }
-    private constructor(private readonly message: string) {
+    private constructor(private readonly propertyName: string, private readonly typeName: string) {
         DisposableStackElement.stack.push(this);
     }
     public dispose() {

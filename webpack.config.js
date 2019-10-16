@@ -57,7 +57,7 @@ var mainConfig = {
 var testConfig = {
     ...sharedConfig,
     name: 'test',
-    entry: './tests/runtime.tests.ts',
+    entry: './tests/index.spec.ts',
     output: { filename: './test.js' },
 };
 

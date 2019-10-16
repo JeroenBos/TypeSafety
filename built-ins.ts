@@ -1,4 +1,5 @@
-import { TypeDescriptionsFor, ITypeDescription } from "./ITypeDescription";
+import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
+import { TypeDescription } from './TypeDescription';
 
 export type PrimitiveTypes = {
     'any': any,
@@ -12,10 +13,6 @@ export type PrimitiveTypes = {
     'number': number,
     'string': string,
     'boolean': boolean,
-
-    // 'optional string': string | Missing,
-    // 'optional number': number | Missing,
-    // 'optional boolean': boolean | Missing,
 
     'string?': string | undefined,
     'number?': number | undefined,
@@ -57,20 +54,16 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
     'null' = nullDescription;
     'undefined' = undefinedDescription
 
-    /** Describes a type being anything else but `null`. */
+    /** Describes a type being anything but `null`. */
     '!null' = nonnullDescription;
-    /** Describes a type being anything else but `undefined`. */
+    /** Describes a type being anything but `undefined`. */
     '!undefined' = definedDescription;
-    /** Describes a type being anything else but `null` or `undefined`. */
+    /** Describes a type being anything but `null` or `undefined`. */
     'any!' = nonnullNorUndefinedDescription;
 
     'number' = numberDescription;
     'string' = stringDescription;
     'boolean' = booleanDescription;
-
-    // 'optional string' = optional(numberDescription);
-    // 'optional number' = optional(numberDescription);
-    // 'optional boolean' = optional(booleanDescription);
 
     'string?' = possiblyUndefined(stringDescription);
     'number?' = possiblyUndefined(numberDescription);
@@ -107,15 +100,15 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
 }
 
 
-const missingDescription: ITypeDescription<Missing> = noPartial(function is(obj: any): obj is Missing { return obj === undefined || obj === missing; });
-const missingOrNullDescription: ITypeDescription<Missing | null> = noPartial(function is(obj: any): obj is Missing | null { return obj === missing || obj === undefined || obj === null; })
-const undefinedOrNullDescription: ITypeDescription<undefined | null> = noPartial(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
-const undefinedDescription: ITypeDescription<undefined> = noPartial(function is(obj: any): obj is undefined { return obj === undefined; })
-const nullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj === null; })
-export const anyDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== missing; })
-export const nonnullDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== null && obj !== missing; })
-export const definedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== missing; })
-export const nonnullNorUndefinedDescription: ITypeDescription<null> = noPartial(function is(obj: any): obj is null { return obj !== undefined && obj !== null && obj !== missing; })
+export const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return obj === missing || obj === undefined; })
+const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | null>(function is(obj: any): obj is Missing | undefined | null { return obj === missing || obj === undefined || obj === null; })
+const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
+const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
+const nullDescription = noVariance<null>(function is(obj: any): obj is null { return obj === null; })
+export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== missing };
+export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && obj !== missing }
+export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && obj !== missing }
+export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && obj !== missing }
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
@@ -124,55 +117,65 @@ export const stringArrayDescription = array(stringDescription);
 export const numberArrayDescription = array(numberDescription);
 export const booleanArrayDescription = array(booleanDescription);
 
-function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescription<PrimitiveTypes[p]> {
+function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescriptions<PrimitiveTypes[p]> {
     function is(obj: any): obj is PrimitiveTypes[p] {
         return typeof obj === s;
     };
-    return noPartial(is);
+    return noVariance(is);
 }
 
 
-export class missingType { }
-export const missing = Object.freeze(new missingType());
-export type Missing = missingType | undefined
-export function nullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | null> {
-    return composeDescriptions(nullDescription, description1);
+export const missing = Object.freeze(class missingType { });
+export type Missing = typeof missing | undefined
+export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
+    return composeAlternativeDescriptions(nullDescription, description1);
 }
-export function optional<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing> {
-    return composeDescriptions(missingDescription, description1);
+export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
+    return composeAlternativeDescriptions(missingOrUndefinedOrNullDescription, description1);
 }
-export function optionalNullable<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | Missing | null> {
-    return composeDescriptions(missingOrNullDescription, description1);
+export function possiblyUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined> {
+    return composeAlternativeDescriptions(undefinedDescription, description1);
 }
-export function possiblyUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined> {
-    return composeDescriptions(undefinedDescription, description1);
+export function possiblyNullOrUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined | null> {
+    return composeAlternativeDescriptions(undefinedOrNullDescription, description1);
 }
-export function possiblyNullOrUndefined<TBase>(description1: ITypeDescription<TBase>): ITypeDescription<TBase | undefined | null> {
-    return composeDescriptions(undefinedOrNullDescription, description1);
-}
-export function array<TElement>(elementDescription: ITypeDescription<TElement>): ITypeDescription<TElement[]> {
-    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is TElement[] {
+export function array<TElement>(elementDescription: ITypeDescriptions<TElement>): ITypeDescriptions<TElement[]> {
+    function is(obj: any, getSubdescription: DescriptionGetter, log: ILogger): obj is TElement[] {
         if (!Array.isArray(obj))
             return false;
         for (let index = 0; index < obj.length; index++) {
             const element = obj[index];
-            if (!elementDescription.is(element, getSubdescription))
+            if (!elementDescription.is(element, Variance.Extends, getSubdescription, log))
                 return false;
         }
         return true;
     }
-    return noPartial(is);
+    return noVariance(is);
 }
-export function noPartial<T>(is: ITypeDescription<T>['is']): ITypeDescription<T> {
-    return { is, isPartial: is };
+export function noVariance<T>(is: ITypeDescription<T>['is']): ITypeDescriptions<T> {
+    const _is = function (obj: any, ...args: RemainingParametersWithVar<T>): obj is T {
+        return is(obj, args[1], args[2]);
+    };
+    return { is: _is };
 }
 
-export function composeDescriptions<K1, K2>(description1: ITypeDescription<K1>, description2: ITypeDescription<K2>): ITypeDescription<K1 | K2> {
-    function is(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is K1 | K2 {
-        return description1.is(obj, getSubdescription) || description2.is(obj, getSubdescription);
+
+export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 | K2> {
+    const is = function (obj: any, ...args: RemainingParametersWithVar<K1 | K2>): obj is K1 | K2 {
+        return description1.is(obj, ...args) || description2.is(obj, ...args);
     };
-    function isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>): obj is Partial<K1 | K2> {
-        return description1.isPartial(obj, getSubdescription) || description2.isPartial(obj, getSubdescription);
-    };
-    return { is, isPartial };
+    return { is };
 }
+
+export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
+    if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
+        return TypeDescription.compose(description1, description2);
+    }
+
+    const is = function (obj: any, ...args: RemainingParametersWithVar<K1 | K2>): obj is K1 & K2 {
+        return description1.is(obj, ...args) && description2.is(obj, ...args);
+    };
+    return { is };
+}
+
+export const compose = composeConjunctDescriptions;
