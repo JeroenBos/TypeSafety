@@ -61,7 +61,6 @@ describe('conjunction', () => {
     });
 
     it('exactly C is partial C', () => {
-        debugger;
         const c = {
             s: '',
             n: '',

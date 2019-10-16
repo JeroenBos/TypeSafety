@@ -173,6 +173,11 @@ describe('tests', () => {
         const isB = typeSystem.isPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
     });
+    
+    it('isPartialExtends allows extraneous properties', () => {
+        const isB = typeSystem.isNonStrictPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
+        if (!isB) throw new Error();
+    });
     it('B is exactly B', () => {
         typeSystem.assertExact('b', new B());
     });

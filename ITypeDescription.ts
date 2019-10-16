@@ -15,9 +15,10 @@ export interface ITypeDescriptions<T> {
 export type DescriptionGetter = (key: any) => ITypeDescriptions<any>;
 
 export enum Variance {
-    Exact,
-    Partial,
-    Extends
+    Exact = 0,
+    Partial = 1,
+    Extends = 2,
+    PartialExtends = Partial + Extends
 }
 
 export function selectExactVariance<T>(description: ITypeDescriptions<T>): ITypeDescription<T> {

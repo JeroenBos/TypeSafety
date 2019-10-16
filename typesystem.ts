@@ -86,11 +86,17 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         return this.isImpl(key, obj, Variance.Partial);
     }
     /**
+     * Returns whether all properties on `obj` that are properties on `Types[K]` are valid.
+     */
+    isNonStrictPartial<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+        return this.isImpl(key, obj, Variance.PartialExtends);
+    }
+    /**
      * Returns a boolean indicating whether all properties on `obj` are properties on `Types[K]`
      * and all properties on `Types[K]` are present; throws otherwise.
      */
     isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
-        return this.isPartial(key, obj) && this.is(key, obj);
+        return this.isImpl(key, obj, Variance.Exact);
     }
 
     private isImpl<K extends string & keyof Types>(

@@ -18,7 +18,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         return new TypeDescription({ ...description1.propertyDescriptions, ...description2.propertyDescriptions } as any);
     }
     public static isObjectDescription<K extends keyof Types, Types>(description: ITypeDescriptions<Types[K]>): description is TypeDescription<K, Types> {
-        return 'is' in description && 'isPartial' in description && 'isValidKey' in description && 'checkProperty' in description;
+        return Object.getPrototypeOf(description) == TypeDescription.prototype;
     }
 
     private constructor(
@@ -31,16 +31,22 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
 
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
         const expectedProperties = Object.assign({}, this.propertyDescriptions);
-        // remove properties that are allowed to be missing:
-        for (const possiblyOptionalPropertyName in expectedProperties) {
-            const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
-            const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
-            if (possiblyOptionalDescription.is(missing, Variance.Exact, getSubdescription, log)) {
-                throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
+        if ((variance & Variance.Partial) == 0) {
+            // remove properties that are allowed to be missing:
+            for (const possiblyOptionalPropertyName in expectedProperties) {
+                const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
+                const possiblyOptionalDescription = getSubdescription(possiblyOptionalTypeKey);
+                if (possiblyOptionalDescription.is(missing, Variance.Exact, getSubdescription, log)) {
+                    throw new Error(`Missing properties aren't supported yet`); // delete expectedProperties[possiblyOptionalPropertyName];
+                }
             }
         }
         for (const propertyName in obj) {
             if (!this.isValidKey(propertyName)) {
+                if ((variance & Variance.Extends) == 0) {
+                    log(stackErrorMessage_Extra(propertyName));
+                    result = false; if (log === undefined) { return result; }
+                }
                 continue;
             }
             delete expectedProperties[propertyName];
@@ -50,31 +56,14 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 // logging is done in this.checkProperty
             }
         }
-        for (const missingPropertyName in expectedProperties) {
-            log(stackErrorMessage_Missing(missingPropertyName));
-            result = false; if (log === undefined) { return result; }
+        if ((variance & Variance.Partial) == 0) {
+            for (const missingPropertyName in expectedProperties) {
+                log(stackErrorMessage_Missing(missingPropertyName));
+                result = false; if (log === undefined) { return result; }
+            }
         }
         return result;
     }
-    // isPartial(obj: any, getSubdescription: (key: any) => ITypeDescription<any>, log: ILogger): obj is Partial<Types[K]> {
-    //     if (obj === undefined || obj === null || obj === missing) {
-    //         return false; // this type handles composite types, so this is never a primitive type, so false
-    //     }
-    //     let result = true;
-    //     for (const propertyName in obj) {
-    //         if (!this.isValidKey(propertyName)) {
-    //             log(stackErrorMessage_Extra(propertyName));
-    //             result = false; if (log === undefined) return result;
-    //         } else {
-    //             const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
-    //             if (!isOfPropertyType) {
-    //                 result = false; if (log === undefined) return result;
-    //                 // logging is done in this.checkProperty
-    //             }
-    //         }
-    //     }
-    //     return result;
-    // }
     private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
