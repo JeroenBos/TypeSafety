@@ -1,5 +1,5 @@
 import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
-import { ITypeDescription, TypeDescriptionsFor } from '../ITypeDescription';
+import { ITypeDescription, TypeDescriptionsFor, ITypeDescriptions, Variance } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './testsystem';
 import { typesystem, X } from '../example/example';
@@ -31,10 +31,10 @@ assert<IsExact<B | undefined, allCheckableTypes[GetKey<B | undefined, allCheckab
 //
 // test type TypeDescriptionsFor<Types extends { [K in keyof Types]: Types[K] }> = { [K in keyof Types]: ITypeDescription<Types[K]> }
 //
-assert<IsExact<ITypeDescription<null>, TypeDescriptionsFor<allCheckableTypes>['null']>>(true);
-assert<IsExact<ITypeDescription<string>, TypeDescriptionsFor<allCheckableTypes>['string']>>(true);
-assert<IsExact<ITypeDescription<B>, TypeDescriptionsFor<allCheckableTypes>['b']>>(true);
-assert<IsExact<ITypeDescription<B | undefined>, TypeDescriptionsFor<allCheckableTypes>['b?']>>(true);
+assert<IsExact<ITypeDescriptions<null>, TypeDescriptionsFor<allCheckableTypes>['null']>>(true);
+assert<IsExact<ITypeDescriptions<string>, TypeDescriptionsFor<allCheckableTypes>['string']>>(true);
+assert<IsExact<ITypeDescriptions<B>, TypeDescriptionsFor<allCheckableTypes>['b']>>(true);
+assert<IsExact<ITypeDescriptions<B | undefined>, TypeDescriptionsFor<allCheckableTypes>['b?']>>(true);
 
 //
 // test type descriptionDebug
@@ -88,7 +88,7 @@ assert<IsExact<TypeDescriptionsFor<CheckableTypes>, almostAllTypeDescriptions>>(
 
 describe('tests', () => {
     it('null is not b?', () => {
-        const nullIsPossiblyUndefinedB = typeSystem.is('b?', null);
+        const nullIsPossiblyUndefinedB = typeSystem.extends('b?', null);
         if (nullIsPossiblyUndefinedB)
             throw new Error();
     });
@@ -102,7 +102,7 @@ describe('tests', () => {
         typeSystem.assert('b?', undefined);
     });
     it('undefined is not nullable b', () => {
-        const undefinedIsNullableB = typeSystem.is('nullable b', undefined);
+        const undefinedIsNullableB = typeSystem.extends('nullable b', undefined);
         if (undefinedIsNullableB)
             throw new Error();
     });
@@ -119,7 +119,7 @@ describe('tests', () => {
         typeSystem.assert('a', { x: "s", b: new B() });
     });
     it('{ x: "s" } is not a', () => {
-        const isA = typeSystem.is('a', { x: "s" });
+        const isA = typeSystem.extends('a', { x: "s" });
         if (isA) // because the property b? is missing
             throw new Error();
     });
@@ -134,18 +134,18 @@ describe('tests', () => {
         typeSystem.assertF('C')({ s: ['a'] });
     });
     it('isF', () => {
-        const isC = typeSystem.isF('C')({ s: ['a'] });
+        const isC = typeSystem.extendsF('C')({ s: ['a'] });
         if (!isC) throw new Error();
     });
     it('verifyF', () => {
         typeSystem.verifyF('C')({ s: ['a'] });
     });
     it('DisposableStack logs error', () => {
-        const isC = typeSystem.is('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
+        const isC = typeSystem.extends('C', {}); // I'm testing here manually, only whether the console.log method was invoked...
         if (isC) throw new Error();
     });
     it('nested DisposableStack logs nested error', () => {
-        const isB = typeSystem.is('b', { a: {} }); // I'm testing here manually, only whether the console.log method was invoked...
+        const isB = typeSystem.extends('b', { a: {} }); // I'm testing here manually, only whether the console.log method was invoked...
         if (isB) throw new Error();
     });
     it('B is partial B', () => {
@@ -172,6 +172,11 @@ describe('tests', () => {
     it('isPartial does not allow extraneous properties', () => {
         const isB = typeSystem.isPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
+    });
+    
+    it('isPartialExtends allows extraneous properties', () => {
+        const isB = typeSystem.isNonStrictPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
+        if (!isB) throw new Error();
     });
     it('B is exactly B', () => {
         typeSystem.assertExact('b', new B());
@@ -210,48 +215,48 @@ describe('tests', () => {
             throw new Error();
     });
     it('undefined is not allowed by nonnullNorUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(undefined, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('null is not allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(null, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(null, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullOrUndefinedDescription', () => {
-        const _is = nonnullNorUndefinedDescription.is(0, null as any, () => { });
+        const _is = nonnullNorUndefinedDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('undefined is allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(undefined, null as any, () => { });
+        const _is = nonnullDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('null is not allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(null, null as any, () => { });
+        const _is = nonnullDescription.is(null, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('non-null,defined is allowed by nonnullDescription', () => {
-        const _is = nonnullDescription.is(0, null as any, () => { });
+        const _is = nonnullDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
 
     it('undefined is not allowed by definedDescription', () => {
-        const _is = definedDescription.is(undefined, null as any, () => { });
+        const _is = definedDescription.is(undefined, Variance.Exact, null as any, () => { });
         if (_is)
             throw new Error();
     });
     it('null is allowed by definedDescription', () => {
-        const _is = definedDescription.is(null, null as any, () => { });
+        const _is = definedDescription.is(null, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
     it('non-null,defined is allowed by definedDescription', () => {
-        const _is = definedDescription.is(0, null as any, () => { });
+        const _is = definedDescription.is(0, Variance.Exact, null as any, () => { });
         if (!_is)
             throw new Error();
     });
@@ -261,7 +266,7 @@ describe('tests', () => {
             y: null,
             z: undefined
         };
-        const _isX = typesystem.is('X', x);
+        const _isX = typesystem.extends('X', x);
         if (!_isX)
             throw new Error();
     });
@@ -271,7 +276,7 @@ describe('tests', () => {
             y: null,
             z: null as any
         };
-        const _isX = typesystem.is('X', x);
+        const _isX = typesystem.extends('X', x);
         if (_isX)
             throw new Error();
     });
