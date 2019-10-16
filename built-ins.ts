@@ -1,4 +1,4 @@
-import { TypeDescriptionsFor, ITypeDescription, ILogger, RemainingParameters, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
+import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
 
 export type PrimitiveTypes = {
@@ -13,10 +13,6 @@ export type PrimitiveTypes = {
     'number': number,
     'string': string,
     'boolean': boolean,
-
-    // 'optional string': string | Missing,
-    // 'optional number': number | Missing,
-    // 'optional boolean': boolean | Missing,
 
     'string?': string | undefined,
     'number?': number | undefined,
@@ -68,10 +64,6 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
     'number' = numberDescription;
     'string' = stringDescription;
     'boolean' = booleanDescription;
-
-    // 'optional string' = optional(numberDescription);
-    // 'optional number' = optional(numberDescription);
-    // 'optional boolean' = optional(booleanDescription);
 
     'string?' = possiblyUndefined(stringDescription);
     'number?' = possiblyUndefined(numberDescription);
