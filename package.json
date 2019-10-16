@@ -27,7 +27,7 @@
     "mocha": "6.0.2",
     "mocha-typescript": "1.1.12",
     "source-map-loader": "0.2.4",
-    "ts-loader": "5.3.3",
+    "ts-loader": "6.2.0",
     "ts-node": "7.0.1",
     "typescript": "3.3.3333",
     "webpack": "4.29.6",
