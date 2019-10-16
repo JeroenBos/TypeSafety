@@ -62,7 +62,7 @@ assert<IsExact<GetKey<r2, Types>, 'optional c'>>(false);
 
 ///////////////////////////
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
-    public readonly 'optional c' = create<Types['optional c']>()({ c: optional('string?') });
+    public readonly 'optional c' = create<Types['optional c']>()({ c: '' });
 }
 
 export const typeSystem = new TypeSystem(new AllTypeDescriptions());

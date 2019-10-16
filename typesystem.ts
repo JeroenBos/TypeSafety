@@ -204,21 +204,24 @@ assert<IsOptional<{ c?: string }, 'c'>>(true);
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (
-        IsOptional<Types[K], u> extends true ? Exclude<possiblyMissing<descriptionKey<K, Types, u>>, undefined> : descriptionKey<K, Types, u>
+        IsOptional<Types[K], u> extends false ? descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>
+        : (Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Exclude<Types[K][u], undefined>, Types>>>, undefined>
+            | Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>>, undefined>
+        )
     )
 };
 type P<T> = T & PrimitiveTypes;
 
-type descriptionKey<K extends keyof Types, Types, u extends keyof Types[K]> =
+type descriptionKey<V, u extends keyof V, UKey> =
 
-    IsNever<GetKey<Types[K][u], Types>> extends false ? GetKey<Types[K][u], Types> :
+    IsNever<UKey> extends false ? UKey :
     (
-        IsAny<Types[K][u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
+        IsAny<V[u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
         (
-            null extends Types[K][u] ?
-            undefined extends Types[K][u] ? 'any' : '!undefined'
+            null extends V[u] ?
+            undefined extends V[u] ? 'any' : '!undefined'
             :
-            undefined extends Types[K][u] ? '!null' : 'any!'
+            undefined extends V[u] ? '!null' : 'any!'
         )
     )
 
