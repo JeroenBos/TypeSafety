@@ -1,4 +1,4 @@
-import './runtime.tests';
-import './testconjunction';
+import './runtime.spec';
+import './conjunction.spec';
 import './logging.spec';
-import './missing';
+import './missing.spec';
