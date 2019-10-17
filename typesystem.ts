@@ -211,4 +211,4 @@ type P<T> = T & PrimitiveTypes;
 /**
  * An implementation of a type system describing only the primitive types.
  */
-export const PrimitiveTypeSystem: TypeSystem<PrimitiveTypes> = new TypeSystem(new BaseTypeDescriptions<PrimitiveTypes>() as TypeDescriptionsFor<PrimitiveTypes>);
+export const PrimitiveTypeSystem: TypeSystem<PrimitiveTypes> = new TypeSystem<PrimitiveTypes>(new BaseTypeDescriptions<PrimitiveTypes>());

@@ -26,8 +26,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements 
     public readonly 'd' = this.create<D>({ x: 'c' });
 }
 
-const descriptions: TypeDescriptionsFor<Types & PrimitiveTypes> = new AllTypeDescriptions();
-export const typeSystem = new TypeSystem(descriptions);
+export const typeSystem = new TypeSystem<Types & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 

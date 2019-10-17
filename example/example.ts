@@ -20,7 +20,7 @@ class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implement
     public readonly X = this.create<X>({ x: 'any', y: '!undefined', z: '!null' });
 }
 
-export const typesystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<CheckableTypes & PrimitiveTypes>);
+export const typesystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new AllTypeDescriptions());
 
 
 //////////////// in another file: ///////////////////

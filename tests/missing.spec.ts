@@ -31,7 +31,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements 
     public readonly 'optional c' = this.create<Types['optional c']>({ c: optional('string') });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
+export const typeSystem = new TypeSystem<Types & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 

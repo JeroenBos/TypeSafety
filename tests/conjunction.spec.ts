@@ -20,7 +20,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements 
     public readonly 'c' = compose(this.s, this.n);
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
+export const typeSystem = new TypeSystem<Types & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 

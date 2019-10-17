@@ -23,7 +23,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<checkableTypes> im
     public readonly d = this.create<D>({});
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<checkableTypes & PrimitiveTypes>);
+export const typeSystem = new TypeSystem<checkableTypes & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 

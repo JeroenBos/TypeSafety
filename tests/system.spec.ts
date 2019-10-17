@@ -46,7 +46,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> im
     public readonly 'AnyContainer' = this.create<AnyContainer>({ x: 'any' });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<CheckableTypes & PrimitiveTypes>);
+export const typeSystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 

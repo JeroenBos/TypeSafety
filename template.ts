@@ -16,7 +16,7 @@ export type checkableTypes = OptionalToMissing<{
 class AllTypeDescriptions extends BaseTypeDescriptions<checkableTypes> implements TypeDescriptionsFor<checkableTypes> {
     public readonly 'D' = this.create<D>({});
 }
-export default new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<checkableTypes & PrimitiveTypes>);
+export default new TypeSystem<checkableTypes & PrimitiveTypes>(new AllTypeDescriptions());
 
 type erroneousTypes = DebugTypeSystem<checkableTypes>
 assert<IsExact<erroneousTypes, {}>>(true);

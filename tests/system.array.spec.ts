@@ -25,8 +25,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> im
     public readonly 'D[]' = array(this['D']);
 }
 
-const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
-export const typeSystem = new TypeSystem(descriptions);
+export const typeSystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new AllTypeDescriptions());
 
 ///////////////////////////
 
