@@ -9,9 +9,6 @@ export { Missing } from './missingHelper';
 // JS:
 
 import {
-    assert,
-} from './typeHelper';
-import {
     BaseTypeDescriptions,
     nullable,
     optionalNullable,
@@ -27,7 +24,6 @@ import {
 import { optional, isMissing } from './missingHelper';
 
 export {
-    assert,
     BaseTypeDescriptions,
     nullable,
     optionalNullable,
@@ -42,7 +38,6 @@ export {
 };
 
 export default {
-    assert,
     BaseTypeDescriptions,
     nullable,
     optionalNullable,
