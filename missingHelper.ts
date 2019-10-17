@@ -31,8 +31,3 @@ export class possiblyMissing<T> { public readonly key: any; constructor(key: str
 export function optional<T extends string>(s: T): possiblyMissing<T> {
     return new possiblyMissing<T>(s);
 }
-export type MissingMap<T> = Missing extends T ? possiblyMissing<Exclude<T, Missing>> : false;
-type t = MissingMap<Missing | string>;
-type t1 = Exclude<string | Missing, Missing>;
-type t2 = possiblyMissing<t1>;
-type t3 = possiblyMissing<Exclude<string | Missing, Missing>>;
