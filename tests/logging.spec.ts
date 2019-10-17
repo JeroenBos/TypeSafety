@@ -63,7 +63,6 @@ describe('Test logging', () => {
         const expectedLogStatements: string[] = [errorMessage_Missing('obj.b', 'c', 'L2'), errorMessage_Missing('obj.b', 's', 'L2')];
 
         // act
-        debugger;
         typesystem.extends('L1', { x: '', b: {} });
 
         // assert

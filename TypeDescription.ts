@@ -69,7 +69,6 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 continue;
             }
             delete expectedProperties[propertyName];
-            debugger;
             const isOfPropertyType = this.checkProperty(obj, propertyName, getSubdescription, log);
             if (!isOfPropertyType) {
                 result = false; if (log === undefined) return result; // TODO: this is never the case so the optimization is never reached
