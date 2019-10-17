@@ -50,6 +50,9 @@ export type PrimitiveTypes = {
 }
 
 export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFor<PrimitiveTypes> {
+    /**
+     * Creates an type description for an `object`.
+     */
     public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
         return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
     }
@@ -131,14 +134,14 @@ function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): IType
 export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
     return disjunct(nullDescription, description1);
 }
-export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
-    return disjunct(missingOrUndefinedOrNullDescription, description1);
-}
 export function possiblyUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined> {
     return disjunct(undefinedDescription, description1);
 }
 export function possiblyNullOrUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined | null> {
     return disjunct(undefinedOrNullDescription, description1);
+}
+export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
+    return disjunct(missingOrUndefinedOrNullDescription, description1);
 }
 export function array<TElement>(elementDescription: ITypeDescriptions<TElement>): ITypeDescriptions<TElement[]> {
     function is(obj: any, getSubdescription: DescriptionGetter, log: ILogger): obj is TElement[] {

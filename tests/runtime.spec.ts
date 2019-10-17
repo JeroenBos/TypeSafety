@@ -1,5 +1,5 @@
-import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
-import { ITypeDescription, TypeDescriptionsFor, ITypeDescriptions, Variance } from '../ITypeDescription';
+import { assert, IsExact, GetKey } from '../typeHelper';
+import { TypeDescriptionsFor, ITypeDescriptions, Variance } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './system.spec';
 import { typesystem, X } from '../example/example';
