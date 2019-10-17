@@ -1,7 +1,7 @@
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { PrimitiveTypes, BaseTypeDescriptions,  array } from "../built-ins";
+import { createHelperFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
+import { PrimitiveTypes, BaseTypeDescriptions } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
-import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";
+import { OptionalToMissing, IsExact, assert } from "../typeHelper";
 
 export class A {
     d: D[] = []; // D is included in checkableTypes, but D[] is explicitly not, and we check an error occurs below
@@ -17,7 +17,7 @@ export type checkableTypes = OptionalToMissing<{
 }>
 export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
-const create = <T extends object>() => createCreateFunction<allCheckableTypes, T>();
+const create = <T extends object>() => createHelperFunction<allCheckableTypes, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
 

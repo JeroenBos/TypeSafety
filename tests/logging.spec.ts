@@ -1,7 +1,7 @@
 import { anyDescription, BaseTypeDescriptions, possiblyUndefined } from "../built-ins";
 import { errorMessage_Missing, errorMessage_Wrong } from "../TypeDescription";
 import { OptionalToMissing } from "../typeHelper";
-import { createCreateFunction, TypeSystem } from "../typeSystem";
+import { createHelperFunction, TypeSystem } from "../typeSystem";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 
 interface L1 {
@@ -22,7 +22,7 @@ export type CheckableTypes = OptionalToMissing<{
     'L2?': L2 | undefined,
 }>
 
-const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
+const create = <T extends object>() => createHelperFunction<CheckableTypes, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
     public readonly L1 = create<L1>()({ x: 'string', b: 'L2' });

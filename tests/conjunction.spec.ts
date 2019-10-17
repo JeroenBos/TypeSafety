@@ -1,5 +1,5 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
+import { createHelperFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
 import { BaseTypeDescriptions, compose } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, assert, IsExact } from "../typeHelper";
@@ -13,7 +13,7 @@ export type Types = OptionalToMissing<{
     's': { s: string },
     'n': { n: string },
 }>
-const create = <T extends object>() => createCreateFunction<Types, T>();
+const create = <T extends object>() => createHelperFunction<Types, T>();
 
 export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
     public readonly 's' = create<Types['s']>()({ s: 'string' });
