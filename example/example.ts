@@ -1,14 +1,23 @@
+import { TypeSystem, BaseTypeDescriptions, TypeDescriptionsFor } from '..';
+import { PrimitiveTypes } from '../built-ins';
 
-import { TypeSystem, BaseTypeDescriptions, TypeDescriptionsFor, PrimitiveTypes } from '..';
+class nonExistent { }
+export type X = {
+    x: any,
+    y: nonExistent | null
+    z: nonExistent | undefined
+};
 
 type CheckableTypes = {
     'Example': Example,
     'hasNumberL': { L: number },
+    'X': X
 }
 
 class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
     public readonly Example = this.create<Example>({ a: 'number[]', b: 'string?', c: 'hasNumberL' });
     public readonly hasNumberL = this.create<{ L: number }>({ L: 'number' });
+    public readonly X = this.create<X>({ x: 'any', y: '!undefined', z: '!null' });
 }
 
 export const typesystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new AllTypeDescriptions());
