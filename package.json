@@ -1,8 +1,8 @@
 {
   "name": "jbsnorro-typesafety",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "description": "A small type-safety library. Contains a function which can check whether Javascript object adheres to a Typescript type definition, and moreover, this function tells you at compile time whether it will be able to perform that check or not.",
-  "main": "jbsnorro_typesafety.js",
+  "main": "dist/jbsnorro_typesafety.js",
   "types": "dist/types/index",
   "scripts": {
     "prepublishOnly": "npm install && webpack && mocha dist/test.js",
