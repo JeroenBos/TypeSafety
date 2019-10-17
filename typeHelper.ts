@@ -266,3 +266,14 @@ assert<IsExact<NotNeverValues<{ a: never, b: never }>, {}>>(true);
 assert<IsExact<NotNeverValues<{ a: string, b: number, c: never }>, { a: string, b: number }>>(true);
 
 export type Eval<T> = { [K in keyof T]: T[K] }
+
+
+type OptionalPropertyOf<T> = Exclude<{
+    [K in keyof T]: T extends Record<K, T[K]>
+    ? never
+    : K
+}[keyof T], undefined>
+
+export type IsOptional<T, K extends keyof T> = K extends OptionalPropertyOf<T> ? true : false;
+assert<IsOptional<{ c: string }, 'c'>>(false);
+assert<IsOptional<{ c?: string }, 'c'>>(true);

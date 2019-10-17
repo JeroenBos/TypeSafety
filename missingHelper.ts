@@ -1,16 +1,7 @@
-import { GetKey, assert, IsNever, IsAny } from "./typeHelper";
+import { GetKey, IsNever, IsAny, IsOptional } from "./typeHelper";
 import { Missing } from "./built-ins";
 
 
-type OptionalPropertyOf<T> = Exclude<{
-    [K in keyof T]: T extends Record<K, T[K]>
-    ? never
-    : K
-}[keyof T], undefined>
-
-type IsOptional<T, K extends keyof T> = K extends OptionalPropertyOf<T> ? true : false;
-assert<IsOptional<{ c: string }, 'c'>>(false);
-assert<IsOptional<{ c?: string }, 'c'>>(true);
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (
         IsOptional<Types[K], u> extends false ? descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>
