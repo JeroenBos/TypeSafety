@@ -2,14 +2,12 @@
 
 export { OptionalToMissing, IsExact } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
-export { DebugTypeSystem, PrimitiveTypeSystem } from './typesystem';
+export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
 export { TypeDescriptionsFor } from './ITypeDescription';
+export { Missing } from './missingHelper';
 
 // JS:
 
-import {
-    assert,
-} from './typeHelper';
 import {
     BaseTypeDescriptions,
     nullable,
@@ -21,36 +19,34 @@ import {
     composeConjunctDescriptions
 } from './built-ins';
 import {
-    createCreateFunction,
     TypeSystem,
-} from './typesystem';
+} from './typeSystem';
+import { optional, isMissing } from './missingHelper';
 
 export {
-    assert,
     BaseTypeDescriptions,
     nullable,
-    possiblyUndefined as optional,
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
     composeAlternativeDescriptions,
-    createCreateFunction,
     TypeSystem,
     array,
     composeConjunctDescriptions,
+    optional,
+    isMissing,
 };
 
 export default {
-    assert,
     BaseTypeDescriptions,
     nullable,
-    optional: possiblyUndefined,
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
     composeAlternativeDescriptions,
     array,
     composeConjunctDescriptions,
-    createCreateFunction,
     TypeSystem,
+    optional,
+    isMissing,
 };

@@ -1,38 +1,40 @@
 import { GetKey, IsNever, IsAny, IsOptional } from "./typeHelper";
-import { Missing } from "./built-ins";
 
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (
-        IsOptional<Types[K], u> extends false ? descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>
-        : (Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Exclude<Types[K][u], undefined>, Types>>>, undefined>
-            | Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>>, undefined>
+        IsOptional<Types[K], u> extends false ? descriptionKey<Types[K][u], GetKey<Types[K][u], Types>>
+        : (Exclude<possiblyMissing<descriptionKey<Types[K][u], GetKey<Exclude<Types[K][u], undefined>, Types>>>, undefined>
+            | Exclude<possiblyMissing<descriptionKey<Types[K][u], GetKey<Types[K][u], Types>>>, undefined>
         )
     )
 };
 
-type descriptionKey<V, u extends keyof V, UKey> =
+// T for value type in (Checkable) Types of the parameter
+// K for the key of the type P in CheckableTypes
+type descriptionKey<T, K> =
 
-    IsNever<UKey> extends false ? UKey :
+    // if the key does not exist in checkable type, we select either one of 'any', '!null', '!undefined', 'any!'
+    // depending on whether null and/or undefined are part of the type T[P]
+    IsNever<K> extends false ? K :
     (
-        IsAny<V[u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
+        
+        IsAny<T> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
         (
-            null extends V[u] ?
-            undefined extends V[u] ? 'any' : '!undefined'
+            null extends T ?
+            undefined extends T ? 'any' : '!undefined'
             :
-            undefined extends V[u] ? '!null' : 'any!'
+            undefined extends T ? '!null' : 'any!'
         )
     )
 
 export function isMissing(o: any): o is possiblyMissing<any> {
-    return true;
+    return o instanceof possiblyMissing;
 }
-export class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
+class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
 export function optional<T extends string>(s: T): possiblyMissing<T> {
     return new possiblyMissing<T>(s);
 }
-export type MissingMap<T> = Missing extends T ? possiblyMissing<Exclude<T, Missing>> : false;
-type t = MissingMap<Missing | string>;
-type t1 = Exclude<string | Missing, Missing>;
-type t2 = possiblyMissing<t1>;
-type t3 = possiblyMissing<Exclude<string | Missing, Missing>>;
+
+export const explicitlyMissing = Object.freeze(new possiblyMissing('Should never be accessed'));
+export type Missing = typeof possiblyMissing | undefined;

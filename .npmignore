@@ -3,3 +3,4 @@
 *.spec.d.ts
 .vscode/**
 example/**
+dist/types/example/example.d.ts

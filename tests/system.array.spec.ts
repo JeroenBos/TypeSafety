@@ -1,5 +1,5 @@
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { BaseTypeDescriptions, array } from "../built-ins";
+import { TypeSystem, DebugTypeSystem } from "../typeSystem";
+import { BaseTypeDescriptions, array, PrimitiveTypes } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";
 
@@ -18,16 +18,15 @@ export type CheckableTypes = OptionalToMissing<{
     'D': D,
     'D[]': D[]
 }>
-const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
+export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
-
-    public readonly a = create<A>()({ s: 'string[]', d: 'D[]' });
-    public readonly D = create<D>()({ n: 'number' });
+    public readonly a = this.create<A>({ s: 'string[]', d: 'D[]' });
+    public readonly D = this.create<D>({ n: 'number' });
     public readonly 'D[]' = array(this['D']);
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
+export const typeSystem = new TypeSystem(descriptions);
 
 ///////////////////////////
 

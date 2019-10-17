@@ -1,8 +1,8 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { BaseTypeDescriptions } from "../built-ins";
+import { TypeSystem, DebugTypeSystem } from "../typeSystem";
+import { BaseTypeDescriptions, PrimitiveTypes } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
-import { OptionalToMissing, assert, IsExact, ContainsExactValues } from "../typeHelper";
+import { OptionalToMissing, assert, IsExact } from "../typeHelper";
 
 interface C {
     e: number | string
@@ -17,14 +17,12 @@ export type Types = OptionalToMissing<{
     'C': C,
     // 'D': D // I expected that when this is uncommented, it would show up in erroneousTypes. Instead it gives an error at the description of d, which is good enough
 }>
-const create = <T extends object>() => createCreateFunction<Types, T>();
-
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
-    public readonly 'C' = create<C>()({ e: 'number' } as any);
-    public readonly 'D' = create<D>()({ f: 'string?' });
+export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
+    public readonly 'C' = this.create<C>({ e: 'number' } as any);
+    public readonly 'D' = this.create<D>({ f: 'string?' });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
 
 ///////////////////////////
 

@@ -15,7 +15,8 @@
     ],
     "outDir": "dist",
     "jsx": "react",
-    "declaration": false,
+    "declaration": true,
+    "declarationDir": "dist\\types"
   },
   "exclude": [
     "dist",

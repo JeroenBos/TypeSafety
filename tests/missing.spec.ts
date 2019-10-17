@@ -1,6 +1,6 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
-import { BaseTypeDescriptions, compose, nullable, PrimitiveTypes, Missing } from "../built-ins";
+import { TypeSystem, DebugTypeSystem } from "../typeSystem";
+import { BaseTypeDescriptions, compose, nullable, PrimitiveTypes } from "../built-ins";
 import { TypeDescriptionsFor, ITypeDescriptions } from "../ITypeDescription";
 import { OptionalToMissing, assert, IsExact, GetKey, Optionals } from "../typeHelper";
 import { optional } from "../missingHelper";
@@ -12,8 +12,6 @@ type C = { s: string } & { n: string };
 export type Types = OptionalToMissing<{
     'optional c': { c?: string },
 }>
-const create = <T extends object>() => createCreateFunction<Types, T>();
-
 
 
 
@@ -29,11 +27,11 @@ assert<IsExact<GetKey<{ c?: string | undefined }, Types>, 'optional c'>>(true);
 
 ///////////////////////////
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
-    public readonly 'optional c' = create<Types['optional c']>()({ c: optional('string') });
+export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
+    public readonly 'optional c' = this.create<Types['optional c']>({ c: optional('string') });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
 
 ///////////////////////////
 

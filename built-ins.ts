@@ -1,5 +1,7 @@
 import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
+import { Missing, isMissing, DescriptionKeys } from './missingHelper';
+import { GetKey } from './typeHelper';
 
 export type PrimitiveTypes = {
     'any': any,
@@ -47,9 +49,10 @@ export type PrimitiveTypes = {
     '(nullable boolean)[]': (boolean | null)[],
 }
 
-export type ExcludePrimitives<T> = Exclude<T, string | number | boolean>
-
-export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes> {
+export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFor<PrimitiveTypes> {
+    public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    }
     'any' = anyDescription;
     'null' = nullDescription;
     'undefined' = undefinedDescription
@@ -100,15 +103,15 @@ export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes>
 }
 
 
-export const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return obj === missing || obj === undefined; })
-const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | null>(function is(obj: any): obj is Missing | undefined | null { return obj === missing || obj === undefined || obj === null; })
+export const missingOrUndefinedDescription = noVariance<Missing | undefined>(function is(obj: any): obj is Missing | undefined { return isMissing(obj) || obj === undefined; })
+const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | null>(function is(obj: any): obj is Missing | undefined | null { return isMissing(obj) || obj === undefined || obj === null; })
 const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription = noVariance<null>(function is(obj: any): obj is null { return obj === null; })
-export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== missing };
-export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && obj !== missing }
-export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && obj !== missing }
-export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && obj !== missing }
+export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => !isMissing(obj) };
+export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && !isMissing(obj) }
+export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && !isMissing(obj) }
+export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && !isMissing(obj) }
 
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
@@ -125,8 +128,6 @@ function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): IType
 }
 
 
-export const missing = Object.freeze(class missingType { });
-export type Missing = typeof missing | undefined
 export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
     return composeAlternativeDescriptions(nullDescription, description1);
 }

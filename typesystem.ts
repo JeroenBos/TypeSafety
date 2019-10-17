@@ -1,9 +1,9 @@
-import { PrimitiveTypes, BaseTypeDescriptions, Missing, compose, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
-import { DescriptionKeys, possiblyMissing } from "./missingHelper";
+import { DescriptionKeys, isMissing } from "./missingHelper";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -100,7 +100,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Get the type description object for the specified key.
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
-        if (key instanceof possiblyMissing) {
+        if (isMissing(key)) {
             return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
         }
         const description = this.typeDescriptions.get(key!);
@@ -208,20 +208,7 @@ assert<IsOptional<{ c?: string }, 'c'>>(true);
 
 type P<T> = T & PrimitiveTypes;
 
-
-
-/**
- * This constructs a helper function to create type descriptions for custom interfaces/classes.
- */
-export function createCreateFunction<Types, T extends object & P<Types>[keyof P<Types>]>()
-    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescriptions<P<Types>[GetKey<T, P<Types>>]> {
-    {
-        return (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) =>
-            TypeDescription.create<P<Types>, GetKey<T, P<Types>>>(propertyDescriptions);
-    }
-}
-
 /**
  * An implementation of a type system describing only the primitive types.
  */
-export const PrimitiveTypeSystem = new TypeSystem(new BaseTypeDescriptions());
+export const PrimitiveTypeSystem: TypeSystem<PrimitiveTypes> = new TypeSystem(new BaseTypeDescriptions<PrimitiveTypes>() as TypeDescriptionsFor<PrimitiveTypes>);

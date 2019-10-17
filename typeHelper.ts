@@ -1,4 +1,4 @@
-import { Missing } from "./built-ins";
+import { Missing } from "./missingHelper";
 
 /**
  * Asserts at compile time that the provided type argument's type resolves to the expected boolean literal type.
