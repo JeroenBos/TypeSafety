@@ -1,7 +1,7 @@
 import { anyDescription, BaseTypeDescriptions, possiblyUndefined } from "../built-ins";
 import { errorMessage_Missing, errorMessage_Wrong } from "../TypeDescription";
 import { OptionalToMissing } from "../typeHelper";
-import { createCreateFunction, TypeSystem } from "../typesystem";
+import { createCreateFunction, TypeSystem } from "../typeSystem";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 
 interface L1 {

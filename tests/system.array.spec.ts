@@ -1,4 +1,4 @@
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
+import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
 import { BaseTypeDescriptions, array } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, IsExactOrAny, IsNotNever, IsNever, Or, ValuesOf, ContainsExactValue, ContainsExactValues, NotNeverValues } from "../typeHelper";

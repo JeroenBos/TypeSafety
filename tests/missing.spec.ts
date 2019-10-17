@@ -1,5 +1,5 @@
 
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typesystem";
+import { createCreateFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
 import { BaseTypeDescriptions, compose, nullable, PrimitiveTypes, Missing } from "../built-ins";
 import { TypeDescriptionsFor, ITypeDescriptions } from "../ITypeDescription";
 import { OptionalToMissing, assert, IsExact, GetKey, Optionals } from "../typeHelper";

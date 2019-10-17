@@ -1,7 +1,7 @@
 assert<undefined extends string ? false : true>(true); // strict mode must be enabled
 import { OptionalToMissing, assert, IsExact } from './typeHelper';
 import { PrimitiveTypes, BaseTypeDescriptions } from './built-ins';
-import { createCreateFunction, TypeSystem, DebugTypeSystem } from './typesystem';
+import { createCreateFunction, TypeSystem, DebugTypeSystem } from './typeSystem';
 import { TypeDescriptionsFor } from './ITypeDescription';
 
 interface D {
