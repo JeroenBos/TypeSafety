@@ -1,6 +1,6 @@
 {
   "name": "jbsnorro-typesafety",
-  "version": "0.9.16",
+  "version": "1.0.0",
   "description": "A typescript enforced type-safety library. ",
   "main": "dist/jbsnorro_typesafety.js",
   "types": "dist/types/index",
