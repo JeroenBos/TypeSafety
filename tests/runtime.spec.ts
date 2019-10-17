@@ -80,7 +80,7 @@ type Diff<T, U> = { [k in keyof T]: k extends keyof U ? IsExact<T[k], U[k]> exte
 type x = Diff<{ a: 0, b: 0, c: 0 }, { a: 0, c: 1, d: 0 }>
 type sdfafd = { a: 0, b: 0, c: 0 } | { a: 0, c: 1, d: 0 }
 
-type almostAllTypeDescriptions = { [K in Exclude<keyof AllTypeDescriptions, keyof BaseTypeDescriptions>]: AllTypeDescriptions[K] };
+type almostAllTypeDescriptions = { [K in Exclude<keyof AllTypeDescriptions, keyof BaseTypeDescriptions<PrimitiveTypes>>]: AllTypeDescriptions[K] };
 type differenceBetweenExpected = Diff<almostAllTypeDescriptions, TypeDescriptionsFor<CheckableTypes>>;
 type differencePart1 = almostAllTypeDescriptions[differenceBetweenExpected];
 type differencePart2 = TypeDescriptionsFor<CheckableTypes>[differenceBetweenExpected];

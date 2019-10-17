@@ -1,5 +1,5 @@
 import { createHelperFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, anyDescription } from "../built-ins";
+import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, anyDescription, PrimitiveTypes } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, IsExact, assert, } from "../typeHelper";
 
@@ -37,7 +37,7 @@ export type CheckableTypes = OptionalToMissing<{
 
 const create = <T extends object>() => createHelperFunction<CheckableTypes, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
+export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
     public readonly a = create<A>()({ x: 'string', b: 'b?' });
     public readonly b = create<B>()({ a: 'a' });
     public readonly C = create<C>()({ s: 'string[]' });
@@ -48,7 +48,7 @@ export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDes
     public readonly 'AnyContainer' = create<AnyContainer>()({ x: 'any' });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<CheckableTypes & PrimitiveTypes>);
 
 ///////////////////////////
 

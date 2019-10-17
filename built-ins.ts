@@ -1,6 +1,7 @@
 import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
-import { Missing, isMissing } from './missingHelper';
+import { Missing, isMissing, DescriptionKeys } from './missingHelper';
+import { GetKey } from './typeHelper';
 
 export type PrimitiveTypes = {
     'any': any,
@@ -48,7 +49,10 @@ export type PrimitiveTypes = {
     '(nullable boolean)[]': (boolean | null)[],
 }
 
-export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes> {
+export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFor<PrimitiveTypes> {
+    public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    }
     'any' = anyDescription;
     'null' = nullDescription;
     'undefined' = undefinedDescription

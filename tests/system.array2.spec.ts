@@ -19,13 +19,13 @@ export type allCheckableTypes = checkableTypes & PrimitiveTypes;
 
 const create = <T extends object>() => createHelperFunction<allCheckableTypes, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<checkableTypes> {
+export class AllTypeDescriptions extends BaseTypeDescriptions<checkableTypes> implements TypeDescriptionsFor<checkableTypes> {
 
     public readonly a = create<A>()({ d: 'D[]' } as any);
     public readonly d = create<D>()({});
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<checkableTypes & PrimitiveTypes>);
 
 ///////////////////////////
 

@@ -1,4 +1,4 @@
-import { anyDescription, BaseTypeDescriptions, possiblyUndefined } from "../built-ins";
+import { anyDescription, BaseTypeDescriptions, possiblyUndefined, PrimitiveTypes } from "../built-ins";
 import { errorMessage_Missing, errorMessage_Wrong } from "../TypeDescription";
 import { OptionalToMissing } from "../typeHelper";
 import { createHelperFunction, TypeSystem } from "../typeSystem";
@@ -24,7 +24,7 @@ export type CheckableTypes = OptionalToMissing<{
 
 const create = <T extends object>() => createHelperFunction<CheckableTypes, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
+export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
     public readonly L1 = create<L1>()({ x: 'string', b: 'L2' });
     public readonly L2 = create<L2>()({ c: 'L1?', s: 'string' });
     public readonly 'L1?' = possiblyUndefined(this.L1);
@@ -46,7 +46,8 @@ describe('Test logging', () => {
     it('{} ∈ a', () => {
         // arrange
         const logStatements: string[] = [];
-        const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
+        const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
+        const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
         const expectedLogStatements: string[] = [errorMessage_Missing('obj', 'x', 'L1'), errorMessage_Missing('obj', 'b', 'L1')];
 
         // act
@@ -59,7 +60,8 @@ describe('Test logging', () => {
     it(`{ x: '', b: {} } ∈ a`, () => {
         // arrange
         const logStatements: string[] = [];
-        const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
+        const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
+        const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
         const expectedLogStatements: string[] = [errorMessage_Missing('obj.b', 'c', 'L2'), errorMessage_Missing('obj.b', 's', 'L2')];
 
         // act
@@ -73,7 +75,8 @@ describe('Test logging', () => {
     it(`{ x: null, b: null } ∈ a`, () => {
         // arrange
         const logStatements: string[] = [];
-        const typesystem = new TypeSystem(new AllTypeDescriptions(), logStatements.push.bind(logStatements));
+        const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
+        const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
         const expectedLogStatements: string[] = [errorMessage_Wrong('obj', 'x', 'string', 'null'), errorMessage_Wrong('obj', 'b', 'L2', 'null')];
 
         // act

@@ -224,4 +224,4 @@ export function createHelperFunction<Types, T extends object & P<Types>[keyof P<
 /**
  * An implementation of a type system describing only the primitive types.
  */
-export const PrimitiveTypeSystem = new TypeSystem(new BaseTypeDescriptions());
+export const PrimitiveTypeSystem: TypeSystem<PrimitiveTypes> = new TypeSystem(new BaseTypeDescriptions<PrimitiveTypes>() as TypeDescriptionsFor<PrimitiveTypes>);

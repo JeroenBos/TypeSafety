@@ -29,11 +29,11 @@ assert<IsExact<GetKey<{ c?: string | undefined }, Types>, 'optional c'>>(true);
 
 ///////////////////////////
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
+export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
     public readonly 'optional c' = create<Types['optional c']>()({ c: optional('string') });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
 
 ///////////////////////////
 

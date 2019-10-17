@@ -1,8 +1,8 @@
 
 import { createHelperFunction, TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { BaseTypeDescriptions } from "../built-ins";
+import { BaseTypeDescriptions, PrimitiveTypes } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
-import { OptionalToMissing, assert, IsExact, ContainsExactValues } from "../typeHelper";
+import { OptionalToMissing, assert, IsExact } from "../typeHelper";
 
 interface C {
     e: number | string
@@ -19,12 +19,12 @@ export type Types = OptionalToMissing<{
 }>
 const create = <T extends object>() => createHelperFunction<Types, T>();
 
-export class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<Types> {
+export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
     public readonly 'C' = create<C>()({ e: 'number' } as any);
     public readonly 'D' = create<D>()({ f: 'string?' });
 }
 
-export const typeSystem = new TypeSystem(new AllTypeDescriptions());
+export const typeSystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<Types & PrimitiveTypes>);
 
 ///////////////////////////
 

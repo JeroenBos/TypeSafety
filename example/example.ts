@@ -1,4 +1,5 @@
 import { TypeSystem, BaseTypeDescriptions, TypeDescriptionsFor, createCreateFunction } from '..';
+import { PrimitiveTypes } from '../built-ins';
 const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
 
 class nonExistent { }
@@ -14,13 +15,13 @@ type CheckableTypes = {
     'X': X
 }
 
-class AllTypeDescriptions extends BaseTypeDescriptions implements TypeDescriptionsFor<CheckableTypes> {
+class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
     public readonly Example = create<Example>()({ a: 'number[]', b: 'string?', c: 'hasNumberL' });
     public readonly hasNumberL = create<{ L: number }>()({ L: 'number' });
     public readonly X = create<X>()({ x: 'any', y: '!undefined', z: '!null' });
 }
 
-export const typesystem = new TypeSystem(new AllTypeDescriptions());
+export const typesystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<CheckableTypes & PrimitiveTypes>);
 
 
 //////////////// in another file: ///////////////////
