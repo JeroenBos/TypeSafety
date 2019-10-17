@@ -1,9 +1,11 @@
 // TS:
 
 export { OptionalToMissing, IsExact } from './typeHelper';
-export { PrimitiveTypes, Missing } from './built-ins';
+export { PrimitiveTypes } from './built-ins';
 export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
 export { TypeDescriptionsFor } from './ITypeDescription';
+export { Missing } from './missingHelper';
+
 // JS:
 
 import {
@@ -23,7 +25,7 @@ import {
     createCreateFunction,
     TypeSystem,
 } from './typeSystem';
-import { optional } from './missingHelper';
+import { optional, isMissing } from './missingHelper';
 
 export {
     assert,
@@ -38,6 +40,7 @@ export {
     array,
     composeConjunctDescriptions,
     optional,
+    isMissing,
 };
 
 export default {
@@ -53,4 +56,5 @@ export default {
     createCreateFunction,
     TypeSystem,
     optional,
+    isMissing,
 };

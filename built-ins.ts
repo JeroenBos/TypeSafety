@@ -1,5 +1,6 @@
 import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
+import { missing, Missing } from './missingHelper';
 
 export type PrimitiveTypes = {
     'any': any,
@@ -125,8 +126,6 @@ function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): IType
 }
 
 
-export const missing = Object.freeze(class missingType { });
-export type Missing = typeof missing | undefined
 export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
     return composeAlternativeDescriptions(nullDescription, description1);
 }

@@ -1,5 +1,4 @@
 import { GetKey, IsNever, IsAny, IsOptional } from "./typeHelper";
-import { Missing } from "./built-ins";
 
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
@@ -31,3 +30,6 @@ export class possiblyMissing<T> { public readonly key: any; constructor(key: str
 export function optional<T extends string>(s: T): possiblyMissing<T> {
     return new possiblyMissing<T>(s);
 }
+
+export const missing = Object.freeze(class missingType { });
+export type Missing = typeof missing | undefined;

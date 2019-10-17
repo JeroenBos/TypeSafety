@@ -1,8 +1,7 @@
-import { missing } from './built-ins';
 import { ILogger, Variance, ITypeDescriptions, DescriptionGetter } from './ITypeDescription';
 import { DisposableStackElement } from './DisposableStackElement';
 import { assert, GetKey, IsNever, IsAny } from './typeHelper';
-import { DescriptionKeys, isMissing } from './missingHelper';
+import { DescriptionKeys, isMissing, missing } from './missingHelper';
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.

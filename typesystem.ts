@@ -1,4 +1,4 @@
-import { PrimitiveTypes, BaseTypeDescriptions, Missing, compose, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
