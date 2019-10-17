@@ -1,9 +1,8 @@
 import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
-import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
-import { TypeDescription } from "./TypeDescription";
+import { ContainsExactValues, NotNeverValues, ContainsExactValue, assert } from "./typeHelper";
 import { DisposableStackElement } from "./DisposableStackElement";
-import { DescriptionKeys, isMissing } from "./missingHelper";
+import { isMissing } from "./missingHelper";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -195,18 +194,6 @@ export type DebugTypeSystem<T>
 // these types help construct DebugTypeSystem<T>:
 type debugTypeSystemType<T, S> = NotNeverValues<{ [K in keyof T]: ContainsExactValue<T[K], S> extends true ? never : T[K] }>
 type debugTypeSystem<T, S> = NotNeverValues<{ [K in keyof T]: T[K] extends any[] ? never : ContainsExactValues<T[K], S> extends true ? never : debugTypeSystemType<T[K], S> }>
-
-type OptionalPropertyOf<T> = Exclude<{
-    [K in keyof T]: T extends Record<K, T[K]>
-    ? never
-    : K
-}[keyof T], undefined>
-type test = OptionalPropertyOf<{ c: string, d?: string }>;
-type IsOptional<T, K extends keyof T> = K extends OptionalPropertyOf<T> ? true : false;
-assert<IsOptional<{ c: string }, 'c'>>(false);
-assert<IsOptional<{ c?: string }, 'c'>>(true);
-
-type P<T> = T & PrimitiveTypes;
 
 /**
  * An implementation of a type system describing only the primitive types.
