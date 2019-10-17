@@ -26,10 +26,10 @@ type descriptionKey<V, u extends keyof V, UKey> =
 export function isMissing(o: any): o is possiblyMissing<any> {
     return o instanceof possiblyMissing;
 }
-export class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
+class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
 export function optional<T extends string>(s: T): possiblyMissing<T> {
     return new possiblyMissing<T>(s);
 }
 
-export const missing = Object.freeze(class missingType { });
-export type Missing = typeof missing | undefined;
+export const explicitlyMissing = Object.freeze(new possiblyMissing('Should never be accessed'));
+export type Missing = typeof possiblyMissing | undefined;

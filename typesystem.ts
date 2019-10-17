@@ -3,7 +3,7 @@ import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITy
 import { GetKey, ContainsExactValues, NotNeverValues, ContainsExactValue, IsExact, IsNever, IsAny, assert } from "./typeHelper";
 import { TypeDescription } from "./TypeDescription";
 import { DisposableStackElement } from "./DisposableStackElement";
-import { DescriptionKeys, possiblyMissing } from "./missingHelper";
+import { DescriptionKeys, isMissing } from "./missingHelper";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -100,7 +100,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Get the type description object for the specified key.
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
-        if (key instanceof possiblyMissing) {
+        if (isMissing(key)) {
             return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
         }
         const description = this.typeDescriptions.get(key!);

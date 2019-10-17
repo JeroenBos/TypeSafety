@@ -1,7 +1,6 @@
 import { ILogger, Variance, ITypeDescriptions, DescriptionGetter } from './ITypeDescription';
 import { DisposableStackElement } from './DisposableStackElement';
-import { assert, GetKey, IsNever, IsAny } from './typeHelper';
-import { DescriptionKeys, isMissing, missing } from './missingHelper';
+import { DescriptionKeys, isMissing, explicitlyMissing } from './missingHelper';
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
@@ -25,7 +24,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
     is(obj: any, variance: Variance, getSubdescription: DescriptionGetter, log: ILogger): obj is Types[K] {
-        if (obj === undefined || obj === null || obj === missing) {
+        if (obj === undefined || obj === null || isMissing(obj)) {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
@@ -38,7 +37,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 // if the property is actually missing
                 if (!(possiblyOptionalPropertyName in obj)) {
                     // if missing is allowed
-                    if (description.is(missing, Variance.Exact, getSubdescription, log)) {
+                    if (description.is(explicitlyMissing, Variance.Exact, getSubdescription, log)) {
                         delete expectedProperties[possiblyOptionalPropertyName];
                     } else {
                         log(stackErrorMessage_Missing(possiblyOptionalPropertyName));
