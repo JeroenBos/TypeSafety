@@ -1,6 +1,6 @@
 
 import { TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { BaseTypeDescriptions, compose, PrimitiveTypes } from "../built-ins";
+import { BaseTypeDescriptions, PrimitiveTypes, conjunct } from "../built-ins";
 import { TypeDescriptionsFor } from "../ITypeDescription";
 import { OptionalToMissing, assert, IsExact } from "../typeHelper";
 
@@ -17,7 +17,7 @@ export type Types = OptionalToMissing<{
 export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
     public readonly 's' = this.create<Types['s']>({ s: 'string' });
     public readonly 'n' = this.create<Types['n']>({ n: 'string' });
-    public readonly 'c' = compose(this.s, this.n);
+    public readonly 'c' = conjunct(this.s, this.n);
 }
 
 export const typeSystem = new TypeSystem<Types & PrimitiveTypes>(new AllTypeDescriptions());

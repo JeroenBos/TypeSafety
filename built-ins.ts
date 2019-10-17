@@ -129,16 +129,16 @@ function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): IType
 
 
 export function nullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | null> {
-    return composeAlternativeDescriptions(nullDescription, description1);
+    return disjunct(nullDescription, description1);
 }
 export function optionalNullable<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | Missing | null> {
-    return composeAlternativeDescriptions(missingOrUndefinedOrNullDescription, description1);
+    return disjunct(missingOrUndefinedOrNullDescription, description1);
 }
 export function possiblyUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined> {
-    return composeAlternativeDescriptions(undefinedDescription, description1);
+    return disjunct(undefinedDescription, description1);
 }
 export function possiblyNullOrUndefined<TBase>(description1: ITypeDescriptions<TBase>): ITypeDescriptions<TBase | undefined | null> {
-    return composeAlternativeDescriptions(undefinedOrNullDescription, description1);
+    return disjunct(undefinedOrNullDescription, description1);
 }
 export function array<TElement>(elementDescription: ITypeDescriptions<TElement>): ITypeDescriptions<TElement[]> {
     function is(obj: any, getSubdescription: DescriptionGetter, log: ILogger): obj is TElement[] {
@@ -153,22 +153,24 @@ export function array<TElement>(elementDescription: ITypeDescriptions<TElement>)
     }
     return noVariance(is);
 }
-export function noVariance<T>(is: ITypeDescription<T>['is']): ITypeDescriptions<T> {
+
+function noVariance<T>(is: ITypeDescription<T>['is']): ITypeDescriptions<T> {
     const _is = function (obj: any, ...args: RemainingParametersWithVar<T>): obj is T {
         return is(obj, args[1], args[2]);
     };
     return { is: _is };
 }
 
-
-export function composeAlternativeDescriptions<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 | K2> {
+/** Applies logical disjunction, i.e. `T | U` */
+export function disjunct<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 | K2> {
     const is = function (obj: any, ...args: RemainingParametersWithVar<K1 | K2>): obj is K1 | K2 {
         return description1.is(obj, ...args) || description2.is(obj, ...args);
     };
     return { is };
 }
 
-export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
+/** Applies logical conjugation, i.e. `T & U` */
+export function conjunct<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
     if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
         return TypeDescription.compose(description1, description2);
     }
@@ -178,5 +180,3 @@ export function composeConjunctDescriptions<K1, K2>(description1: ITypeDescripti
     };
     return { is };
 }
-
-export const compose = composeConjunctDescriptions;

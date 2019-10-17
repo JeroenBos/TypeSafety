@@ -1,8 +1,8 @@
 
 import { TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { BaseTypeDescriptions, compose, nullable, PrimitiveTypes } from "../built-ins";
-import { TypeDescriptionsFor, ITypeDescriptions } from "../ITypeDescription";
-import { OptionalToMissing, assert, IsExact, GetKey, Optionals } from "../typeHelper";
+import { BaseTypeDescriptions, PrimitiveTypes } from "../built-ins";
+import { TypeDescriptionsFor } from "../ITypeDescription";
+import { OptionalToMissing, assert, IsExact, GetKey } from "../typeHelper";
 import { optional } from "../missingHelper";
 
 type C = { s: string } & { n: string };

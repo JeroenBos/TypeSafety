@@ -14,9 +14,9 @@ import {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeAlternativeDescriptions,
+    disjunct,
     array,
-    composeConjunctDescriptions
+    conjunct
 } from './built-ins';
 import {
     TypeSystem,
@@ -29,10 +29,10 @@ export {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeAlternativeDescriptions,
+    disjunct,
     TypeSystem,
     array,
-    composeConjunctDescriptions,
+    conjunct,
     optional,
     isMissing,
 };
@@ -43,9 +43,9 @@ export default {
     optionalNullable,
     possiblyUndefined,
     possiblyNullOrUndefined,
-    composeAlternativeDescriptions,
+    disjunct,
     array,
-    composeConjunctDescriptions,
+    conjunct,
     TypeSystem,
     optional,
     isMissing,

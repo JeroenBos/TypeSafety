@@ -1,4 +1,4 @@
-import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, composeAlternativeDescriptions } from "./built-ins";
+import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, disjunct } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
 import { ContainsExactValues, NotNeverValues, ContainsExactValue, assert } from "./typeHelper";
 import { DisposableStackElement } from "./DisposableStackElement";
@@ -100,7 +100,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
         if (isMissing(key)) {
-            return composeAlternativeDescriptions(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
+            return disjunct(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
         }
         const description = this.typeDescriptions.get(key!);
         if (description === undefined)
