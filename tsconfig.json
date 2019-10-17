@@ -20,7 +20,11 @@
   },
   "exclude": [
     "dist",
-    "node_modules"
+    "node_modules",
+    "example/**",
+  ],
+  "include": [
+    "*.ts"
   ],
   "atom": {
     "rewriteTsconfig": false
