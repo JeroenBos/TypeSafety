@@ -48,8 +48,6 @@ export type PrimitiveTypes = {
     '(nullable boolean)[]': (boolean | null)[],
 }
 
-export type ExcludePrimitives<T> = Exclude<T, string | number | boolean>
-
 export class BaseTypeDescriptions implements TypeDescriptionsFor<PrimitiveTypes> {
     'any' = anyDescription;
     'null' = nullDescription;

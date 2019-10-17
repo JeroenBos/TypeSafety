@@ -3,23 +3,28 @@ import { GetKey, IsNever, IsAny, IsOptional } from "./typeHelper";
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (
-        IsOptional<Types[K], u> extends false ? descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>
-        : (Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Exclude<Types[K][u], undefined>, Types>>>, undefined>
-            | Exclude<possiblyMissing<descriptionKey<Types[K], u, GetKey<Types[K][u], Types>>>, undefined>
+        IsOptional<Types[K], u> extends false ? descriptionKey<Types[K][u], GetKey<Types[K][u], Types>>
+        : (Exclude<possiblyMissing<descriptionKey<Types[K][u], GetKey<Exclude<Types[K][u], undefined>, Types>>>, undefined>
+            | Exclude<possiblyMissing<descriptionKey<Types[K][u], GetKey<Types[K][u], Types>>>, undefined>
         )
     )
 };
 
-type descriptionKey<V, u extends keyof V, UKey> =
+// T for value type in (Checkable) Types of the parameter
+// K for the key of the type P in CheckableTypes
+type descriptionKey<T, K> =
 
-    IsNever<UKey> extends false ? UKey :
+    // if the key does not exist in checkable type, we select either one of 'any', '!null', '!undefined', 'any!'
+    // depending on whether null and/or undefined are part of the type T[P]
+    IsNever<K> extends false ? K :
     (
-        IsAny<V[u]> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
+        
+        IsAny<T> extends true ? 'any' | '!null' | '!undefined' | 'any!' :
         (
-            null extends V[u] ?
-            undefined extends V[u] ? 'any' : '!undefined'
+            null extends T ?
+            undefined extends T ? 'any' : '!undefined'
             :
-            undefined extends V[u] ? '!null' : 'any!'
+            undefined extends T ? '!null' : 'any!'
         )
     )
 
