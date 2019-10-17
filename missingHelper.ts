@@ -25,7 +25,7 @@ type descriptionKey<V, u extends keyof V, UKey> =
     )
 
 export function isMissing(o: any): o is possiblyMissing<any> {
-    return true;
+    return o instanceof possiblyMissing;
 }
 export class possiblyMissing<T> { public readonly key: any; constructor(key: string) { this.key = key; } }
 export function optional<T extends string>(s: T): possiblyMissing<T> {
