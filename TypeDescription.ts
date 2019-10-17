@@ -76,12 +76,6 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                 // logging is done in this.checkProperty
             }
         }
-        if ((variance & Variance.Partial) == 0) {
-            for (const missingPropertyName in expectedProperties) {
-                log(stackErrorMessage_Missing(missingPropertyName));
-                result = false; if (log === undefined) { return result; }
-            }
-        }
         return result;
     }
     private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
