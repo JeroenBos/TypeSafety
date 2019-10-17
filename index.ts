@@ -22,7 +22,6 @@ import {
     composeConjunctDescriptions
 } from './built-ins';
 import {
-    createHelperFunction,
     TypeSystem,
 } from './typeSystem';
 import { optional, isMissing } from './missingHelper';
@@ -35,7 +34,6 @@ export {
     possiblyUndefined,
     possiblyNullOrUndefined,
     composeAlternativeDescriptions,
-    createHelperFunction as createCreateFunction,
     TypeSystem,
     array,
     composeConjunctDescriptions,
@@ -53,7 +51,6 @@ export default {
     composeAlternativeDescriptions,
     array,
     composeConjunctDescriptions,
-    createCreateFunction: createHelperFunction,
     TypeSystem,
     optional,
     isMissing,

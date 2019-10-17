@@ -1,6 +1,5 @@
-import { TypeSystem, BaseTypeDescriptions, TypeDescriptionsFor, createCreateFunction } from '..';
+import { TypeSystem, BaseTypeDescriptions, TypeDescriptionsFor } from '..';
 import { PrimitiveTypes } from '../built-ins';
-const create = <T extends object>() => createCreateFunction<CheckableTypes, T>();
 
 class nonExistent { }
 export type X = {
@@ -16,9 +15,9 @@ type CheckableTypes = {
 }
 
 class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
-    public readonly Example = create<Example>()({ a: 'number[]', b: 'string?', c: 'hasNumberL' });
-    public readonly hasNumberL = create<{ L: number }>()({ L: 'number' });
-    public readonly X = create<X>()({ x: 'any', y: '!undefined', z: '!null' });
+    public readonly Example = this.create<Example>({ a: 'number[]', b: 'string?', c: 'hasNumberL' });
+    public readonly hasNumberL = this.create<{ L: number }>({ L: 'number' });
+    public readonly X = this.create<X>({ x: 'any', y: '!undefined', z: '!null' });
 }
 
 export const typesystem = new TypeSystem(new AllTypeDescriptions() as TypeDescriptionsFor<CheckableTypes & PrimitiveTypes>);

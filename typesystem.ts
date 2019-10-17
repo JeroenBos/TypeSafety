@@ -208,19 +208,6 @@ assert<IsOptional<{ c?: string }, 'c'>>(true);
 
 type P<T> = T & PrimitiveTypes;
 
-
-
-/**
- * This constructs a helper function to create type descriptions for custom interfaces/classes.
- */
-export function createHelperFunction<Types, T extends object & P<Types>[keyof P<Types>]>()
-    : (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) => ITypeDescriptions<P<Types>[GetKey<T, P<Types>>]> {
-    {
-        return (propertyDescriptions: DescriptionKeys<GetKey<T, P<Types>>, P<Types>>) =>
-            TypeDescription.create<P<Types>, GetKey<T, P<Types>>>(propertyDescriptions);
-    }
-}
-
 /**
  * An implementation of a type system describing only the primitive types.
  */
