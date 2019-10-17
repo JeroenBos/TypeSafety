@@ -2,20 +2,22 @@ import { assert, IsExact, IsExactOrAny, GetKey } from '../typeHelper';
 import { ITypeDescription, TypeDescriptionsFor, ITypeDescriptions, Variance } from '../ITypeDescription';
 import { BaseTypeDescriptions, PrimitiveTypes, nonnullNorUndefinedDescription, nonnullDescription, definedDescription } from '../built-ins';
 import { CheckableTypes, typeSystem, AllTypeDescriptions, A, B } from './system.spec';
+import { typesystem, X } from '../example/example';
 
 type allCheckableTypes = CheckableTypes & PrimitiveTypes;
 
 assert<IsExact<A['b'], B | undefined>>(true);
 
 
+
 //
 // test getKey
 //
 
-assert<IsExact<'string', GetKey<string, allCheckableTypes>>>(false); // should be true. see ./example/wtf.png
+assert<IsExact<'string', GetKey<string, allCheckableTypes>>>(true);
 assert<IsExact<'a', GetKey<A, allCheckableTypes>>>(true);
-assert<IsExact<'b', GetKey<B, allCheckableTypes>>>(false); // should be true. see ./example/wtf.png
-assert<IsExact<'b?', GetKey<B | undefined, allCheckableTypes>>>(false); // should be true. see ./example/wtf.png
+assert<IsExact<'b', GetKey<B, allCheckableTypes>>>(true);
+assert<IsExact<'b?', GetKey<B | undefined, allCheckableTypes>>>(true);
 type t = GetKey<B | undefined, allCheckableTypes>;
 
 //
@@ -49,7 +51,7 @@ export type descriptionDebug<K extends keyof Types, T extends Types[K], Types, U
 //
 type realwrapper<K extends keyof allCheckableTypes> = real<K, allCheckableTypes>;
 type reala = realwrapper<'a'>;
-assert<IsExact<{ x: 'string', b: 'b?' }, reala>>(false); // should be true. see ./example/wtf.png
+assert<IsExact<{ x: 'string', b: 'b?' }, reala>>(true);
 type realb = realwrapper<'b'>;
 assert<IsExact<{ a: 'a' }, realb>>(true);
 
@@ -172,7 +174,7 @@ describe('tests', () => {
         const isB = typeSystem.isPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (isB) throw new Error();
     });
-
+    
     it('isPartialExtends allows extraneous properties', () => {
         const isB = typeSystem.isNonStrictPartial('b', { Y: undefined }); // note that 'Y' does not exist on B
         if (!isB) throw new Error();
@@ -259,25 +261,24 @@ describe('tests', () => {
         if (!_is)
             throw new Error();
     });
-    // idscarded tests due to TS bug. see ./example/wtf.png
-    // it('test X, which contains properties of type any, nonnull and nonundefined', () => {
-    //     const x: X = {
-    //         x: null,
-    //         y: null,
-    //         z: undefined
-    //     };
-    //     const _isX = typesystem.extends('X', x);
-    //     if (!_isX)
-    //         throw new Error();
-    // });
-    // it('test X, which contains properties of type any, nonnull and nonundefined', () => {
-    //     const x: X = {
-    //         x: null,
-    //         y: null,
-    //         z: null as any
-    //     };
-    //     const _isX = typesystem.extends('X', x);
-    //     if (_isX)
-    //         throw new Error();
-    // });
+    it('test X, which contains properties of type any, nonnull and nonundefined', () => {
+        const x: X = {
+            x: null,
+            y: null,
+            z: undefined
+        };
+        const _isX = typesystem.extends('X', x);
+        if (!_isX)
+            throw new Error();
+    });
+    it('test X, which contains properties of type any, nonnull and nonundefined', () => {
+        const x: X = {
+            x: null,
+            y: null,
+            z: null as any
+        };
+        const _isX = typesystem.extends('X', x);
+        if (_isX)
+            throw new Error();
+    });
 });
