@@ -37,7 +37,7 @@ The convention includes types like `AllTypesDescriptions` and `TypeDescriptionsF
 So the idea is you just write type descriptions once, and you can assert type safety for ever! Some basic type descriptions have already been implemented in `BaseTypeDescriptions`.
 
 
-## Available methods
+## Available API
 
 I'd kindly like to inform you of the following methods that are designed to help creating type descriptions: 
 
@@ -52,7 +52,7 @@ I'd kindly like to inform you of the following methods that are designed to help
 
 
 
-And the typesystem has the following methods in its API:
+Furthermore, the typesystem has the following methods in its API:
 
 - isExact(key, obj).
 - extends(key, obj) .
@@ -63,7 +63,7 @@ And the typesystem has the following methods in its API:
 
 
 ### Extensions
-If for example you don't want to bother checking a particular property on an object, you could always check is using the type description with key `any`, or alternatively the following also exist: `!undefined`, `!null` and `any!`. In the first two, `!` is to be read as `not`, in the last one as the _bang_ operator.
+If for example you don't want to bother checking a particular property on an object, you could always check it using the type description with key `any`, or alternatively the following also exist: `!undefined`, `!null` and `any!`. In the first two, `!` is to be read as `not`, in the last one as the _bang_ operator.
 
 Alternatively, if you bother a lot, you can of course completely implement your own type descriptions, simply implement `ITypeDescriptions`, and let  `TypeSystem` do the rest, and even guide you on correctly implementing it.
 
