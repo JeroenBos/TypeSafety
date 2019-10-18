@@ -56,7 +56,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      * Returns whether all properties on `obj` are valid properties on `Types[K]`
      * and all properties on `Types[K]` are present.
      */
-    isExact<K extends string & keyof Types>(key: K, obj: any): obj is Partial<Types[K]> {
+    isExact<K extends string & keyof Types>(key: K, obj: any): obj is Types[K] {
         return this.isImpl(key, obj, Variance.Exact);
     }
     /**
