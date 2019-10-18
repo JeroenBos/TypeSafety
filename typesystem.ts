@@ -1,6 +1,6 @@
 import { PrimitiveTypes, BaseTypeDescriptions, missingOrUndefinedDescription, disjunct } from "./built-ins";
 import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITypeDescription";
-import { ContainsExactValues, NotNeverValues, ContainsExactValue, assert } from "./typeHelper";
+import { ContainsExactValues, NotNeverValues, ContainsExactValue } from "./typeHelper";
 import { DisposableStackElement } from "./DisposableStackElement";
 import { isMissing } from "./missingHelper";
 
