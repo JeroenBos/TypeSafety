@@ -17,12 +17,32 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     }
 
     /**
-     * Verifies compile time and runtime whether `obj` is assignable to `Types[K]`.
-     * At runtime, throws if `obj` is not assignable to `Types[K]`.
+     * Verifies compile time and runtime whether `obj` is assignable to `Types[K]`; throws otherwise.
      */
     verify<K extends string & keyof Types>(key: K, obj: Types[K]): void {
         this.assert(key, obj);
     }
+    /**
+     * Verifies compile time and runtime whether `obj` is assignable to `Types[K]` 
+     * and at runtime that `obj` has no extraneous properties; throws otherwise.
+     */
+    verifyExact<K extends string & keyof Types>(key: K, obj: Types[K]): void {
+        this.assertExact(key, obj);
+    }
+    /**
+     * Verifies compile time and runtime whether `obj` is assignable to `Partial<Types[K]>`; throws otherwise.
+     */
+    verifyPartial<K extends string & keyof Types>(key: K, obj: Partial<Types[K]>): void {
+        this.assertPartial(key, obj);
+    }
+    /**
+     * Verifies compile time whether `obj` is assignable to `Partial<Types[K]>` 
+     * and runtime whether all properties on `obj` that are properties on `Types[K]` are valid.
+     */
+    verifyNonStrictPartial<K extends string & keyof Types>(key: K, obj: Partial<Types[K]>): void {
+        this.assertNonStrictPartial(key, obj);
+    }
+
     /**
      * Checks only at runtime whether `obj` is assignable to `Types[K]`; throws otherwise.
      */
