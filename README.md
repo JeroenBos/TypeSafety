@@ -61,6 +61,7 @@ Furthermore, the typesystem has the following methods in its API:
 - assertion methods for all variants of the above (_asserting_ as opposed to _checking_)
 - lambda-returning methods for all of the above e.g. isExactF(key)(obj)
 
+Lastly, the `TypeSystem` constructor takes a function as argument to log to, in case you want to know what exactly is wrong with any type check. Usually I specify `console.error`.
 
 ### Extensions
 If for example you don't want to bother checking a particular property on an object, you could always check it using the type description with key `any`, or alternatively the following also exist: `!undefined`, `!null` and `any!`. In the first two, `!` is to be read as `not`, in the last one as the _bang_ operator.
