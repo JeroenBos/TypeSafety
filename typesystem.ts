@@ -3,6 +3,7 @@ import { TypeDescriptionsFor, ILogger, ITypeDescriptions, Variance } from "./ITy
 import { ContainsExactValues, NotNeverValues, ContainsExactValue } from "./typeHelper";
 import { DisposableStackElement } from "./DisposableStackElement";
 import { isMissing } from "./missingHelper";
+import { rootName } from "./TypeDescription";
 
 export class TypeSystem<Types extends PrimitiveTypes> {
     private readonly typeDescriptions = new Map<keyof Types, ITypeDescriptions<Types[keyof Types]>>();
@@ -107,7 +108,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         if (typeof key !== 'string') throw new Error('only string keys are supported');
 
         const description = this.getDescription(key);
-        const stackElem = DisposableStackElement.enter('obj', key);
+        const stackElem = DisposableStackElement.enter(rootName, key);
         try {
             return description.is(obj, variance, key => this.getDescription(key), this.log);
         }

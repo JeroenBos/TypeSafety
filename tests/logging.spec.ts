@@ -1,5 +1,5 @@
 import { anyDescription, BaseTypeDescriptions, possiblyUndefined, PrimitiveTypes } from "../built-ins";
-import { errorMessage_Missing, errorMessage_Wrong } from "../TypeDescription";
+import { errorMessage_Missing, errorMessage_Wrong, rootName } from "../TypeDescription";
 import { OptionalToMissing } from "../typeHelper";
 import { TypeSystem } from "../typeSystem";
 import { TypeDescriptionsFor } from "../ITypeDescription";
@@ -47,7 +47,7 @@ describe('Test logging', () => {
         const logStatements: string[] = [];
         const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
         const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('obj', 'x', 'L1'), errorMessage_Missing('obj', 'b', 'L1')];
+        const expectedLogStatements: string[] = [errorMessage_Missing(rootName, 'x', 'L1'), errorMessage_Missing(rootName, 'b', 'L1')];
 
         // act
         typesystem.extends('L1', {});
@@ -61,7 +61,7 @@ describe('Test logging', () => {
         const logStatements: string[] = [];
         const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
         const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Missing('obj.b', 'c', 'L2'), errorMessage_Missing('obj.b', 's', 'L2')];
+        const expectedLogStatements: string[] = [errorMessage_Missing('arg.b', 'c', 'L2'), errorMessage_Missing('arg.b', 's', 'L2')];
 
         // act
         typesystem.extends('L1', { x: '', b: {} });
@@ -76,7 +76,7 @@ describe('Test logging', () => {
         const logStatements: string[] = [];
         const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
         const typesystem = new TypeSystem(descriptions, logStatements.push.bind(logStatements));
-        const expectedLogStatements: string[] = [errorMessage_Wrong('obj', 'x', 'string', 'null'), errorMessage_Wrong('obj', 'b', 'L2', 'null')];
+        const expectedLogStatements: string[] = [errorMessage_Wrong(rootName, 'x', 'string', 'null'), errorMessage_Wrong(rootName, 'b', 'L2', 'null')];
 
         // act
         typesystem.extends('L1', { x: null, b: null });

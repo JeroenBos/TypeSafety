@@ -117,7 +117,7 @@ function stackErrorMessage_Extra(extraPropertyName: string): string {
     return errorMessage_Extra(path, extraPropertyName, type);
 }
 
-
+export const rootName = 'arg';
 export function errorMessage_Missing(path: string, missingPropertyName: string, type: string): string {
     const extraDot = path == '' ? '' : '.';
     return `'${path}${extraDot}${missingPropertyName}' is missing ${type == '' ? '' : `(type = ${type})`}`;
