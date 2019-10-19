@@ -20,7 +20,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         return Object.getPrototypeOf(description) == TypeDescription.prototype;
     }
 
-    private constructor(
+    protected constructor(
         private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
     is(obj: any, variance: Variance, getSubdescription: DescriptionGetter, log: ILogger): obj is Types[K] {
@@ -75,13 +75,19 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
         return result;
     }
-    private isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
+    protected isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
-    private checkProperty(obj: any, propertyName: string & keyof Types[K], getSubdescription: DescriptionGetter, log: ILogger): boolean {
+    protected checkProperty(
+        obj: any,
+        propertyName: string & keyof Types[K],
+        getSubdescription: DescriptionGetter,
+        log: ILogger,
+        propertyKey?: DescriptionKeys<K, Types>[string & keyof Types[K]]
+    ): boolean {
         const property = obj[propertyName];
-        const propertyKey = this.propertyDescriptions[propertyName];
+        propertyKey = propertyKey || this.propertyDescriptions[propertyName];
         const propertyDescription = getSubdescription(propertyKey);
         const stackElem = DisposableStackElement.enter(propertyName, propertyKey as any);
         let isOfPropertyType;
