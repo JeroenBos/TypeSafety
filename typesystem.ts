@@ -117,7 +117,7 @@ export class TypeSystem<Types extends PrimitiveTypes> {
     }
 
     /**
-     * Get the type description object for the specified key.
+     * Gets the type description object for the specified key.
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
         if (isMissing(key)) {
@@ -127,6 +127,16 @@ export class TypeSystem<Types extends PrimitiveTypes> {
         if (description === undefined)
             throw new Error('description missing for key ' + key);
         return description;
+    }
+
+    /**
+      * Gets whether this type system has a type description object for the specified key.
+      */
+    hasDescription(key: any): key is keyof Types {
+        if (isMissing(key)) {
+            return this.hasDescription(key.key);
+        }
+        return this.typeDescriptions.get(key) !== undefined;
     }
 
     private add<TKey extends keyof Types>(key: TKey, typeDescription: ITypeDescriptions<Types[TKey]>) {
