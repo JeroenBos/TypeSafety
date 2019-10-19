@@ -27,7 +27,7 @@ export class AnyContainer {
 
 export type CheckableTypes = OptionalToMissing<{
     'a': A,
-    'record': Record<string, A>
+    'record': Record<string, A>,
 }>
 
 export class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> implements TypeDescriptionsFor<CheckableTypes> {
@@ -41,8 +41,34 @@ export const typesystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new Al
 
 
 describe('RecordTypeDescription', () => {
-    it('empty record is a record', () => {
+    it('empty record is a exactly a record', () => {
         const is = typesystem.isExact('record', {});
         if (!is) throw new Error();
+    });
+    it('empty record is a partial record', () => {
+        const is = typesystem.isPartial('record', {});
+        if (!is) throw new Error();
+    });
+    it('empty record extends a record', () => {
+        const is = typesystem.extends('record', {});
+        if (!is) throw new Error();
+    });
+
+    it('record with single element is exactly a record', () => {
+        const is2 = typesystem.isExact('record', { _: { x: '', b: undefined } });
+        if (!is2) throw new Error();
+    });
+    it('record with single element is partial record', () => {
+        const is2 = typesystem.isPartial('record', { _: { x: '', b: undefined } });
+        if (!is2) throw new Error();
+    });
+    it('record with single element extends record', () => {
+        const is2 = typesystem.extends('record', { _: { x: '', b: undefined } });
+        if (!is2) throw new Error();
+    });
+
+    it('record with two elements is exactly a record', () => {
+        const is2 = typesystem.isExact('record', { _: { x: '', b: undefined }, __: { x: '', b: undefined } });
+        if (!is2) throw new Error();
     });
 });
