@@ -2,6 +2,7 @@ import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Vari
 import { TypeDescription } from './TypeDescription';
 import { Missing, isMissing, DescriptionKeys } from './missingHelper';
 import { GetKey } from './typeHelper';
+import { RecordTypeDescription } from './record.typedescription';
 
 export type PrimitiveTypes = {
     'any': any,
@@ -55,6 +56,16 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
      */
     public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
         return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    }
+    /**
+     * Creates an type description for an `Record<string, T>`.
+     */
+    public createRecord<V,
+        TRecord extends Record<string, V> = Record<string, V>,
+        K extends keyof (PrimitiveTypes & TCheckableTypes) & GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)> = GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)>>
+        (elementDescriptionKey: GetKey<V, PrimitiveTypes & TCheckableTypes>): ITypeDescriptions<(PrimitiveTypes & TCheckableTypes)[K]>
+    {
+        return new RecordTypeDescription<PrimitiveTypes & TCheckableTypes, V, TRecord, K>(elementDescriptionKey)
     }
     'any' = anyDescription;
     'null' = nullDescription;
