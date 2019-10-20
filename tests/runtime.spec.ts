@@ -281,4 +281,9 @@ describe('tests', () => {
         if (_isX)
             throw new Error();
     });
+    
+    it('.is(non-object) returns false', () => {
+        const is2 = typesystem.isExact('X', 0);
+        if (is2) throw new Error();
+    });
 });
