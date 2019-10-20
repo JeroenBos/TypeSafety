@@ -22,6 +22,8 @@ import {
     TypeSystem,
 } from './typeSystem';
 import { optional, isMissing } from './missingHelper';
+import { RecordTypeDescription } from './record.typedescription';
+import { TypeDescription } from './TypeDescription';
 
 export {
     BaseTypeDescriptions,
@@ -35,6 +37,8 @@ export {
     conjunct,
     optional,
     isMissing,
+    TypeDescription,
+    RecordTypeDescription,
 };
 
 export default {
@@ -49,4 +53,6 @@ export default {
     TypeSystem,
     optional,
     isMissing,
+    TypeDescription,
+    RecordTypeDescription,
 };
