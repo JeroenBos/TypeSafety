@@ -4,9 +4,8 @@ export { OptionalToMissing, IsExact } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
 export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
 export { TypeDescriptionsFor } from './ITypeDescription';
-export { Missing } from './missingHelper';
+export { Missing, DescriptionKeys } from './missingHelper';
 export { DescriptionGetter, Variance, ILogger } from './ITypeDescription';
-
 // JS:
 
 import {
