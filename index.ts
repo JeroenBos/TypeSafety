@@ -3,7 +3,7 @@
 export { OptionalToMissing, IsExact } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
 export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
-export { TypeDescriptionsFor } from './ITypeDescription';
+export { TypeDescriptionsFor, ITypeDescriptions } from './ITypeDescription';
 export { Missing, DescriptionKeys } from './missingHelper';
 export { DescriptionGetter, Variance, ILogger } from './ITypeDescription';
 // JS:
