@@ -24,7 +24,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
     }
     is(obj: any, variance: Variance, getSubdescription: DescriptionGetter, log: ILogger): obj is Types[K] {
-        if (obj === undefined || obj === null || isMissing(obj)) {
+        if (obj === undefined || obj === null || isMissing(obj) || typeof obj !== 'object') {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
