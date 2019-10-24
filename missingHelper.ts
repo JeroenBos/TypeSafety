@@ -1,4 +1,9 @@
 import { GetKey, IsNever, IsAny, IsOptional } from './typeHelper';
+import { INamedTypeDescriptions } from './ITypeDescription';
+
+export type DescriptionKeysOrObjects<K extends keyof Types, Types> = {
+    [u in keyof Types[K]]-?: INamedTypeDescriptions<Types[K][u]> | DescriptionKeys<K, Types>[u]
+}
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (
@@ -16,6 +21,8 @@ export type DescriptionKeys<K extends keyof Types, Types> = {
 
     )
 };
+
+type ExtractStringValues<T> = { [K in keyof T]: Extract<T[K], string> };
 
 // T for value type in (Checkable) Types of the parameter
 // K for the key of the type P in CheckableTypes
