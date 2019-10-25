@@ -11,7 +11,7 @@ export class RecordTypeDescription<
     >
     extends TypeDescription<K, Types> {
     constructor(elementDescriptionKey: GetKey<V, Types>, ...mandatoryNames: string[]) {
-        super(RecordTypeDescription.toSuperCtorArg(mandatoryNames, elementDescriptionKey));
+        super(RecordTypeDescription.toSuperCtorArg(mandatoryNames, elementDescriptionKey) as any);
         this.elementDescriptionKey = elementDescriptionKey as any;
     }
     private static toSuperCtorArg<K extends keyof Types, Types>(names: string[], elementDescription: any): DescriptionKeys<K, Types> {
