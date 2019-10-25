@@ -1,4 +1,4 @@
-import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
+import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter, INamedTypeDescriptions } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
 import { Missing, isMissing, DescriptionKeysOrObjects } from './missingHelper';
 import { GetKey } from './typeHelper';
@@ -63,8 +63,7 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     public createRecord<V,
         TRecord extends Record<string, V> = Record<string, V>,
         K extends keyof (PrimitiveTypes & TCheckableTypes) & GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)> = GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)>>
-        (elementDescriptionKey: GetKey<V, PrimitiveTypes & TCheckableTypes>): ITypeDescriptions<(PrimitiveTypes & TCheckableTypes)[K]>
-    {
+        (elementDescriptionKey: GetKey<V, PrimitiveTypes & TCheckableTypes>): ITypeDescriptions<(PrimitiveTypes & TCheckableTypes)[K]> {
         return new RecordTypeDescription<PrimitiveTypes & TCheckableTypes, V, TRecord, K>(elementDescriptionKey)
     }
     'any' = anyDescription;
@@ -122,9 +121,9 @@ const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | nul
 const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription = noVariance<null>(function is(obj: any): obj is null { return obj === null; })
-export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => !isMissing(obj) };
-export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && !isMissing(obj) }
-export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && !isMissing(obj) }
+export const anyDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => !isMissing(obj), typeName: 'any' };
+export const nonnullDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => obj !== null && !isMissing(obj), typeName: '!null' }
+export const definedDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => obj !== undefined && !isMissing(obj), typeName: '!undefined' }
 export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && !isMissing(obj) }
 
 export const stringDescription = createPrimitiveDescription('string');
