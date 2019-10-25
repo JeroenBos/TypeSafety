@@ -32,8 +32,8 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         if ((variance & Variance.Partial) == 0) {
             // remove properties that are allowed to be missing:
             for (const possiblyOptionalPropertyName in expectedProperties) {
-                const possiblyOptionalTypeKey = expectedProperties[possiblyOptionalPropertyName];
-                const description = getSubdescription(possiblyOptionalTypeKey)
+                const x = expectedProperties[possiblyOptionalPropertyName]; // x can be just the key, a missing key, or the description itself
+                const description = typeof x == 'string' || isMissing(x) ? getSubdescription(x) : (x as ITypeDescriptions<any>);
                 // if the property is actually missing
                 if (!(possiblyOptionalPropertyName in obj)) {
                     // if missing is allowed
@@ -45,16 +45,13 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
                     }
                 } else { // it's not missing
                     // then omit the part of the description that said it could be missing (it is was described as such)
-                    if (isMissing(possiblyOptionalTypeKey)) {
-                        expectedProperties[possiblyOptionalPropertyName] = possiblyOptionalTypeKey.key;
+                    if (isMissing(x)) {
+                        expectedProperties[possiblyOptionalPropertyName] = x.key;
                     }
                 }
 
-                if (isMissing(possiblyOptionalTypeKey)) {
-                    if (!(possiblyOptionalPropertyName in obj)) {
-                        delete expectedProperties[possiblyOptionalPropertyName];
-                    } else {
-                    }
+                if (isMissing(x) && !(possiblyOptionalPropertyName in obj)) {
+                    delete expectedProperties[possiblyOptionalPropertyName];
                 }
             }
         }
@@ -124,7 +121,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
     ): boolean {
         const property = obj[propertyName];
         const { name: loggedName, description } = this.getProperty(propertyName, getSubdescription, propertyKey as any);
-        const stackElem = DisposableStackElement.enter(propertyName, loggedName as any);
+        const stackElem = DisposableStackElement.enter(propertyName, loggedName);
         let isOfPropertyType;
 
         let loggedError = false; // this boolean indicates whether checking this property has already resulted in logging errors, in which case we won't add anything here
@@ -140,7 +137,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         }
 
         if (!isOfPropertyType && !loggedError) {
-            log(stackErrorMessage_Wrong(propertyName, loggedName as any, property));
+            log(stackErrorMessage_Wrong(propertyName, loggedName, property));
         }
         return isOfPropertyType;
     }
