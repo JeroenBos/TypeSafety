@@ -54,8 +54,14 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     /**
      * Creates an type description for an `object`.
      */
-    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
         return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    }
+    /**
+     * Creates an type description for an `object`.
+     */
+    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+        return BaseTypeDescriptions.create<T, TCheckableTypes & PrimitiveTypes>(propertyDescriptions);
     }
     /**
      * Creates an type description for an `Record<string, T>`.
