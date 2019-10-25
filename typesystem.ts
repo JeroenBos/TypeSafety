@@ -122,6 +122,9 @@ export class TypeSystem<Types extends PrimitiveTypes> {
      */
     getDescription<K extends keyof Types>(key: K): ITypeDescriptions<Types[keyof Types]> {
         if (isMissing(key)) {
+            if (typeof key == 'object' && 'is' in key) {
+                return key as any;
+            }
             return disjunct(missingOrUndefinedDescription, this.getDescription(key.key)) as any;
         }
         const description = this.typeDescriptions.get(key!);

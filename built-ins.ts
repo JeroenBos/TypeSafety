@@ -1,6 +1,6 @@
-import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
+import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter, INamedTypeDescriptions } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
-import { Missing, isMissing, DescriptionKeys } from './missingHelper';
+import { Missing, isMissing, DescriptionKeysOrObjects } from './missingHelper';
 import { GetKey } from './typeHelper';
 import { RecordTypeDescription } from './record.typedescription';
 
@@ -54,8 +54,15 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     /**
      * Creates an type description for an `object`.
      */
-    public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
-        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions: 
+        DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes, T>) {
+        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>, T>(propertyDescriptions);
+    }
+    /**
+     * Creates an type description for an `object`.
+     */
+    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes, T>) {
+        return BaseTypeDescriptions.create<T, TCheckableTypes & PrimitiveTypes>(propertyDescriptions);
     }
     /**
      * Creates an type description for an `Record<string, T>`.
@@ -63,8 +70,7 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     public createRecord<V,
         TRecord extends Record<string, V> = Record<string, V>,
         K extends keyof (PrimitiveTypes & TCheckableTypes) & GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)> = GetKey<TRecord, (PrimitiveTypes & TCheckableTypes)>>
-        (elementDescriptionKey: GetKey<V, PrimitiveTypes & TCheckableTypes>): ITypeDescriptions<(PrimitiveTypes & TCheckableTypes)[K]>
-    {
+        (elementDescriptionKey: GetKey<V, PrimitiveTypes & TCheckableTypes>): ITypeDescriptions<(PrimitiveTypes & TCheckableTypes)[K]> {
         return new RecordTypeDescription<PrimitiveTypes & TCheckableTypes, V, TRecord, K>(elementDescriptionKey)
     }
     'any' = anyDescription;
@@ -122,9 +128,9 @@ const missingOrUndefinedOrNullDescription = noVariance<Missing | undefined | nul
 const undefinedOrNullDescription = noVariance<null | undefined>(function is(obj: any): obj is undefined | null { return obj === undefined || obj === null; });
 const undefinedDescription = noVariance<undefined>(function is(obj: any): obj is undefined { return obj === undefined; })
 const nullDescription = noVariance<null>(function is(obj: any): obj is null { return obj === null; })
-export const anyDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => !isMissing(obj) };
-export const nonnullDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== null && !isMissing(obj) }
-export const definedDescription: ITypeDescriptions<null> = { is: (obj: any): obj is null => obj !== undefined && !isMissing(obj) }
+export const anyDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => !isMissing(obj), typeName: 'any' };
+export const nonnullDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => obj !== null && !isMissing(obj), typeName: '!null' }
+export const definedDescription: INamedTypeDescriptions<any> = { is: (obj: any): obj is null => obj !== undefined && !isMissing(obj), typeName: '!undefined' }
 export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => obj !== undefined && obj !== null && !isMissing(obj) }
 
 export const stringDescription = createPrimitiveDescription('string');
@@ -185,7 +191,7 @@ export function disjunct<K1, K2>(description1: ITypeDescriptions<K1>, descriptio
 
 /** Applies logical conjugation, i.e. `T & U` */
 export function conjunct<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
-    if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
+    if (TypeDescription.isObjectDescription(description1) && TypeDescription.isObjectDescription(description2)) {
         return TypeDescription.compose(description1, description2);
     }
 

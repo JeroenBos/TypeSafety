@@ -3,10 +3,9 @@
 export { OptionalToMissing, IsExact } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
 export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
-export { TypeDescriptionsFor } from './ITypeDescription';
-export { Missing } from './missingHelper';
+export { TypeDescriptionsFor, ITypeDescriptions } from './ITypeDescription';
+export { Missing, DescriptionKeys } from './missingHelper';
 export { DescriptionGetter, Variance, ILogger } from './ITypeDescription';
-
 // JS:
 
 import {
@@ -23,6 +22,8 @@ import {
     TypeSystem,
 } from './typeSystem';
 import { optional, isMissing } from './missingHelper';
+import { RecordTypeDescription } from './record.typedescription';
+import { TypeDescription } from './TypeDescription';
 
 export {
     BaseTypeDescriptions,
@@ -36,6 +37,8 @@ export {
     conjunct,
     optional,
     isMissing,
+    TypeDescription,
+    RecordTypeDescription,
 };
 
 export default {
@@ -50,4 +53,6 @@ export default {
     TypeSystem,
     optional,
     isMissing,
+    TypeDescription,
+    RecordTypeDescription,
 };

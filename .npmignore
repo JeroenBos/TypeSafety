@@ -4,3 +4,5 @@
 .vscode/**
 example/**
 dist/types/example/example.d.ts
+dist/test.js
+dist/test.js.map

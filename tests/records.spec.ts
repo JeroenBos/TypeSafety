@@ -1,8 +1,7 @@
-import { TypeSystem, DebugTypeSystem } from "../typeSystem";
-import { BaseTypeDescriptions, possiblyUndefined, possiblyNullOrUndefined, nullable, anyDescription, PrimitiveTypes } from "../built-ins";
-import { TypeDescriptionsFor, ITypeDescriptions } from "../ITypeDescription";
-import { OptionalToMissing, IsExact, assert, GetKey, } from "../typeHelper";
-import { RecordTypeDescription } from "../record.typedescription";
+import { TypeSystem } from "../typeSystem";
+import { BaseTypeDescriptions, PrimitiveTypes } from "../built-ins";
+import { TypeDescriptionsFor } from "../ITypeDescription";
+import { OptionalToMissing } from "../typeHelper";
 
 export class A {
     x: string = 'a';
