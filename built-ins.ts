@@ -1,6 +1,6 @@
 import { TypeDescriptionsFor, ITypeDescription, ILogger, ITypeDescriptions, Variance, RemainingParametersWithVar, DescriptionGetter } from './ITypeDescription';
 import { TypeDescription } from './TypeDescription';
-import { Missing, isMissing, DescriptionKeys } from './missingHelper';
+import { Missing, isMissing, DescriptionKeysOrObjects } from './missingHelper';
 import { GetKey } from './typeHelper';
 import { RecordTypeDescription } from './record.typedescription';
 
@@ -54,7 +54,7 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     /**
      * Creates an type description for an `object`.
      */
-    public create<T extends object>(propertyDescriptions: DescriptionKeys<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
         return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
     }
     /**
