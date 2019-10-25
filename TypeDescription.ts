@@ -106,7 +106,10 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             else {
                 const namedDescription = descriptionOrKey as any as INamedTypeDescriptions<T>;
                 description = namedDescription;
-                name = namedDescription.name;
+                if (typeof namedDescription.typeName == 'string')
+                    name = namedDescription.typeName;
+                else
+                    name = '?';
             }
         }
 

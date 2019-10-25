@@ -13,7 +13,7 @@ export interface ITypeDescriptions<T> {
 }
 
 export interface INamedTypeDescriptions<T> extends ITypeDescriptions<T> {
-    readonly name: string;
+    readonly typeName?: string;
 }
 
 export type DescriptionGetter = (key: any) => ITypeDescriptions<any>;
