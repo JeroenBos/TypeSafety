@@ -12,6 +12,10 @@ export interface ITypeDescriptions<T> {
         log: ILogger): obj is T;
 }
 
+export interface INamedTypeDescriptions<T> extends ITypeDescriptions<T> {
+    readonly typeName?: string;
+}
+
 export type DescriptionGetter = (key: any) => ITypeDescriptions<any>;
 
 export enum Variance {

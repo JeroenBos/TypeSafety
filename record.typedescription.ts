@@ -9,9 +9,9 @@ export class RecordTypeDescription<
     TRecord extends Record<string, V> = Record<string, V>,
     K extends keyof Types & GetKey<TRecord, Types> = GetKey<TRecord, Types>
     >
-    extends TypeDescription<K, Types> {
+    extends TypeDescription<K, Types, TRecord> {
     constructor(elementDescriptionKey: GetKey<V, Types>, ...mandatoryNames: string[]) {
-        super(RecordTypeDescription.toSuperCtorArg(mandatoryNames, elementDescriptionKey));
+        super(RecordTypeDescription.toSuperCtorArg(mandatoryNames, elementDescriptionKey) as any);
         this.elementDescriptionKey = elementDescriptionKey as any;
     }
     private static toSuperCtorArg<K extends keyof Types, Types>(names: string[], elementDescription: any): DescriptionKeys<K, Types> {
@@ -24,7 +24,7 @@ export class RecordTypeDescription<
 
     private readonly elementDescriptionKey: DescriptionKeys<K, Types>[string & keyof Types[K]];
 
-    protected isValidKey(_propertyName: any): _propertyName is keyof Types[K] {
+    protected isValidKey(_propertyName: any): _propertyName is keyof Types[K] & keyof TRecord {
         return true; // all property names are considered valid for a record type
     }
 
