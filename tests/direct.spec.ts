@@ -1,8 +1,8 @@
-import { TypeDescriptionsFor, TypeSystem, PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined } from '..';
-import { anyDescription, stringDescription } from '../built-ins';
-import { ITypeDescriptions } from '../ITypeDescription';
+import { anyDescription, stringDescription, PrimitiveTypes, BaseTypeDescriptions } from '../built-ins';
+import { ITypeDescriptions, TypeDescriptionsFor } from '../ITypeDescription';
 import { DescriptionKeysOrObjects, optional } from '../missingHelper';
-import { GetKey, assert, IsExact } from '../typeHelper';
+import { GetKey } from '../typeHelper';
+import { TypeSystem } from '../typeSystem';
 
 interface L1 {
     x: string;
@@ -95,5 +95,13 @@ describe('in conjunction with optional(..)', () => {
 
         // assert
         if (!is) throw new Error();
+    });
+    it(`m of wrong type is not accepted`, () => {
+        debugger;
+        // act
+        const is = typesystem.extends('L1', { m: 0 });
+
+        // assert
+        if (is) throw new Error();
     });
 });
