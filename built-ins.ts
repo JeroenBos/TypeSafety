@@ -54,13 +54,14 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     /**
      * Creates an type description for an `object`.
      */
-    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
-        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>>(propertyDescriptions);
+    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions: 
+        DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes, T>) {
+        return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>, T>(propertyDescriptions);
     }
     /**
      * Creates an type description for an `object`.
      */
-    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes>) {
+    public create<T extends object>(propertyDescriptions: DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes, T>) {
         return BaseTypeDescriptions.create<T, TCheckableTypes & PrimitiveTypes>(propertyDescriptions);
     }
     /**
@@ -190,7 +191,7 @@ export function disjunct<K1, K2>(description1: ITypeDescriptions<K1>, descriptio
 
 /** Applies logical conjugation, i.e. `T & U` */
 export function conjunct<K1, K2>(description1: ITypeDescriptions<K1>, description2: ITypeDescriptions<K2>): ITypeDescriptions<K1 & K2> {
-    if (TypeDescription.isObjectDescription<any, any>(description1) && TypeDescription.isObjectDescription<any, any>(description2)) {
+    if (TypeDescription.isObjectDescription(description1) && TypeDescription.isObjectDescription(description2)) {
         return TypeDescription.compose(description1, description2);
     }
 

@@ -9,7 +9,7 @@ export class RecordTypeDescription<
     TRecord extends Record<string, V> = Record<string, V>,
     K extends keyof Types & GetKey<TRecord, Types> = GetKey<TRecord, Types>
     >
-    extends TypeDescription<K, Types> {
+    extends TypeDescription<K, Types, TRecord> {
     constructor(elementDescriptionKey: GetKey<V, Types>, ...mandatoryNames: string[]) {
         super(RecordTypeDescription.toSuperCtorArg(mandatoryNames, elementDescriptionKey) as any);
         this.elementDescriptionKey = elementDescriptionKey as any;

@@ -1,9 +1,12 @@
 import { GetKey, IsNever, IsAny, IsOptional } from './typeHelper';
 import { INamedTypeDescriptions } from './ITypeDescription';
 
-export type DescriptionKeysOrObjects<K extends keyof Types, Types> = {
-    [u in keyof Types[K]]-?: INamedTypeDescriptions<Types[K][u]> | DescriptionKeys<K, Types>[u]
-}
+export type PropertyWiseUnion<T, U> = {
+    [K in keyof (T & U)]: (K extends keyof T ? T[K] : never) | (K extends keyof U ? U[K] : never)
+};
+
+export type DescriptionKeysOrObjects<K extends keyof Types, Types, T = Types[K]> = PropertyWiseUnion<DescriptionKeys<K, Types>,
+    { [K in keyof T]: INamedTypeDescriptions<T[K]> }>;
 
 export type DescriptionKeys<K extends keyof Types, Types> = {
     [u in keyof Types[K]]-?: (

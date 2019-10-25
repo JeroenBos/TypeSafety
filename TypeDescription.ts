@@ -8,27 +8,27 @@ import { DescriptionKeys, isMissing, explicitlyMissing, DescriptionKeysOrObjects
  * More specifically, given the name of a property `p` of interface `Types[K]` where `p extends string & keyof Types[K]`,
  * the key for this property is `Types[K][p]` and its type is `Types[Types[K][p]]`.
  */
-export class TypeDescription<K extends keyof Types, Types> implements ITypeDescriptions<Types[K]> {
-    public static create<Types, K extends keyof Types>(propertyDescriptions: DescriptionKeysOrObjects<K, Types>): ITypeDescriptions<Types[K]> {
+export class TypeDescription<K extends keyof Types, Types, T> implements ITypeDescriptions<Types[K]> {
+    public static create<Types, K extends keyof Types, T>(propertyDescriptions: DescriptionKeysOrObjects<K, Types, T>): ITypeDescriptions<Types[K]> {
         return new TypeDescription(propertyDescriptions);
     }
-    public static compose<K1 extends keyof Types, K2 extends keyof Types, Types>(description1: TypeDescription<any, any>, description2: TypeDescription<any, any>): TypeDescription<K1 & K2, Types> {
+    public static compose<K1 extends keyof Types, K2 extends keyof Types, Types>(description1: TypeDescription<any, any, any>, description2: TypeDescription<any, any, any>): TypeDescription<K1 & K2, Types, any> {
         // TODO: check for overlap, in which case this is never going to work anyway?
         return new TypeDescription({ ...description1.propertyDescriptions, ...description2.propertyDescriptions } as any);
     }
-    public static isObjectDescription<K extends keyof Types, Types>(description: ITypeDescriptions<Types[K]>): description is TypeDescription<K, Types> {
+    public static isObjectDescription(description: ITypeDescriptions<any>): description is TypeDescription<any, any, any> {
         return Object.getPrototypeOf(description) == TypeDescription.prototype;
     }
 
     protected constructor(
-        private readonly propertyDescriptions: DescriptionKeysOrObjects<K, Types>) {
+        private readonly propertyDescriptions: DescriptionKeysOrObjects<K, Types, T>) {
     }
     is(obj: any, variance: Variance, getSubdescription: DescriptionGetter, log: ILogger): obj is Types[K] {
         if (obj === undefined || obj === null || isMissing(obj) || typeof obj !== 'object') {
             return false; // this type handles composite types, so this is never a primitive type, so false
         }
         let result = true; // depending on whether a log is provided, we log everything we can find that's wrong, or we return immediately
-        const expectedProperties = Object.assign({}, this.propertyDescriptions);
+        const expectedProperties: Record<string, ITypeDescriptions<any> | string> = Object.assign({} as any, this.propertyDescriptions);
         if ((variance & Variance.Partial) == 0) {
             // remove properties that are allowed to be missing:
             for (const possiblyOptionalPropertyName in expectedProperties) {
