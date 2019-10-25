@@ -1,6 +1,6 @@
-import { ILogger, Variance, ITypeDescriptions, DescriptionGetter } from './ITypeDescription';
+import { ILogger, Variance, ITypeDescriptions, DescriptionGetter, INamedTypeDescriptions } from './ITypeDescription';
 import { DisposableStackElement } from './DisposableStackElement';
-import { DescriptionKeys, isMissing, explicitlyMissing } from './missingHelper';
+import { DescriptionKeys, isMissing, explicitlyMissing, DescriptionKeysOrObjects } from './missingHelper';
 
 /**
  * This class describes an interface, `Types[K]`, with key `K`.
@@ -9,7 +9,7 @@ import { DescriptionKeys, isMissing, explicitlyMissing } from './missingHelper';
  * the key for this property is `Types[K][p]` and its type is `Types[Types[K][p]]`.
  */
 export class TypeDescription<K extends keyof Types, Types> implements ITypeDescriptions<Types[K]> {
-    public static create<Types, K extends keyof Types>(propertyDescriptions: DescriptionKeys<K, Types>): ITypeDescriptions<Types[K]> {
+    public static create<Types, K extends keyof Types>(propertyDescriptions: DescriptionKeysOrObjects<K, Types>): ITypeDescriptions<Types[K]> {
         return new TypeDescription(propertyDescriptions);
     }
     public static compose<K1 extends keyof Types, K2 extends keyof Types, Types>(description1: TypeDescription<any, any>, description2: TypeDescription<any, any>): TypeDescription<K1 & K2, Types> {
@@ -21,7 +21,7 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
     }
 
     protected constructor(
-        private readonly propertyDescriptions: DescriptionKeys<K, Types>) {
+        private readonly propertyDescriptions: DescriptionKeysOrObjects<K, Types>) {
     }
     is(obj: any, variance: Variance, getSubdescription: DescriptionGetter, log: ILogger): obj is Types[K] {
         if (obj === undefined || obj === null || isMissing(obj) || typeof obj !== 'object') {
@@ -79,6 +79,39 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
+    /** Helper function to extract name and description given the property name and possibly overriding propertyKey. */
+    private getProperty<T>(
+        propertyName: string & keyof Types[K],
+        getSubdescription: DescriptionGetter,
+        propertyKey: string | undefined
+    ): {
+        name: string,
+        description: ITypeDescriptions<T>
+    } {
+        let name: string;
+        let description: ITypeDescriptions<T>;
+        if (propertyKey != undefined) {
+            name = propertyKey;
+            description = getSubdescription(propertyKey);
+        } else {
+            const descriptionOrKey = this.propertyDescriptions[propertyName];
+
+            if (typeof descriptionOrKey == 'string') {
+                description = getSubdescription(descriptionOrKey);
+                name = descriptionOrKey;
+            } else if (isMissing(descriptionOrKey)) {
+                description = getSubdescription(descriptionOrKey);
+                name = descriptionOrKey.key;
+            }
+            else {
+                const namedDescription = descriptionOrKey as any as INamedTypeDescriptions<T>;
+                description = namedDescription;
+                name = namedDescription.name;
+            }
+        }
+
+        return { name, description };
+    }
     protected checkProperty(
         obj: any,
         propertyName: string & keyof Types[K],
@@ -87,9 +120,8 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
         propertyKey?: DescriptionKeys<K, Types>[string & keyof Types[K]]
     ): boolean {
         const property = obj[propertyName];
-        propertyKey = propertyKey || this.propertyDescriptions[propertyName];
-        const propertyDescription = getSubdescription(propertyKey);
-        const stackElem = DisposableStackElement.enter(propertyName, propertyKey as any);
+        const { name: loggedName, description } = this.getProperty(propertyName, getSubdescription, propertyKey as any);
+        const stackElem = DisposableStackElement.enter(propertyName, loggedName as any);
         let isOfPropertyType;
 
         let loggedError = false; // this boolean indicates whether checking this property has already resulted in logging errors, in which case we won't add anything here
@@ -98,14 +130,14 @@ export class TypeDescription<K extends keyof Types, Types> implements ITypeDescr
             log(s);
         }
         try {
-            isOfPropertyType = propertyDescription.is(property, Variance.Extends, getSubdescription, _log);
+            isOfPropertyType = description.is(property, Variance.Extends, getSubdescription, _log);
         }
         finally {
             stackElem.dispose();
         }
 
         if (!isOfPropertyType && !loggedError) {
-            log(stackErrorMessage_Wrong(propertyName, propertyKey as any, property));
+            log(stackErrorMessage_Wrong(propertyName, loggedName as any, property));
         }
         return isOfPropertyType;
     }
