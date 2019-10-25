@@ -1,6 +1,8 @@
 import { TypeDescriptionsFor, TypeSystem, PrimitiveTypes, BaseTypeDescriptions, possiblyUndefined } from '..';
-import { anyDescription } from '../built-ins';
+import { anyDescription, stringDescription } from '../built-ins';
 import { ITypeDescriptions } from '../ITypeDescription';
+import { DescriptionKeysOrObjects, optional } from '../missingHelper';
+import { GetKey, assert, IsExact } from '../typeHelper';
 
 interface L1 {
     x: string;
@@ -49,7 +51,6 @@ describe('direct description', () => {
         const particularStringDescription: ITypeDescriptions<string> = { is: (obj: any, ..._args): obj is string => { return obj == 'x'; } }
         const L2Description: ITypeDescriptions<L2> = BaseTypeDescriptions.create<L2, CheckableTypes & PrimitiveTypes>({ c: anyDescription, s: particularStringDescription });
         class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> {
-
             public readonly L1 = this.create<L1>({ x: anyDescription, b: L2Description });
         }
         const typesystem = new TypeSystem<CheckableTypes & PrimitiveTypes>(new AllTypeDescriptions());
@@ -61,4 +62,38 @@ describe('direct description', () => {
         if (!is) throw new Error();
         if (is2) throw new Error();
     });
-}); // TODO: test combination with optional(..). maybe refactor into getSubDescriptions
+});
+describe('in conjunction with optional(..)', () => {
+    type L4 = { m?: string };
+    type CheckableTypes = { L1: { m?: string } };
+    type L4Description = DescriptionKeysOrObjects<GetKey<L4, PrimitiveTypes & CheckableTypes>, PrimitiveTypes & CheckableTypes, L4>;
+
+    class AllTypeDescriptions extends BaseTypeDescriptions<CheckableTypes> {
+        public readonly L1 = this.create<L4>({ m: optional(stringDescription) });
+    }
+    const descriptions: TypeDescriptionsFor<CheckableTypes & PrimitiveTypes> = new AllTypeDescriptions();
+    const typesystem = new TypeSystem(descriptions);
+
+    it(`m is missing is accepted`, () => {
+        debugger;
+        // act
+        const is = typesystem.extends('L1', {}); // m is missing
+
+        // assert
+        if (!is) throw new Error();
+    });
+    it(`m is missing is present is accepted`, () => {
+        // act
+        const is = typesystem.extends('L1', { m: '' });
+
+        // assert
+        if (!is) throw new Error();
+    });
+    it(`m is missing is undefined is accepted`, () => {
+        // act
+        const is = typesystem.extends('L1', { m: undefined });
+
+        // assert
+        if (!is) throw new Error();
+    });
+});
