@@ -17,9 +17,10 @@ export type Types = OptionalToMissing<{
     'C': C,
     // 'D': D // I expected that when this is uncommented, it would show up in erroneousTypes. Instead it gives an error at the description of d, which is good enough
 }>
+
 export class AllTypeDescriptions extends BaseTypeDescriptions<Types> implements TypeDescriptionsFor<Types> {
     public readonly 'C' = this.create<C>({ e: 'number' } as any);
-    public readonly 'D' = this.create<D>({ f: 'string?' });
+    public readonly 'D' = this.create<D>({ f: 'string' });
 }
 
 export const typeSystem = new TypeSystem<Types & PrimitiveTypes>(new AllTypeDescriptions());

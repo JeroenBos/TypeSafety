@@ -24,7 +24,7 @@ export class RecordTypeDescription<
 
     private readonly elementDescriptionKey: DescriptionKeys<K, Types>[string & keyof Types[K]];
 
-    protected isValidKey(_propertyName: any): _propertyName is keyof Types[K] {
+    protected isValidKey(_propertyName: any): _propertyName is keyof Types[K] & keyof TRecord {
         return true; // all property names are considered valid for a record type
     }
 

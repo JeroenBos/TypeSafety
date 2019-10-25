@@ -72,21 +72,21 @@ export class TypeDescription<K extends keyof Types, Types, T> implements ITypeDe
         }
         return result;
     }
-    protected isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] {
+    protected isValidKey(propertyName: string | keyof Types[K]): propertyName is keyof Types[K] & keyof T {
         const propertyDescriptions: object = this.propertyDescriptions;
         return propertyDescriptions.hasOwnProperty(propertyName);
     }
     /** Helper function to extract name and description given the property name and possibly overriding propertyKey. */
-    private getProperty<T>(
-        propertyName: string & keyof Types[K],
+    private getProperty<S>(
+        propertyName: string & keyof T,
         getSubdescription: DescriptionGetter,
         propertyKey: string | undefined
     ): {
         name: string,
-        description: ITypeDescriptions<T>
+        description: ITypeDescriptions<S>
     } {
         let name: string;
-        let description: ITypeDescriptions<T>;
+        let description: ITypeDescriptions<S>;
         if (propertyKey != undefined) {
             name = propertyKey;
             description = getSubdescription(propertyKey);
@@ -101,7 +101,7 @@ export class TypeDescription<K extends keyof Types, Types, T> implements ITypeDe
                 name = descriptionOrKey.key;
             }
             else {
-                const namedDescription = descriptionOrKey as any as INamedTypeDescriptions<T>;
+                const namedDescription = descriptionOrKey as any as INamedTypeDescriptions<S>;
                 description = namedDescription;
                 if (typeof namedDescription.typeName == 'string')
                     name = namedDescription.typeName;
@@ -114,7 +114,7 @@ export class TypeDescription<K extends keyof Types, Types, T> implements ITypeDe
     }
     protected checkProperty(
         obj: any,
-        propertyName: string & keyof Types[K],
+        propertyName: string & keyof T,
         getSubdescription: DescriptionGetter,
         log: ILogger,
         propertyKey?: DescriptionKeys<K, Types>[string & keyof Types[K]]

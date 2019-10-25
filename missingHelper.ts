@@ -5,19 +5,19 @@ export type PropertyWiseUnion<T, U> = {
     [K in keyof (T & U)]: (K extends keyof T ? T[K] : never) | (K extends keyof U ? U[K] : never)
 };
 
-export type DescriptionKeysOrObjects<K extends keyof Types, Types, T = Types[K]> = PropertyWiseUnion<DescriptionKeys<K, Types>,
+export type DescriptionKeysOrObjects<K extends keyof Types, Types, T = Types[K]> = PropertyWiseUnion<DescriptionKeys<K, Types, T>,
     { [K in keyof T]: INamedTypeDescriptions<T[K]> }>;
 
-export type DescriptionKeys<K extends keyof Types, Types> = {
-    [u in keyof Types[K]]-?: (
-        IsOptional<Types[K], u> extends false
-        ? descriptionKey<Types[K][u], GetKey<Types[K][u], Types>>
+export type DescriptionKeys<K extends keyof Types, Types, T = Types[K]> = {
+    [u in keyof T]-?: (
+        IsOptional<T, u> extends false
+        ? descriptionKey<T[u], GetKey<T[u], Types>>
         :
         Exclude<
             possiblyMissing<
                 descriptionKey<
-                    Types[K][u],
-                    GetKey<Types[K][u], Types> | GetKey<Exclude<Types[K][u], undefined>, Types>
+                    T[u],
+                    GetKey<T[u], Types> | GetKey<Exclude<T[u], undefined>, Types>
                 >
             >,
             undefined>
