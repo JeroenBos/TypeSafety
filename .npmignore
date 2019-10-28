@@ -1,8 +1,16 @@
 *.png
 *.spec.ts
-*.spec.d.ts
 .vscode/**
 example/**
+# ignore .ts
+*.ts
+# but include d.ts:
+!*.d.ts
+# but ignore spec.d.ts
+*.spec.d.ts
 dist/types/example/example.d.ts
+
 dist/test.js
 dist/test.js.map
+webpack.config.js
+tsconfig.json
