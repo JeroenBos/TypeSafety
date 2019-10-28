@@ -1,6 +1,6 @@
 // TS:
 
-export { OptionalToMissing, IsExact } from './typeHelper';
+export { OptionalToMissing, IsExact, GetKey } from './typeHelper';
 export { PrimitiveTypes } from './built-ins';
 export { DebugTypeSystem, PrimitiveTypeSystem } from './typeSystem';
 export { TypeDescriptionsFor, ITypeDescriptions } from './ITypeDescription';
