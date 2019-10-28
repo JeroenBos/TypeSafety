@@ -1,9 +1,9 @@
 {
   "name": "jbsnorro-typesafety",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "A typescript enforced type-safety library. ",
   "main": "dist/jbsnorro_typesafety.js",
-  "types": "dist/types/index",
+  "types": "dist/types/index.d.ts",
   "scripts": {
     "prepublishOnly": "npm install && webpack && mocha dist/test.js",
     "build": "webpack",
