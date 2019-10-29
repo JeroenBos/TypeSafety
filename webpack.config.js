@@ -39,7 +39,7 @@ var sharedConfig = {
         })
     ],
     watchOptions: {
-        aggregateTimeout: 300
+        aggregateTimeout: 0
     }
 };
 
