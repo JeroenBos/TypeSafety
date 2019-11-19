@@ -54,7 +54,7 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     /**
      * Creates an type description for an `object`.
      */
-    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions: 
+    public static create<T extends object, TCheckableTypes extends PrimitiveTypes>(propertyDescriptions:
         DescriptionKeysOrObjects<GetKey<T, PrimitiveTypes & TCheckableTypes>, PrimitiveTypes & TCheckableTypes, T>) {
         return TypeDescription.create<PrimitiveTypes & TCheckableTypes, GetKey<T, PrimitiveTypes & TCheckableTypes>, T>(propertyDescriptions);
     }
@@ -75,7 +75,7 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     }
     'any' = anyDescription;
     'null' = nullDescription;
-    'undefined' = undefinedDescription
+    'undefined' = undefinedDescription;
 
     /** Describes a type being anything but `null`. */
     '!null' = nonnullDescription;
