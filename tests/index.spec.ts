@@ -5,3 +5,4 @@ import './missing.spec';
 import './has.description.spec';
 import './records.spec';
 import './direct.spec';
+import './function.spec';
