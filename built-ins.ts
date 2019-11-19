@@ -16,38 +16,48 @@ export type PrimitiveTypes = {
     'number': number,
     'string': string,
     'boolean': boolean,
+    'function': (...args: any[]) => any,
 
     'string?': string | undefined,
     'number?': number | undefined,
     'boolean?': boolean | undefined,
+    'function?': ((...args: any[]) => any) | undefined,
 
     'nullable string': string | null,
     'nullable number': number | null,
     'nullable boolean': boolean | null,
+    'nullable function': ((...args: any[]) => any) | null,
 
     'nullable string?': string | null | undefined,
     'nullable number?': number | null | undefined,
     'nullable boolean?': boolean | null | undefined,
+    'nullable function?': ((...args: any[]) => any) | null | undefined,
 
     'string[]': string[],
     'number[]': number[],
     'boolean[]': boolean[],
+    'function[]': ((...args: any[]) => any)[],
 
     'string[]?': string[] | undefined,
     'number[]?': number[] | undefined,
     'boolean[]?': boolean[] | undefined,
+    'function[]?': ((...args: any[]) => any)[] | undefined,
 
     'nullable string[]': string[] | null,
     'nullable number[]': number[] | null,
     'nullable boolean[]': boolean[] | null,
+    'nullable function[]': ((...args: any[]) => any)[] | null,
 
     'nullable string[]?': string[] | null | undefined,
     'nullable number[]?': number[] | null | undefined,
     'nullable boolean[]?': boolean[] | null | undefined,
+    'nullable function[]?': ((...args: any[]) => any)[] | null | undefined,
 
     '(nullable string)[]': (string | null)[],
     '(nullable number)[]': (number | null)[],
     '(nullable boolean)[]': (boolean | null)[],
+    '(nullable function)[]': (((...args: any[]) => any) | null)[],
+
 }
 
 export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFor<PrimitiveTypes> {
@@ -87,39 +97,48 @@ export class BaseTypeDescriptions<TCheckableTypes> implements TypeDescriptionsFo
     'number' = numberDescription;
     'string' = stringDescription;
     'boolean' = booleanDescription;
+    'function' = functionDescription;
 
     'string?' = possiblyUndefined(stringDescription);
     'number?' = possiblyUndefined(numberDescription);
     'boolean?' = possiblyUndefined(booleanDescription);
+    'function?' = possiblyUndefined(functionDescription);
 
     'nullable string' = nullable(stringDescription);
     'nullable number' = nullable(numberDescription);
     'nullable boolean' = nullable(booleanDescription);
+    'nullable function' = nullable(functionDescription);
 
     'nullable string?' = possiblyNullOrUndefined(stringDescription);
     'nullable number?' = possiblyNullOrUndefined(numberDescription);
     'nullable boolean?' = possiblyNullOrUndefined(booleanDescription);
+    'nullable function?' = possiblyNullOrUndefined(functionDescription);
 
 
     'string[]' = stringArrayDescription;
     'number[]' = numberArrayDescription;
     'boolean[]' = booleanArrayDescription;
+    'function[]' = functionArrayDescription;
 
     'string[]?' = possiblyUndefined(stringArrayDescription);
     'number[]?' = possiblyUndefined(numberArrayDescription);
     'boolean[]?' = possiblyUndefined(booleanArrayDescription);
+    'function[]?' = possiblyUndefined(functionArrayDescription);
 
     'nullable string[]' = nullable(stringArrayDescription);
     'nullable number[]' = nullable(numberArrayDescription);
     'nullable boolean[]' = nullable(booleanArrayDescription);
+    'nullable function[]' = nullable(functionArrayDescription);
 
     'nullable string[]?' = possiblyNullOrUndefined(stringArrayDescription);
     'nullable number[]?' = possiblyNullOrUndefined(numberArrayDescription);
     'nullable boolean[]?' = possiblyNullOrUndefined(booleanArrayDescription);
+    'nullable function[]?' = possiblyNullOrUndefined(functionArrayDescription);
 
     '(nullable string)[]' = array(this['nullable string']);
     '(nullable number)[]' = array(this['nullable number']);
     '(nullable boolean)[]' = array(this['nullable boolean']);
+    '(nullable function)[]' = array(this['nullable function']);
 }
 
 
@@ -136,9 +155,11 @@ export const nonnullNorUndefinedDescription = { is: (obj: any): obj is null => o
 export const stringDescription = createPrimitiveDescription('string');
 export const numberDescription = createPrimitiveDescription('number');
 export const booleanDescription = createPrimitiveDescription('boolean');
+export const functionDescription = createPrimitiveDescription('function');
 export const stringArrayDescription = array(stringDescription);
 export const numberArrayDescription = array(numberDescription);
 export const booleanArrayDescription = array(booleanDescription);
+export const functionArrayDescription = array(functionDescription);
 
 function createPrimitiveDescription<p extends keyof PrimitiveTypes>(s: p): ITypeDescriptions<PrimitiveTypes[p]> {
     function is(obj: any): obj is PrimitiveTypes[p] {
